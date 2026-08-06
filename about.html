@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>À propos — OuSuisJe</title>
+<meta name="theme-color" content="#0B1220" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Retour à OuSuisJe</a>
+  <h1>À propos</h1>
+  <p class="page-sub">Ce que fait cette application, et ce qu'elle ne fait pas.</p>
+
+  <h2>Le principe</h2>
+  <p>OuSuisJe affiche votre position en direct : latitude, longitude, altitude, vitesse, cap et précision, telles que fournies par le GPS ou le système de localisation de votre appareil. L'application traduit également vos coordonnées en adresse lisible (rue, code postal, commune, département, région, pays).</p>
+
+  <h2>Vos données</h2>
+  <p>La position calculée par votre appareil <strong>reste sur votre appareil</strong>. Elle n'est envoyée à aucun serveur d'OuSuisJe — il n'y en a pas. La seule requête sortante sert à convertir vos coordonnées en adresse : elle est envoyée directement, depuis votre navigateur, au service de géocodage inversé d'OpenStreetMap (Nominatim), sans passer par un serveur intermédiaire.</p>
+
+  <h2>Fonctionnement hors-ligne</h2>
+  <p>Une fois installée sur votre écran d'accueil, l'application se charge sans connexion grâce à un service worker qui garde ses fichiers en cache. Seule la traduction en adresse nécessite une connexion active, puisqu'elle interroge un service tiers.</p>
+
+  <h2>Précision</h2>
+  <p>La précision affichée dépend entièrement de votre appareil (GPS, Wi-Fi, réseau mobile) et des conditions du moment (intérieur, couverture, météo). Voir les <a class="inline" href="mentions-legales.html">mentions légales</a> pour le détail des limites et responsabilités.</p>
+
+  <h2>Sources</h2>
+  <p>Les données cartographiques et d'adresse proviennent du projet <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> et de ses contributeurs, sous licence ODbL.</p>
+</div>
+</body>
+</html>

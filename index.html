@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>OuSuisJe — Où suis-je, précisément ?</title>
+<meta name="description" content="OuSuisJe affiche en direct votre position, votre adresse et la précision GPS de votre appareil. Installable comme application." />
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0B1220" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="OuSuisJe" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">OuSuisJe · position en direct</div>
+    <h1>Où êtes-vous, précisément ?</h1>
+    <p class="sub">La localisation reste sur cet appareil — rien n'est envoyé nulle part, hormis l'adresse à OpenStreetMap.</p>
+  </header>
+
+  <div class="hud">
+    <svg viewBox="0 0 340 340">
+      <circle class="ring-outer" cx="170" cy="170" r="160" />
+      <circle class="ring-outer" cx="170" cy="170" r="118" />
+      <circle class="ring-mid" cx="170" cy="170" r="76" />
+      <g class="crosshair">
+        <line x1="170" y1="10" x2="170" y2="40" />
+        <line x1="170" y1="300" x2="170" y2="330" />
+        <line x1="10" y1="170" x2="40" y2="170" />
+        <line x1="300" y1="170" x2="330" y2="170" />
+      </g>
+      <g id="sweepGroup" class="sweep paused">
+        <path d="M170,170 L170,10 A160,160 0 0,1 250,40 Z" fill="url(#sweepGrad)" opacity="0.5" />
+      </g>
+      <defs>
+        <linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4FD1C5" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#4FD1C5" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <circle id="accuracyCircle" class="accuracy-circle" cx="170" cy="170" r="0" />
+      <circle id="pulseCircle" class="pulse" cx="170" cy="170" r="6" style="display:none" />
+      <circle class="center-dot" cx="170" cy="170" r="5" />
+    </svg>
+    <div class="status-badge">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusText">En attente</span>
+    </div>
+  </div>
+
+  <div class="coords" style="margin-top: 8px;">
+    <div id="latValue" class="lat placeholder">Latitude —</div>
+    <div id="lonValue" class="lon placeholder">Longitude —</div>
+  </div>
+
+  <div class="grid">
+    <div class="cell">
+      <div class="label">Précision</div>
+      <div id="accVal" class="value dim">—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Altitude</div>
+      <div id="altVal" class="value dim">—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Vitesse</div>
+      <div id="spdVal" class="value dim">—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Cap</div>
+      <div id="hdgVal" class="value dim">—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Horodatage</div>
+      <div id="tsVal" class="value dim">—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Précision altitude</div>
+      <div id="altAccVal" class="value dim">—</div>
+    </div>
+  </div>
+
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Localisation administrative</span>
+      <span id="addrStatus">—</span>
+    </div>
+    <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Code postal</span><span id="addrCP" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Commune</span><span id="addrCommune" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Département</span><span id="addrDept" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Région</span><span id="addrRegion" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
+  </div>
+  <p class="osm-credit">Adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+
+  <div class="actions">
+    <button id="locateBtn" class="btn-primary">Activer la localisation</button>
+    <button id="mapBtn" class="btn-secondary" disabled>Voir sur la carte</button>
+    <button id="installBtn" class="btn-secondary" style="display:none;">Installer l'application</button>
+    <p id="installNote" class="install-note"></p>
+  </div>
+
+  <footer>
+    <div class="footer-nav">
+      <a href="about.html">À propos</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+    </div>
+    OUSUISJE — FONCTIONNE HORS-LIGNE UNE FOIS INSTALLÉ
+  </footer>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const statusDot = $('statusDot');
+  const statusText = $('statusText');
+  const latValue = $('latValue');
+  const lonValue = $('lonValue');
+  const accVal = $('accVal');
+  const altVal = $('altVal');
+  const spdVal = $('spdVal');
+  const hdgVal = $('hdgVal');
+  const tsVal = $('tsVal');
+  const altAccVal = $('altAccVal');
+  const locateBtn = $('locateBtn');
+  const mapBtn = $('mapBtn');
+  const sweepGroup = $('sweepGroup');
+  const accuracyCircle = $('accuracyCircle');
+  const pulseCircle = $('pulseCircle');
+
+  const addrStatus = $('addrStatus');
+  const addrAdresse = $('addrAdresse');
+  const addrCP = $('addrCP');
+  const addrCommune = $('addrCommune');
+  const addrDept = $('addrDept');
+  const addrRegion = $('addrRegion');
+  const addrPays = $('addrPays');
+
+  let watchId = null;
+  let lastPos = null;
+  let lastGeocodedAt = 0;
+  let lastGeocodedCoords = null;
+  let geocoding = false;
+
+  function setStatus(state, label) {
+    statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
+    statusText.textContent = label;
+  }
+
+  function fmtCoord(v) { return v.toFixed(6) + '°'; }
+
+  function radiusForAccuracy(meters) {
+    return 8 + Math.min(150, Math.log2(Math.max(meters, 3)) * 22);
+  }
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function setAddrField(el, value) {
+    el.textContent = value || '—';
+    el.classList.toggle('dim', !value);
+  }
+
+  async function maybeGeocode(latitude, longitude) {
+    const now = Date.now();
+    const movedFar = !lastGeocodedCoords || haversine(lastGeocodedCoords.lat, lastGeocodedCoords.lon, latitude, longitude) > 40;
+    const enoughTimePassed = now - lastGeocodedAt > 8000;
+    if (geocoding || (!movedFar && lastGeocodedAt !== 0)) return;
+    if (lastGeocodedAt !== 0 && !enoughTimePassed) return;
+
+    geocoding = true;
+    addrStatus.textContent = 'Recherche…';
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
+        headers: { 'Accept-Language': 'fr' }
+      });
+      const data = await res.json();
+      const addr = data.address || {};
+
+      const adresse = [addr.house_number, addr.road].filter(Boolean).join(' ')
+        || addr.pedestrian || addr.neighbourhood || null;
+      const commune = addr.village || addr.town || addr.city || addr.municipality || null;
+      const departement = addr.county || addr.state_district || null;
+      const region = addr.state || null;
+      const pays = addr.country || null;
+      const codePostal = addr.postcode || null;
+
+      setAddrField(addrAdresse, adresse);
+      setAddrField(addrCP, codePostal);
+      setAddrField(addrCommune, commune);
+      setAddrField(addrDept, departement);
+      setAddrField(addrRegion, region);
+      setAddrField(addrPays, pays);
+
+      addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
+      lastGeocodedAt = now;
+      lastGeocodedCoords = { lat: latitude, lon: longitude };
+    } catch (e) {
+      addrStatus.textContent = 'Indisponible';
+    } finally {
+      geocoding = false;
+    }
+  }
+
+  function updateUI(pos) {
+    lastPos = pos;
+    const { latitude, longitude, accuracy, altitude, altitudeAccuracy, speed, heading } = pos.coords;
+
+    latValue.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtCoord(Math.abs(latitude));
+    latValue.classList.remove('placeholder');
+    lonValue.textContent = (longitude >= 0 ? 'E ' : 'O ') + fmtCoord(Math.abs(longitude));
+    lonValue.classList.remove('placeholder');
+
+    accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
+    accVal.classList.remove('dim');
+    altVal.textContent = altitude != null ? Math.round(altitude) + ' m' : 'Non fournie';
+    altVal.classList.toggle('dim', altitude == null);
+    spdVal.textContent = speed != null ? (speed * 3.6).toFixed(1) + ' km/h' : 'À l\'arrêt';
+    spdVal.classList.toggle('dim', speed == null);
+    hdgVal.textContent = heading != null && !Number.isNaN(heading) ? Math.round(heading) + '°' : 'Non fournie';
+    hdgVal.classList.toggle('dim', heading == null || Number.isNaN(heading));
+    tsVal.textContent = new Date(pos.timestamp).toLocaleTimeString('fr-FR');
+    tsVal.classList.remove('dim');
+    altAccVal.textContent = altitudeAccuracy != null ? '± ' + Math.round(altitudeAccuracy) + ' m' : '—';
+    altAccVal.classList.toggle('dim', altitudeAccuracy == null);
+
+    if (accuracy != null) accuracyCircle.setAttribute('r', radiusForAccuracy(accuracy));
+
+    setStatus('live', 'Repérage actif');
+    sweepGroup.classList.remove('paused');
+    pulseCircle.style.display = 'block';
+    mapBtn.disabled = false;
+
+    maybeGeocode(latitude, longitude);
+  }
+
+  function handleError(err) {
+    let msg = 'Erreur de localisation';
+    if (err.code === err.PERMISSION_DENIED) msg = 'Localisation refusée';
+    else if (err.code === err.POSITION_UNAVAILABLE) msg = 'Position indisponible';
+    else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
+    setStatus('err', msg);
+    sweepGroup.classList.add('paused');
+    pulseCircle.style.display = 'none';
+    locateBtn.textContent = 'Réessayer';
+    locateBtn.disabled = false;
+  }
+
+  function startWatch() {
+    if (!('geolocation' in navigator)) {
+      setStatus('err', 'Non pris en charge');
+      locateBtn.disabled = true;
+      locateBtn.textContent = 'Indisponible sur cet appareil';
+      return;
+    }
+    setStatus('idle', 'Recherche du signal…');
+    locateBtn.textContent = 'Recherche en cours…';
+    locateBtn.disabled = true;
+
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => { updateUI(pos); locateBtn.textContent = 'Arrêter le repérage'; locateBtn.disabled = false; },
+      handleError,
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
+    );
+  }
+
+  function stopWatch() {
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    setStatus('idle', 'En pause');
+    sweepGroup.classList.add('paused');
+    pulseCircle.style.display = 'none';
+    locateBtn.textContent = 'Reprendre le repérage';
+  }
+
+  locateBtn.addEventListener('click', () => { if (watchId != null) stopWatch(); else startWatch(); });
+
+  mapBtn.addEventListener('click', () => {
+    if (!lastPos) return;
+    const { latitude, longitude } = lastPos.coords;
+    window.open(`https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`, '_blank');
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+
+  const installBtn = $('installBtn');
+  const installNote = $('installNote');
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'flex';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') installBtn.style.display = 'none';
+    deferredPrompt = null;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    installNote.textContent = 'Application installée ✓';
+  });
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isIOS && !isStandalone) {
+    installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
+  }
+})();
+</script>
+</body>
+</html>

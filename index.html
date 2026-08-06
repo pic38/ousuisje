@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 <body>
 
@@ -28,37 +29,12 @@
     <p class="sub">La localisation reste sur cet appareil — rien n'est envoyé nulle part, hormis l'adresse à OpenStreetMap.</p>
   </header>
 
-  <div class="hud">
-    <svg viewBox="0 0 340 340">
-      <circle class="ring-outer" cx="170" cy="170" r="160" />
-      <circle class="ring-outer" cx="170" cy="170" r="118" />
-      <circle class="ring-mid" cx="170" cy="170" r="76" />
-      <g class="crosshair">
-        <line x1="170" y1="10" x2="170" y2="40" />
-        <line x1="170" y1="300" x2="170" y2="330" />
-        <line x1="10" y1="170" x2="40" y2="170" />
-        <line x1="300" y1="170" x2="330" y2="170" />
-      </g>
-      <g id="sweepGroup" class="sweep paused">
-        <path d="M170,170 L170,10 A160,160 0 0,1 250,40 Z" fill="url(#sweepGrad)" opacity="0.5" />
-      </g>
-      <defs>
-        <linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#4FD1C5" stop-opacity="0.5" />
-          <stop offset="100%" stop-color="#4FD1C5" stop-opacity="0" />
-        </linearGradient>
-      </defs>
-      <circle id="accuracyCircle" class="accuracy-circle" cx="170" cy="170" r="0" />
-      <circle id="pulseCircle" class="pulse" cx="170" cy="170" r="6" style="display:none" />
-      <circle class="center-dot" cx="170" cy="170" r="5" />
-    </svg>
-    <div class="status-badge">
-      <span id="statusDot" class="dot"></span>
-      <span id="statusText">En attente</span>
-    </div>
+  <div class="status-line">
+    <span id="statusDot" class="dot"></span>
+    <span id="statusText">En attente</span>
   </div>
 
-  <div class="coords" style="margin-top: 8px;">
+  <div class="coords">
     <div id="latValue" class="lat placeholder">Latitude —</div>
     <div id="lonValue" class="lon placeholder">Longitude —</div>
   </div>
@@ -90,23 +66,28 @@
     </div>
   </div>
 
+  <div class="map-wrap">
+    <div id="map"></div>
+    <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir en plein écran sur OpenStreetMap ↗</a>
+  </div>
+
   <div class="addr-panel">
     <div class="addr-head">
       <span>Localisation administrative</span>
       <span id="addrStatus">—</span>
     </div>
     <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Lieu-dit</span><span id="addrLieuDit" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Code postal</span><span id="addrCP" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Commune</span><span id="addrCommune" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Département</span><span id="addrDept" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Région</span><span id="addrRegion" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
   </div>
-  <p class="osm-credit">Adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+  <p class="osm-credit">Carte et adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
 
   <div class="actions">
     <button id="locateBtn" class="btn-primary">Activer la localisation</button>
-    <button id="mapBtn" class="btn-secondary" disabled>Voir sur la carte</button>
     <button id="installBtn" class="btn-secondary" style="display:none;">Installer l'application</button>
     <p id="installNote" class="install-note"></p>
   </div>
@@ -120,6 +101,7 @@
   </footer>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
@@ -134,18 +116,46 @@
   const tsVal = $('tsVal');
   const altAccVal = $('altAccVal');
   const locateBtn = $('locateBtn');
-  const mapBtn = $('mapBtn');
-  const sweepGroup = $('sweepGroup');
-  const accuracyCircle = $('accuracyCircle');
-  const pulseCircle = $('pulseCircle');
+  const osmLink = $('osmLink');
 
   const addrStatus = $('addrStatus');
   const addrAdresse = $('addrAdresse');
+  const addrLieuDit = $('addrLieuDit');
   const addrCP = $('addrCP');
   const addrCommune = $('addrCommune');
   const addrDept = $('addrDept');
   const addrRegion = $('addrRegion');
   const addrPays = $('addrPays');
+
+  // --- Carte OSM (Leaflet) ---
+  const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([46.6, 2.4], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  const markerIcon = L.divIcon({
+    className: 'gps-marker',
+    html: '<span class="gps-marker-dot"></span>',
+    iconSize: [16, 16]
+  });
+  let marker = null;
+  let accuracyCircleLayer = null;
+
+  function updateMap(latitude, longitude, accuracy) {
+    const latlng = [latitude, longitude];
+    if (!marker) {
+      marker = L.marker(latlng, { icon: markerIcon }).addTo(map);
+      map.setView(latlng, 17);
+    } else {
+      marker.setLatLng(latlng);
+    }
+    if (accuracy != null) {
+      if (!accuracyCircleLayer) {
+        accuracyCircleLayer = L.circle(latlng, { radius: accuracy, color: '#4FD1C5', weight: 1.5, fillColor: '#4FD1C5', fillOpacity: 0.1 }).addTo(map);
+      } else {
+        accuracyCircleLayer.setLatLng(latlng);
+        accuracyCircleLayer.setRadius(accuracy);
+      }
+    }
+    osmLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
+  }
 
   let watchId = null;
   let lastPos = null;
@@ -159,10 +169,6 @@
   }
 
   function fmtCoord(v) { return v.toFixed(6) + '°'; }
-
-  function radiusForAccuracy(meters) {
-    return 8 + Math.min(150, Math.log2(Math.max(meters, 3)) * 22);
-  }
 
   function haversine(lat1, lon1, lat2, lon2) {
     const R = 6371000;
@@ -195,6 +201,7 @@
 
       const adresse = [addr.house_number, addr.road].filter(Boolean).join(' ')
         || addr.pedestrian || addr.neighbourhood || null;
+      const lieuDit = addr.hamlet || addr.locality || addr.isolated_dwelling || addr.suburb || addr.quarter || null;
       const commune = addr.village || addr.town || addr.city || addr.municipality || null;
       const departement = addr.county || addr.state_district || null;
       const region = addr.state || null;
@@ -202,6 +209,7 @@
       const codePostal = addr.postcode || null;
 
       setAddrField(addrAdresse, adresse);
+      setAddrField(addrLieuDit, lieuDit);
       setAddrField(addrCP, codePostal);
       setAddrField(addrCommune, commune);
       setAddrField(addrDept, departement);
@@ -240,12 +248,8 @@
     altAccVal.textContent = altitudeAccuracy != null ? '± ' + Math.round(altitudeAccuracy) + ' m' : '—';
     altAccVal.classList.toggle('dim', altitudeAccuracy == null);
 
-    if (accuracy != null) accuracyCircle.setAttribute('r', radiusForAccuracy(accuracy));
-
+    updateMap(latitude, longitude, accuracy);
     setStatus('live', 'Repérage actif');
-    sweepGroup.classList.remove('paused');
-    pulseCircle.style.display = 'block';
-    mapBtn.disabled = false;
 
     maybeGeocode(latitude, longitude);
   }
@@ -256,8 +260,6 @@
     else if (err.code === err.POSITION_UNAVAILABLE) msg = 'Position indisponible';
     else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
     setStatus('err', msg);
-    sweepGroup.classList.add('paused');
-    pulseCircle.style.display = 'none';
     locateBtn.textContent = 'Réessayer';
     locateBtn.disabled = false;
   }
@@ -283,18 +285,10 @@
   function stopWatch() {
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
     setStatus('idle', 'En pause');
-    sweepGroup.classList.add('paused');
-    pulseCircle.style.display = 'none';
     locateBtn.textContent = 'Reprendre le repérage';
   }
 
   locateBtn.addEventListener('click', () => { if (watchId != null) stopWatch(); else startWatch(); });
-
-  mapBtn.addEventListener('click', () => {
-    if (!lastPos) return;
-    const { latitude, longitude } = lastPos.coords;
-    window.open(`https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`, '_blank');
-  });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });

@@ -1,4 +1,4 @@
-const CACHE_NAME = "ousuisje-cache-v2";
+const CACHE_NAME = "ousuisje-cache-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,8 +29,13 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Ne jamais mettre en cache les appels d'API (ex: reverse geocoding)
-  if (event.request.url.includes("nominatim.openstreetmap.org")) return;
+  // Ne jamais intercepter les appels d'API, les tuiles de carte ou les libs tierces
+  const url = event.request.url;
+  if (
+    url.includes("nominatim.openstreetmap.org") ||
+    url.includes("tile.openstreetmap.org") ||
+    url.includes("unpkg.com")
+  ) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {

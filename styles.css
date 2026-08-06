@@ -46,65 +46,53 @@ h1 {
 }
 .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
 
-/* --- Signature: HUD radar reticle --- */
-.hud {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-width: 340px;
-  margin: 4px auto 0;
+/* --- Status line --- */
+.status-line {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.hud svg { width: 100%; height: 100%; overflow: visible; }
-.ring-outer { fill: none; stroke: var(--line); stroke-width: 1; }
-.ring-mid { fill: none; stroke: var(--line); stroke-width: 1; opacity: 0.7; }
-.crosshair { stroke: var(--amber); stroke-width: 1.4; opacity: 0.85; }
-.accuracy-circle {
-  fill: rgba(79, 209, 197, 0.08);
-  stroke: var(--teal);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 3;
-  transform-origin: 170px 170px;
-  transition: r 0.6s cubic-bezier(.2,.8,.2,1);
-}
-.sweep { transform-origin: 170px 170px; animation: spin 3.4s linear infinite; }
-.sweep.paused { animation-play-state: paused; opacity: 0.15; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.center-dot { fill: var(--amber); }
-.pulse {
-  fill: none;
-  stroke: var(--amber);
-  stroke-width: 1.5;
-  transform-origin: 170px 170px;
-  animation: pulse 2.2s ease-out infinite;
-}
-@keyframes pulse {
-  0% { r: 6; opacity: 0.9; }
-  100% { r: 46; opacity: 0; }
-}
-
-.status-badge {
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  padding: 5px 14px;
-  border-radius: 999px;
+  gap: 8px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.05em;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 7px;
+  color: var(--muted);
 }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
 .dot.live { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
 .dot.err { background: var(--danger); }
+
+/* --- Carte OSM --- */
+.map-wrap {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+}
+#map {
+  width: 100%;
+  height: 240px;
+  background: var(--surface-2);
+  filter: saturate(0.85) brightness(0.92);
+}
+.map-link {
+  display: block;
+  text-align: center;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--teal);
+  text-decoration: none;
+  border-top: 1px solid var(--line);
+}
+.map-link:hover { text-decoration: underline; }
+.gps-marker-dot {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--amber);
+  border: 2px solid #1A1206;
+  box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.35);
+}
 
 /* --- Coordinate readout --- */
 .coords { text-align: center; font-family: var(--mono); line-height: 1.5; }

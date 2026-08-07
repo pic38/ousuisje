@@ -28,7 +28,7 @@
     <h1>Où êtes-vous, précisément ?</h1>
   </header>
 
-  <button id="locateBtn" class="btn-primary">Activer la localisation</button>
+  <button id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
 
   <div class="status-line">
     <span id="statusDot" class="dot"></span>
@@ -67,18 +67,22 @@
     </div>
   </div>
 
-  <button id="geocodeToggle" class="btn-secondary">Activer le géocodage inverse</button>
+  <button id="geocodeBtn" class="btn-secondary" disabled>Trouver l'adresse correspondant à ma localisation</button>
 
   <div class="map-wrap">
     <div id="map"></div>
-    <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir en plein écran sur OpenStreetMap ↗</a>
+    <div class="map-footer">
+      <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse.</span>
+      <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir en plein écran sur OpenStreetMap ↗</a>
+    </div>
   </div>
 
   <div class="addr-panel">
     <div class="addr-head">
       <span>Localisation administrative</span>
-      <span id="addrStatus">Désactivé</span>
+      <span id="addrStatus">—</span>
     </div>
+    <div class="addr-row"><span class="k">Source</span><span id="addrSource" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Lieu-dit</span><span id="addrLieuDit" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Code postal</span><span id="addrCP" class="v dim">—</span></div>
@@ -132,13 +136,14 @@
   const altAccVal = $('altAccVal');
   const locateBtn = $('locateBtn');
   const osmLink = $('osmLink');
-  const geocodeToggle = $('geocodeToggle');
+  const geocodeBtn = $('geocodeBtn');
   const infoToggle = $('infoToggle');
   const infoContent = $('infoContent');
   const infoToggleIcon = $('infoToggleIcon');
   const visitCount = $('visitCount');
 
   const addrStatus = $('addrStatus');
+  const addrSource = $('addrSource');
   const addrAdresse = $('addrAdresse');
   const addrLieuDit = $('addrLieuDit');
   const addrCP = $('addrCP');
@@ -148,7 +153,8 @@
   const addrPays = $('addrPays');
 
   // --- Carte OSM (Leaflet) ---
-  const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([46.6, 2.4], 5);
+  const map = L.map('map', { zoomControl: true, attributionControl: false });
+  map.fitBounds([[41.2, -5.3], [51.2, 9.7]]); // France entière par défaut
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   const markerIcon = L.divIcon({
     className: 'gps-marker',
@@ -158,11 +164,10 @@
   let marker = null;
   let accuracyCircleLayer = null;
 
-  function updateMap(latitude, longitude, accuracy) {
+  function placeMarker(latitude, longitude, accuracy) {
     const latlng = [latitude, longitude];
     if (!marker) {
       marker = L.marker(latlng, { icon: markerIcon }).addTo(map);
-      map.setView(latlng, 17);
     } else {
       marker.setLatLng(latlng);
     }
@@ -173,6 +178,9 @@
         accuracyCircleLayer.setLatLng(latlng);
         accuracyCircleLayer.setRadius(accuracy);
       }
+    } else if (accuracyCircleLayer) {
+      map.removeLayer(accuracyCircleLayer);
+      accuracyCircleLayer = null;
     }
     osmLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
   }
@@ -181,10 +189,7 @@
   let lastPos = null;
   let lastRawPos = null;
   let refreshInterval = null;
-  let lastGeocodedAt = 0;
-  let lastGeocodedCoords = null;
   let geocoding = false;
-  let reverseGeocodeEnabled = false;
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -193,26 +198,13 @@
 
   function fmtCoord(v) { return v.toFixed(6) + '°'; }
 
-  function haversine(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
-
   function setAddrField(el, value) {
     el.textContent = value || '—';
     el.classList.toggle('dim', !value);
   }
 
-  async function maybeGeocode(latitude, longitude) {
-    if (!reverseGeocodeEnabled) return;
-    const now = Date.now();
-    const movedFar = !lastGeocodedCoords || haversine(lastGeocodedCoords.lat, lastGeocodedCoords.lon, latitude, longitude) > 15;
+  async function doGeocode(latitude, longitude, source) {
     if (geocoding) return;
-    if (lastGeocodedAt !== 0 && (now - lastGeocodedAt < 10000 || !movedFar)) return;
-
     geocoding = true;
     addrStatus.textContent = 'Recherche…';
     try {
@@ -239,9 +231,9 @@
       setAddrField(addrRegion, region);
       setAddrField(addrPays, pays);
 
+      addrSource.textContent = source === 'gps' ? 'Coordonnées GPS' : 'Point sélectionné sur la carte';
+      addrSource.classList.remove('dim');
       addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
-      lastGeocodedAt = now;
-      lastGeocodedCoords = { lat: latitude, lon: longitude };
     } catch (e) {
       addrStatus.textContent = 'Indisponible';
     } finally {
@@ -249,20 +241,18 @@
     }
   }
 
-  geocodeToggle.addEventListener('click', () => {
-    reverseGeocodeEnabled = !reverseGeocodeEnabled;
-    if (reverseGeocodeEnabled) {
-      geocodeToggle.textContent = 'Désactiver le géocodage inverse';
-      addrStatus.textContent = lastPos ? 'Recherche…' : 'En attente de position';
-      if (lastPos) {
-        lastGeocodedAt = 0;
-        lastGeocodedCoords = null;
-        maybeGeocode(lastPos.coords.latitude, lastPos.coords.longitude);
-      }
-    } else {
-      geocodeToggle.textContent = 'Activer le géocodage inverse';
-      addrStatus.textContent = 'Désactivé';
-    }
+  geocodeBtn.addEventListener('click', () => {
+    if (!lastPos) return;
+    const { latitude, longitude, accuracy } = lastPos.coords;
+    placeMarker(latitude, longitude, accuracy);
+    map.setView([latitude, longitude], 17);
+    doGeocode(latitude, longitude, 'gps');
+  });
+
+  map.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    placeMarker(lat, lng, null);
+    doGeocode(lat, lng, 'carte');
   });
 
   function updateUI(pos) {
@@ -287,10 +277,8 @@
     altAccVal.textContent = altitudeAccuracy != null ? '± ' + Math.round(altitudeAccuracy) + ' m' : '—';
     altAccVal.classList.toggle('dim', altitudeAccuracy == null);
 
-    updateMap(latitude, longitude, accuracy);
-    setStatus('live', 'Repérage actif');
-
-    maybeGeocode(latitude, longitude);
+    geocodeBtn.disabled = false;
+    setStatus('live', 'Localisation GPS active');
   }
 
   function handleError(err) {
@@ -300,7 +288,7 @@
     else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
     setStatus('err', msg);
     if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
-    locateBtn.textContent = 'Réessayer';
+    locateBtn.textContent = 'Activer la localisation GPS';
     locateBtn.disabled = false;
   }
 
@@ -318,7 +306,7 @@
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
         lastRawPos = pos;
-        locateBtn.textContent = 'Arrêter le repérage';
+        locateBtn.textContent = 'Désactiver la localisation GPS';
         locateBtn.disabled = false;
         updateUI(pos);
       },
@@ -336,8 +324,8 @@
   function stopWatch() {
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
     if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
-    setStatus('idle', 'En pause');
-    locateBtn.textContent = 'Reprendre le repérage';
+    setStatus('idle', 'Localisation désactivée');
+    locateBtn.textContent = 'Activer la localisation GPS';
   }
 
   locateBtn.addEventListener('click', () => { if (watchId != null) stopWatch(); else startWatch(); });

@@ -26,8 +26,9 @@
   <header>
     <div class="eyebrow">OuSuisJe · position en direct</div>
     <h1>Où êtes-vous, précisément ?</h1>
-    <p class="sub">La localisation reste sur cet appareil — rien n'est envoyé nulle part, hormis l'adresse à OpenStreetMap.</p>
   </header>
+
+  <button id="locateBtn" class="btn-primary">Activer la localisation</button>
 
   <div class="status-line">
     <span id="statusDot" class="dot"></span>
@@ -41,7 +42,7 @@
 
   <div class="grid">
     <div class="cell">
-      <div class="label">Précision</div>
+      <div class="label">Précision horizontale</div>
       <div id="accVal" class="value dim">—</div>
     </div>
     <div class="cell">
@@ -66,6 +67,8 @@
     </div>
   </div>
 
+  <button id="geocodeToggle" class="btn-secondary">Activer le géocodage inverse</button>
+
   <div class="map-wrap">
     <div id="map"></div>
     <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir en plein écran sur OpenStreetMap ↗</a>
@@ -74,7 +77,7 @@
   <div class="addr-panel">
     <div class="addr-head">
       <span>Localisation administrative</span>
-      <span id="addrStatus">—</span>
+      <span id="addrStatus">Désactivé</span>
     </div>
     <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Lieu-dit</span><span id="addrLieuDit" class="v dim">—</span></div>
@@ -86,8 +89,18 @@
   </div>
   <p class="osm-credit">Carte et adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
 
+  <div class="info-panel">
+    <button id="infoToggle" class="info-toggle" aria-expanded="true">
+      <span>Confidentialité des données</span>
+      <span id="infoToggleIcon" class="info-toggle-icon">▲</span>
+    </button>
+    <div id="infoContent" class="info-content">
+      <p>Si la localisation GPS est activée, aucune information n'est envoyée à ousuisje.fun : le traitement se fait entièrement en local, sur votre appareil (ce site peut fonctionner comme une application hors ligne si vous l'ajoutez à l'écran d'accueil).</p>
+      <p>Si le géocodage inverse est activé pour trouver les informations administratives (commune, département, etc.), aucune information n'est envoyée à ousuisje.fun, mais seulement au service Nominatim d'OpenStreetMap (ne fonctionne pas hors ligne).</p>
+    </div>
+  </div>
+
   <div class="actions">
-    <button id="locateBtn" class="btn-primary">Activer la localisation</button>
     <button id="installBtn" class="btn-secondary" style="display:none;">Installer l'application</button>
     <p id="installNote" class="install-note"></p>
   </div>
@@ -97,9 +110,11 @@
       <a href="about.html">À propos</a>
       <a href="mentions-legales.html">Mentions légales</a>
     </div>
+    <div class="visit-counter">Visites : <span id="visitCount">…</span></div>
     OUSUISJE — FONCTIONNE HORS-LIGNE UNE FOIS INSTALLÉ
   </footer>
 </div>
+
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
@@ -117,6 +132,11 @@
   const altAccVal = $('altAccVal');
   const locateBtn = $('locateBtn');
   const osmLink = $('osmLink');
+  const geocodeToggle = $('geocodeToggle');
+  const infoToggle = $('infoToggle');
+  const infoContent = $('infoContent');
+  const infoToggleIcon = $('infoToggleIcon');
+  const visitCount = $('visitCount');
 
   const addrStatus = $('addrStatus');
   const addrAdresse = $('addrAdresse');
@@ -159,9 +179,12 @@
 
   let watchId = null;
   let lastPos = null;
+  let lastRawPos = null;
+  let refreshInterval = null;
   let lastGeocodedAt = 0;
   let lastGeocodedCoords = null;
   let geocoding = false;
+  let reverseGeocodeEnabled = false;
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -184,11 +207,11 @@
   }
 
   async function maybeGeocode(latitude, longitude) {
+    if (!reverseGeocodeEnabled) return;
     const now = Date.now();
-    const movedFar = !lastGeocodedCoords || haversine(lastGeocodedCoords.lat, lastGeocodedCoords.lon, latitude, longitude) > 40;
-    const enoughTimePassed = now - lastGeocodedAt > 8000;
-    if (geocoding || (!movedFar && lastGeocodedAt !== 0)) return;
-    if (lastGeocodedAt !== 0 && !enoughTimePassed) return;
+    const movedFar = !lastGeocodedCoords || haversine(lastGeocodedCoords.lat, lastGeocodedCoords.lon, latitude, longitude) > 15;
+    if (geocoding) return;
+    if (lastGeocodedAt !== 0 && (now - lastGeocodedAt < 10000 || !movedFar)) return;
 
     geocoding = true;
     addrStatus.textContent = 'Recherche…';
@@ -226,6 +249,22 @@
     }
   }
 
+  geocodeToggle.addEventListener('click', () => {
+    reverseGeocodeEnabled = !reverseGeocodeEnabled;
+    if (reverseGeocodeEnabled) {
+      geocodeToggle.textContent = 'Désactiver le géocodage inverse';
+      addrStatus.textContent = lastPos ? 'Recherche…' : 'En attente de position';
+      if (lastPos) {
+        lastGeocodedAt = 0;
+        lastGeocodedCoords = null;
+        maybeGeocode(lastPos.coords.latitude, lastPos.coords.longitude);
+      }
+    } else {
+      geocodeToggle.textContent = 'Activer le géocodage inverse';
+      addrStatus.textContent = 'Désactivé';
+    }
+  });
+
   function updateUI(pos) {
     lastPos = pos;
     const { latitude, longitude, accuracy, altitude, altitudeAccuracy, speed, heading } = pos.coords;
@@ -260,6 +299,7 @@
     else if (err.code === err.POSITION_UNAVAILABLE) msg = 'Position indisponible';
     else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
     setStatus('err', msg);
+    if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
     locateBtn.textContent = 'Réessayer';
     locateBtn.disabled = false;
   }
@@ -276,14 +316,26 @@
     locateBtn.disabled = true;
 
     watchId = navigator.geolocation.watchPosition(
-      (pos) => { updateUI(pos); locateBtn.textContent = 'Arrêter le repérage'; locateBtn.disabled = false; },
+      (pos) => {
+        lastRawPos = pos;
+        locateBtn.textContent = 'Arrêter le repérage';
+        locateBtn.disabled = false;
+        updateUI(pos);
+      },
       handleError,
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
     );
+
+    if (!refreshInterval) {
+      refreshInterval = setInterval(() => {
+        if (lastRawPos) updateUI(lastRawPos);
+      }, 1000);
+    }
   }
 
   function stopWatch() {
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
     setStatus('idle', 'En pause');
     locateBtn.textContent = 'Reprendre le repérage';
   }
@@ -322,6 +374,20 @@
   if (isIOS && !isStandalone) {
     installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
   }
+
+  // --- Panneau d'informations (masquable) ---
+  infoToggle.addEventListener('click', () => {
+    const expanded = infoToggle.getAttribute('aria-expanded') === 'true';
+    infoToggle.setAttribute('aria-expanded', String(!expanded));
+    infoContent.classList.toggle('collapsed', expanded);
+    infoToggleIcon.textContent = expanded ? '▼' : '▲';
+  });
+
+  // --- Compteur de visites ---
+  fetch('https://countapi.mileshilliard.com/api/v1/hit/ousuisje-fun-site-visits')
+    .then((r) => r.json())
+    .then((data) => { visitCount.textContent = data.value.toLocaleString('fr-FR'); })
+    .catch(() => { visitCount.textContent = '—'; });
 })();
 </script>
 </body>

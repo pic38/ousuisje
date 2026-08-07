@@ -26,6 +26,7 @@
   <header>
     <div class="eyebrow">OuSuisJe · position en direct</div>
     <h1>Où êtes-vous, précisément ?</h1>
+    <p class="sub">Vous pouvez aussi trouver une adresse sans utiliser le GPS : cliquez simplement sur la carte plus bas.</p>
   </header>
 
   <button id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
@@ -67,16 +68,6 @@
     </div>
   </div>
 
-  <button id="geocodeBtn" class="btn-secondary" disabled>Trouver l'adresse correspondant à ma localisation</button>
-
-  <div class="map-wrap">
-    <div id="map"></div>
-    <div class="map-footer">
-      <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse.</span>
-      <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir en plein écran sur OpenStreetMap ↗</a>
-    </div>
-  </div>
-
   <div class="addr-panel">
     <div class="addr-head">
       <span>Localisation administrative</span>
@@ -91,6 +82,16 @@
     <div class="addr-row"><span class="k">Région</span><span id="addrRegion" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
   </div>
+
+  <button id="geocodeBtn" class="btn-secondary" disabled>Trouver l'adresse correspondant à ma localisation</button>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-footer">
+      <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse, cela mettra à jour les champs ci-dessus.</span>
+      <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir en plein écran sur OpenStreetMap ↗</a>
+    </div>
+  </div>
   <p class="osm-credit">Carte et adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
 
   <div class="info-panel">
@@ -104,19 +105,19 @@
     </div>
   </div>
 
-  <div class="actions">
-    <button id="installBtn" class="btn-secondary" style="display:none;">Installer l'application</button>
-    <p id="installNote" class="install-note"></p>
-  </div>
-
   <footer>
     <div class="footer-nav">
       <a href="about.html">À propos</a>
       <a href="mentions-legales.html">Mentions légales</a>
     </div>
     <div class="visit-counter">Visites : <span id="visitCount">…</span></div>
-    OUSUISJE — FONCTIONNE HORS-LIGNE UNE FOIS INSTALLÉ
+    Ajoutez ce site à l'écran d'accueil, la localisation GPS peut fonctionner hors ligne mais pas le géocodage inverse qui permet de retrouver l'adresse
   </footer>
+
+  <div class="actions">
+    <button id="installBtn" class="btn-secondary">Ajouter à l'écran d'accueil</button>
+    <p id="installNote" class="install-note"></p>
+  </div>
 </div>
 
 
@@ -341,15 +342,22 @@
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    installBtn.style.display = 'flex';
   });
 
   installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') installBtn.style.display = 'none';
-    deferredPrompt = null;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none';
+        installNote.textContent = 'Application installée ✓';
+      }
+      deferredPrompt = null;
+    } else if (isIOS) {
+      installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
+    } else {
+      installNote.textContent = 'Ouvrez le menu de votre navigateur et choisissez « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».';
+    }
   });
 
   window.addEventListener('appinstalled', () => {
@@ -359,7 +367,10 @@
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  if (isIOS && !isStandalone) {
+  if (isStandalone) {
+    installBtn.style.display = 'none';
+    installNote.textContent = 'Application installée ✓';
+  } else if (isIOS) {
     installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
   }
 

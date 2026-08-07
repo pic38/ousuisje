@@ -25,7 +25,7 @@
 <div class="wrap">
   <header>
     <div class="eyebrow">OuSuisJe · position en direct</div>
-    <h1>Où êtes-vous, précisément ?</h1>
+    <h1>Où êtes-vous, à quelle adresse ?</h1>
     <p class="sub">Vous pouvez aussi trouver une adresse sans utiliser le GPS : cliquez simplement sur la carte plus bas.</p>
   </header>
 
@@ -68,6 +68,8 @@
     </div>
   </div>
 
+  <button id="geocodeBtn" class="btn-secondary" disabled>Trouver l'adresse correspondant à ma localisation</button>
+
   <div class="addr-panel">
     <div class="addr-head">
       <span>Localisation administrative</span>
@@ -83,12 +85,11 @@
     <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
   </div>
 
-  <button id="geocodeBtn" class="btn-secondary" disabled>Trouver l'adresse correspondant à ma localisation</button>
-
   <div class="map-wrap">
     <div id="map"></div>
     <div class="map-footer">
       <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse, cela mettra à jour les champs ci-dessus.</span>
+      <a id="googleMapsLink" class="map-link" href="https://www.google.com/maps" target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
       <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir en plein écran sur OpenStreetMap ↗</a>
     </div>
   </div>
@@ -137,6 +138,7 @@
   const altAccVal = $('altAccVal');
   const locateBtn = $('locateBtn');
   const osmLink = $('osmLink');
+  const googleMapsLink = $('googleMapsLink');
   const geocodeBtn = $('geocodeBtn');
   const infoToggle = $('infoToggle');
   const infoContent = $('infoContent');
@@ -184,6 +186,7 @@
       accuracyCircleLayer = null;
     }
     osmLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
+    googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
   }
 
   let watchId = null;
@@ -219,10 +222,17 @@
         || addr.pedestrian || addr.neighbourhood || null;
       const lieuDit = addr.hamlet || addr.locality || addr.isolated_dwelling || addr.suburb || addr.quarter || null;
       const commune = addr.village || addr.town || addr.city || addr.municipality || null;
-      const departement = addr.county || addr.state_district || null;
+      let departement = addr.county || addr.state_district || null;
       const region = addr.state || null;
       const pays = addr.country || null;
       const codePostal = addr.postcode || null;
+
+      if (departement && addr.country_code === 'fr' && codePostal) {
+        const deptNum = (codePostal.startsWith('97') || codePostal.startsWith('98'))
+          ? codePostal.slice(0, 3)
+          : codePostal.slice(0, 2);
+        departement = `${departement} (${deptNum})`;
+      }
 
       setAddrField(addrAdresse, adresse);
       setAddrField(addrLieuDit, lieuDit);
@@ -291,6 +301,7 @@
     if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
     locateBtn.textContent = 'Activer la localisation GPS';
     locateBtn.disabled = false;
+    geocodeBtn.disabled = true;
   }
 
   function startWatch() {
@@ -327,6 +338,9 @@
     if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
     setStatus('idle', 'Localisation désactivée');
     locateBtn.textContent = 'Activer la localisation GPS';
+    geocodeBtn.disabled = true;
+    lastPos = null;
+    lastRawPos = null;
   }
 
   locateBtn.addEventListener('click', () => { if (watchId != null) stopWatch(); else startWatch(); });

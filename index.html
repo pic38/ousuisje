@@ -194,6 +194,32 @@
   let lastRawPos = null;
   let refreshInterval = null;
   let geocoding = false;
+  let prevFixForSpeed = null;
+  let lastKnownSpeedKmh = null;
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  // Beaucoup d'appareils ne renseignent pas coords.speed : on la recalcule
+  // nous-mêmes à partir de la distance parcourue entre deux relevés GPS réels.
+  function computeSpeedKmh(pos) {
+    if (pos.coords.speed != null && !Number.isNaN(pos.coords.speed)) {
+      return pos.coords.speed * 3.6;
+    }
+    if (prevFixForSpeed) {
+      const dt = (pos.timestamp - prevFixForSpeed.timestamp) / 1000;
+      if (dt >= 1) {
+        const dist = haversine(prevFixForSpeed.lat, prevFixForSpeed.lon, pos.coords.latitude, pos.coords.longitude);
+        return (dist / dt) * 3.6;
+      }
+    }
+    return lastKnownSpeedKmh;
+  }
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -268,7 +294,7 @@
 
   function updateUI(pos) {
     lastPos = pos;
-    const { latitude, longitude, accuracy, altitude, altitudeAccuracy, speed, heading } = pos.coords;
+    const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading } = pos.coords;
 
     latValue.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtCoord(Math.abs(latitude));
     latValue.classList.remove('placeholder');
@@ -279,8 +305,8 @@
     accVal.classList.remove('dim');
     altVal.textContent = altitude != null ? Math.round(altitude) + ' m' : 'Non fournie';
     altVal.classList.toggle('dim', altitude == null);
-    spdVal.textContent = speed != null ? (speed * 3.6).toFixed(1) + ' km/h' : 'À l\'arrêt';
-    spdVal.classList.toggle('dim', speed == null);
+    spdVal.textContent = lastKnownSpeedKmh != null ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : 'À l\'arrêt';
+    spdVal.classList.toggle('dim', lastKnownSpeedKmh == null);
     hdgVal.textContent = heading != null && !Number.isNaN(heading) ? Math.round(heading) + '°' : 'Non fournie';
     hdgVal.classList.toggle('dim', heading == null || Number.isNaN(heading));
     tsVal.textContent = new Date(pos.timestamp).toLocaleTimeString('fr-FR');
@@ -317,13 +343,15 @@
 
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
+        lastKnownSpeedKmh = computeSpeedKmh(pos);
+        prevFixForSpeed = { lat: pos.coords.latitude, lon: pos.coords.longitude, timestamp: pos.timestamp };
         lastRawPos = pos;
         locateBtn.textContent = 'Désactiver la localisation GPS';
         locateBtn.disabled = false;
         updateUI(pos);
       },
       handleError,
-      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
     );
 
     if (!refreshInterval) {
@@ -341,6 +369,8 @@
     geocodeBtn.disabled = true;
     lastPos = null;
     lastRawPos = null;
+    prevFixForSpeed = null;
+    lastKnownSpeedKmh = null;
   }
 
   locateBtn.addEventListener('click', () => { if (watchId != null) stopWatch(); else startWatch(); });

@@ -1,4 +1,4 @@
-const CACHE_NAME = "ousuisje-cache-v8";
+const CACHE_NAME = "ousuisje-cache-v9";
 const ASSETS = [
   "./",
   "./index.html",
@@ -35,7 +35,9 @@ self.addEventListener("fetch", (event) => {
     url.includes("nominatim.openstreetmap.org") ||
     url.includes("tile.openstreetmap.org") ||
     url.includes("unpkg.com") ||
-    url.includes("countapi.mileshilliard.com")
+    url.includes("countapi.mileshilliard.com") ||
+    url.includes("data.geopf.fr") ||
+    url.includes("overpass-api.de")
   ) return;
 
   event.respondWith(

@@ -206,6 +206,32 @@ h1 {
 .addr-row .v { font-weight: 600; text-align: right; }
 .addr-row .v.dim { color: var(--muted); font-weight: 400; }
 
+/* --- POI table --- */
+.poi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.poi-table thead th {
+  text-align: left;
+  padding: 10px 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.poi-table thead th:last-child,
+.poi-table tbody td:last-child { text-align: right; }
+.poi-table tbody td {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+}
+.poi-table tbody tr:last-child td { border-bottom: none; }
+.poi-table tbody td.dim { color: var(--muted); text-align: center; }
+
 /* --- Buttons --- */
 .actions { display: flex; flex-direction: column; gap: 10px; }
 button {

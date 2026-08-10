@@ -68,6 +68,18 @@
     </div>
   </div>
 
+  <button id="altCompareBtn" class="btn-secondary" disabled>Comparer avec l'altitude IGN</button>
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Comparaison d'altitude</span>
+      <span id="altCompareStatus">—</span>
+    </div>
+    <div class="addr-row"><span class="k">Altitude GPS</span><span id="altGpsVal" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Altitude IGN (RGE ALTI)</span><span id="altIgnVal" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Écart</span><span id="altDiffVal" class="v dim">—</span></div>
+  </div>
+  <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
+
   <button id="geocodeBtn" class="btn-secondary" disabled>Trouver l'adresse correspondant à ma localisation</button>
 
   <div class="addr-panel">
@@ -95,6 +107,23 @@
   </div>
   <p class="osm-credit">Carte et adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
 
+  <button id="poiBtn" class="btn-secondary" disabled>Points d'intérêt à proximité</button>
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Points d'intérêt à proximité</span>
+      <span id="poiStatus">—</span>
+    </div>
+    <table class="poi-table">
+      <thead>
+        <tr><th>Point</th><th>Distance</th><th>Direction</th></tr>
+      </thead>
+      <tbody id="poiTableBody">
+        <tr><td colspan="3" class="dim">Aucune recherche effectuée</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="osm-credit">Points d'intérêt : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+
   <div class="info-panel">
     <button id="infoToggle" class="info-toggle" aria-expanded="true">
       <span>Confidentialité des données</span>
@@ -103,6 +132,7 @@
     <div id="infoContent" class="info-content">
       <p>Si la localisation GPS est activée, aucune information n'est envoyée à ousuisje.fun : le traitement se fait entièrement en local, sur votre appareil (ce site peut fonctionner comme une application hors ligne si vous l'ajoutez à l'écran d'accueil).</p>
       <p>Si le géocodage inverse est activé pour trouver les informations administratives (commune, département, etc.), aucune information n'est envoyée à ousuisje.fun, mais seulement au service Nominatim d'OpenStreetMap (ne fonctionne pas hors ligne).</p>
+      <p>La comparaison d'altitude interroge le service géoplateforme de l'IGN, et la recherche de points d'intérêt interroge l'API Overpass d'OpenStreetMap — dans les deux cas, uniquement les coordonnées du point sélectionné sont envoyées, directement depuis votre navigateur, sans passer par ousuisje.fun (ne fonctionnent pas hors ligne).</p>
     </div>
   </div>
 
@@ -155,6 +185,16 @@
   const addrRegion = $('addrRegion');
   const addrPays = $('addrPays');
 
+  const altCompareBtn = $('altCompareBtn');
+  const altCompareStatus = $('altCompareStatus');
+  const altGpsVal = $('altGpsVal');
+  const altIgnVal = $('altIgnVal');
+  const altDiffVal = $('altDiffVal');
+
+  const poiBtn = $('poiBtn');
+  const poiStatus = $('poiStatus');
+  const poiTableBody = $('poiTableBody');
+
   // --- Carte OSM (Leaflet) ---
   const map = L.map('map', { zoomControl: true, attributionControl: false });
   map.fitBounds([[41.2, -5.3], [51.2, 9.7]]); // France entière par défaut
@@ -166,6 +206,7 @@
   });
   let marker = null;
   let accuracyCircleLayer = null;
+  let lastQueriedPoint = null;
 
   function placeMarker(latitude, longitude, accuracy) {
     const latlng = [latitude, longitude];
@@ -187,6 +228,9 @@
     }
     osmLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
     googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    lastQueriedPoint = { lat: latitude, lon: longitude };
+    altCompareBtn.disabled = false;
+    poiBtn.disabled = false;
   }
 
   let watchId = null;
@@ -292,6 +336,107 @@
     doGeocode(lat, lng, 'carte');
   });
 
+  // --- Comparaison d'altitude (IGN / Géoplateforme, RGE ALTI) ---
+  altCompareBtn.addEventListener('click', async () => {
+    if (!lastQueriedPoint) return;
+    const { lat, lon } = lastQueriedPoint;
+    altCompareStatus.textContent = 'Recherche…';
+    try {
+      const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
+      const data = await res.json();
+      const raw = data && data.elevations ? data.elevations[0] : null;
+      const ignAlt = (raw != null && typeof raw === 'object') ? raw.z : raw;
+
+      const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude : null;
+
+      if (gpsAlt != null) {
+        altGpsVal.textContent = Math.round(gpsAlt) + ' m';
+        altGpsVal.classList.remove('dim');
+      } else {
+        altGpsVal.textContent = 'Non fournie par le GPS';
+        altGpsVal.classList.add('dim');
+      }
+
+      if (ignAlt != null && ignAlt > -9999) {
+        altIgnVal.textContent = Math.round(ignAlt) + ' m';
+        altIgnVal.classList.remove('dim');
+      } else {
+        altIgnVal.textContent = 'Indisponible pour ce point';
+        altIgnVal.classList.add('dim');
+      }
+
+      if (gpsAlt != null && ignAlt != null && ignAlt > -9999) {
+        const diff = gpsAlt - ignAlt;
+        altDiffVal.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+        altDiffVal.classList.remove('dim');
+      } else {
+        altDiffVal.textContent = '—';
+        altDiffVal.classList.add('dim');
+      }
+
+      altCompareStatus.textContent = 'Point comparé : ' + (addrSource.textContent || 'dernier point sélectionné');
+    } catch (e) {
+      altCompareStatus.textContent = 'Service IGN indisponible';
+    }
+  });
+
+  // --- Points d'intérêt à proximité (Overpass API) ---
+  function bearingTo(lat1, lon1, lat2, lon2) {
+    const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+    const deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    const points = ['Nord', 'Nord-Est', 'Est', 'Sud-Est', 'Sud', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'];
+    return points[Math.round(deg / 45) % 8];
+  }
+
+  function fmtDistance(m) {
+    return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
+  }
+
+  poiBtn.addEventListener('click', async () => {
+    if (!lastQueriedPoint) return;
+    const { lat, lon } = lastQueriedPoint;
+    poiStatus.textContent = 'Recherche…';
+    poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche en cours…</td></tr>';
+    try {
+      const radius = 1500;
+      const query = `[out:json][timeout:20];node(around:${radius},${lat},${lon})["name"]["amenity"~"."];out body 200;`;
+      const res = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query)
+      });
+      const data = await res.json();
+      const elements = (data.elements || []).filter((el) => el.tags && el.tags.name);
+
+      const withDistance = elements.map((el) => ({
+        name: el.tags.name,
+        distance: haversine(lat, lon, el.lat, el.lon),
+        bearing: bearingTo(lat, lon, el.lat, el.lon)
+      }));
+
+      withDistance.sort((a, b) => a.distance - b.distance);
+      const nearest = withDistance.slice(0, 10);
+
+      if (nearest.length === 0) {
+        poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Aucun point trouvé à proximité</td></tr>';
+      } else {
+        poiTableBody.innerHTML = nearest.map((p) => `
+          <tr>
+            <td>${p.name}</td>
+            <td>${fmtDistance(p.distance)}</td>
+            <td>${p.bearing}</td>
+          </tr>
+        `).join('');
+      }
+      poiStatus.textContent = nearest.length + ' point(s) · rayon ' + radius + ' m';
+    } catch (e) {
+      poiStatus.textContent = 'Service Overpass indisponible';
+      poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
+    }
+  });
+
   function updateUI(pos) {
     lastPos = pos;
     const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading } = pos.coords;
@@ -381,6 +526,8 @@
 
   const installBtn = $('installBtn');
   const installNote = $('installNote');
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   let deferredPrompt = null;
 
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -409,8 +556,6 @@
     installNote.textContent = 'Application installée ✓';
   });
 
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (isStandalone) {
     installBtn.style.display = 'none';
     installNote.textContent = 'Application installée ✓';

@@ -59,6 +59,7 @@
       <div id="altAccVal" class="value dim">—</div>
     </div>
   </div>
+  <p id="accuracyWarning" class="accuracy-warning" style="display:none;"></p>
 
   <div class="info-panel">
     <button id="diagToggle" class="info-toggle" aria-expanded="false">
@@ -159,6 +160,8 @@
     <button id="installBtn" class="btn-secondary">Ajouter à l'écran d'accueil</button>
     <p id="installNote" class="install-note"></p>
   </div>
+
+  <p class="feedback-note">Une suggestion, un bug à signaler ? N'hésitez pas à écrire à l'adresse indiquée dans les <a href="mentions-legales.html" class="inline">mentions légales</a>.</p>
 </div>
 
 
@@ -175,6 +178,7 @@
   const hdgVal = $('hdgVal');
   const tsVal = $('tsVal');
   const altAccVal = $('altAccVal');
+  const accuracyWarning = $('accuracyWarning');
   const locateBtn = $('locateBtn');
   const keepAliveCheckbox = $('keepAliveCheckbox');
   const autoStopCountdown = $('autoStopCountdown');
@@ -509,6 +513,13 @@
 
     accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
     accVal.classList.remove('dim');
+
+    if (accuracy != null && accuracy >= 50) {
+      accuracyWarning.textContent = `Précision faible (${Math.round(accuracy)} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil).`;
+      accuracyWarning.style.display = 'block';
+    } else {
+      accuracyWarning.style.display = 'none';
+    }
     altVal.textContent = altitude != null ? Math.round(altitude) + ' m' : 'Non fournie';
     altVal.classList.toggle('dim', altitude == null);
     spdVal.textContent = lastKnownSpeedKmh != null ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : 'À l\'arrêt';
@@ -597,7 +608,7 @@
         diagFixState.textContent = 'Signal perdu';
         diagFixState.classList.add('dim');
       },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' }
     );
 
     // L'affichage se rafraîchit chaque seconde à partir du dernier relevé connu,

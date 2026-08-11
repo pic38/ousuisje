@@ -193,6 +193,17 @@ h1 {
 .cell .value { margin-top: 5px; font-family: var(--mono); font-size: 16px; font-weight: 700; }
 .cell .value.dim { color: var(--muted); font-weight: 400; font-size: 14px; }
 
+.accuracy-warning {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--amber);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #C7CEDA;
+}
+
 /* --- Address panel --- */
 .addr-panel {
   background: var(--surface);
@@ -276,6 +287,16 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-secondary:hover:not(:disabled) { background: #1d2c47; }
 
 .install-note { text-align: center; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.feedback-note {
+  text-align: center;
+  font-size: 11px;
+  color: #4A5568;
+  line-height: 1.6;
+  padding-top: 4px;
+}
+.feedback-note a { color: #5b6b85; }
+.feedback-note a:hover { color: var(--teal); }
 
 .osm-credit { text-align: center; font-size: 10.5px; color: #4A5568; }
 .osm-credit a { color: #5b6b85; }

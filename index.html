@@ -162,6 +162,7 @@
   </div>
 
   <p class="feedback-note">Une suggestion, un bug à signaler ? N'hésitez pas à écrire à l'adresse indiquée dans les <a href="mentions-legales.html" class="inline">mentions légales</a>.</p>
+  <p class="version-note">Version 0.9</p>
 </div>
 
 
@@ -258,6 +259,7 @@
   }
 
   let watchId = null;
+  let pollTimerId = null;
   let renderInterval = null;
   let countdownInterval = null;
   let lastPos = null;
@@ -270,6 +272,9 @@
   let lastFixReceivedAt = null;
   let autoStopRemaining = 0;
   const AUTO_STOP_SECONDS = 100;
+  const isFirefox = /firefox/i.test(navigator.userAgent);
+  const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
+  const POLL_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 8000, accuracyMode: 'precise' };
 
   function haversine(lat1, lon1, lat2, lon2) {
     const R = 6371000;
@@ -522,10 +527,11 @@
     }
     altVal.textContent = altitude != null ? Math.round(altitude) + ' m' : 'Non fournie';
     altVal.classList.toggle('dim', altitude == null);
-    spdVal.textContent = lastKnownSpeedKmh != null ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : 'À l\'arrêt';
-    spdVal.classList.toggle('dim', lastKnownSpeedKmh == null);
-    hdgVal.textContent = heading != null && !Number.isNaN(heading) ? Math.round(heading) + '°' : 'Non fournie';
-    hdgVal.classList.toggle('dim', heading == null || Number.isNaN(heading));
+    const isMoving = lastKnownSpeedKmh != null && lastKnownSpeedKmh >= 2;
+    spdVal.textContent = isMoving ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : '—';
+    spdVal.classList.toggle('dim', !isMoving);
+    hdgVal.textContent = (isMoving && heading != null && !Number.isNaN(heading)) ? Math.round(heading) + '°' : '—';
+    hdgVal.classList.toggle('dim', !(isMoving && heading != null && !Number.isNaN(heading)));
     tsVal.textContent = new Date(pos.timestamp).toLocaleTimeString('fr-FR');
     tsVal.classList.remove('dim');
     altAccVal.textContent = altitudeAccuracy != null ? '± ' + Math.round(altitudeAccuracy) + ' m' : '—';
@@ -556,6 +562,7 @@
     else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
     setStatus('err', msg);
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (pollTimerId != null) { clearInterval(pollTimerId); pollTimerId = null; }
     if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     autoStopCountdown.textContent = '';
@@ -568,6 +575,30 @@
 
   function updateCountdownDisplay() {
     autoStopCountdown.textContent = autoStopRemaining > 0 ? `Arrêt automatique dans ${autoStopRemaining} s` : '';
+  }
+
+  function isTrackingActive() { return watchId != null || pollTimerId != null; }
+
+  function handleFix(pos) {
+    fixCount++;
+    lastKnownSpeedKmh = computeSpeedKmh(pos);
+    lastFixReceivedAt = Date.now();
+    lastRawPos = pos;
+    locateBtn.textContent = 'Désactiver la localisation GPS';
+    locateBtn.disabled = false;
+    updateUI(pos);
+  }
+
+  function handleFixError(err) {
+    if (err.code === err.PERMISSION_DENIED) { handleError(err); return; }
+    // Signal momentanément perdu : on ne coupe pas le suivi, il reprendra de lui-même.
+    setStatus('err', err.code === err.TIMEOUT ? 'Délai dépassé, nouvelle tentative…' : 'Signal GPS perdu, nouvelle tentative…');
+    diagFixState.textContent = 'Signal perdu';
+    diagFixState.classList.add('dim');
+  }
+
+  function pollOnce() {
+    navigator.geolocation.getCurrentPosition(handleFix, handleFixError, POLL_OPTIONS);
   }
 
   function startWatch() {
@@ -586,30 +617,19 @@
     lastSpeedSource = null;
     diagFixCount.textContent = '0';
 
-    // watchPosition maintient le récepteur GPS actif en continu : c'est ce qui lui
-    // permet d'affiner sa précision au fil du temps. Des appels ponctuels répétés
-    // (getCurrentPosition en boucle) ont tendance à ne renvoyer que des positions
-    // grossières (réseau/wifi), le récepteur GPS n'ayant jamais le temps de "verrouiller".
-    watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        fixCount++;
-        lastKnownSpeedKmh = computeSpeedKmh(pos);
-        lastFixReceivedAt = Date.now();
-        lastRawPos = pos;
-        locateBtn.textContent = 'Désactiver la localisation GPS';
-        locateBtn.disabled = false;
-        updateUI(pos);
-      },
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) { handleError(err); return; }
-        // Signal momentanément perdu : watchPosition continue de tourner en arrière-plan,
-        // on ne coupe pas le suivi, il reprendra de lui-même au prochain relevé valide.
-        setStatus('err', err.code === err.TIMEOUT ? 'Délai dépassé, nouvelle tentative…' : 'Signal GPS perdu, nouvelle tentative…');
-        diagFixState.textContent = 'Signal perdu';
-        diagFixState.classList.add('dim');
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' }
-    );
+    if (isFirefox) {
+      // Sur Firefox, un simple watchPosition semble laisser le récepteur GPS en
+      // veille et ne converge pas vers une bonne précision. Des appels répétés et
+      // explicites via getCurrentPosition (une vraie nouvelle demande à chaque
+      // fois) obtiennent de meilleurs résultats dans la pratique sur ce navigateur.
+      pollOnce();
+      pollTimerId = setInterval(pollOnce, 1000);
+    } else {
+      // Sur les autres navigateurs (Chrome...), watchPosition maintient le
+      // récepteur GPS actif en continu, ce qui lui permet d'affiner sa précision
+      // au fil du temps — supérieur à des appels ponctuels répétés.
+      watchId = navigator.geolocation.watchPosition(handleFix, handleFixError, WATCH_OPTIONS);
+    }
 
     // L'affichage se rafraîchit chaque seconde à partir du dernier relevé connu,
     // indépendamment de la cadence réelle (souvent plus rapide) des relevés GPS.
@@ -635,6 +655,7 @@
 
   function stopWatch() {
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (pollTimerId != null) { clearInterval(pollTimerId); pollTimerId = null; }
     if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     autoStopCountdown.textContent = '';
@@ -651,7 +672,7 @@
   }
 
   keepAliveCheckbox.addEventListener('change', () => {
-    if (watchId == null) return; // pas de suivi actif, rien à faire tout de suite
+    if (!isTrackingActive()) return; // pas de suivi actif, rien à faire tout de suite
     if (keepAliveCheckbox.checked) {
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
       autoStopCountdown.textContent = '';
@@ -669,7 +690,7 @@
     }
   });
 
-  locateBtn.addEventListener('click', () => { if (watchId != null) stopWatch(); else startWatch(); });
+  locateBtn.addEventListener('click', () => { if (isTrackingActive()) stopWatch(); else startWatch(); });
 
   diagToggle.addEventListener('click', () => {
     const expanded = diagToggle.getAttribute('aria-expanded') === 'true';

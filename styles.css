@@ -298,6 +298,14 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .feedback-note a { color: #5b6b85; }
 .feedback-note a:hover { color: var(--teal); }
 
+.version-note {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #3A4457;
+  letter-spacing: 0.04em;
+}
+
 .osm-credit { text-align: center; font-size: 10.5px; color: #4A5568; }
 .osm-credit a { color: #5b6b85; }
 

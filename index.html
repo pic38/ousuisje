@@ -24,7 +24,7 @@
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">OuSuisJe · position en direct</div>
+    <div class="eyebrow">OuSuisJe · outils de localisation</div>
     <h1>Où êtes-vous, à quelle adresse ?</h1>
     <p class="sub">Vous pouvez aussi trouver une adresse sans utiliser le GPS : cliquez simplement sur la carte plus bas.</p>
   </header>
@@ -41,27 +41,14 @@
     <span id="statusText">En attente</span>
   </div>
 
-  <div class="coords">
-    <div id="latValue" class="lat placeholder">Latitude —</div>
-    <div id="lonValue" class="lon placeholder">Longitude —</div>
-  </div>
-
   <div class="grid">
     <div class="cell">
       <div class="label">Précision horizontale</div>
       <div id="accVal" class="value dim">—</div>
     </div>
     <div class="cell">
-      <div class="label">Altitude</div>
+      <div class="label">Altitude GPS</div>
       <div id="altVal" class="value dim">—</div>
-    </div>
-    <div class="cell">
-      <div class="label">Vitesse</div>
-      <div id="spdVal" class="value dim">—</div>
-    </div>
-    <div class="cell">
-      <div class="label">Cap</div>
-      <div id="hdgVal" class="value dim">—</div>
     </div>
     <div class="cell">
       <div class="label">Horodatage</div>
@@ -75,10 +62,13 @@
 
   <div class="info-panel">
     <button id="diagToggle" class="info-toggle" aria-expanded="false">
-      <span>Détails techniques du fix GPS</span>
+      <span>Détails technique GPS</span>
       <span id="diagToggleIcon" class="info-toggle-icon">▼</span>
     </button>
     <div id="diagContent" class="info-content collapsed">
+      <div class="addr-row"><span class="k">Position GPS</span><span id="diagPosition" class="v dim placeholder">—</span></div>
+      <div class="addr-row"><span class="k">Vitesse</span><span id="spdVal" class="v dim">—</span></div>
+      <div class="addr-row"><span class="k">Cap</span><span id="hdgVal" class="v dim">—</span></div>
       <div class="addr-row"><span class="k">État du fix</span><span id="diagFixState" class="v dim">—</span></div>
       <div class="addr-row"><span class="k">Âge du relevé</span><span id="diagFixAge" class="v dim">—</span></div>
       <div class="addr-row"><span class="k">Relevés reçus</span><span id="diagFixCount" class="v dim">0</span></div>
@@ -103,6 +93,7 @@
     <div class="addr-row"><span class="k">Région</span><span id="addrRegion" class="v dim">—</span></div>
     <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
   </div>
+  <button id="copyAddressBtn" class="btn-secondary" disabled>Copier l'adresse</button>
 
   <div class="map-wrap">
     <div id="map"></div>
@@ -177,8 +168,7 @@
   const $ = (id) => document.getElementById(id);
   const statusDot = $('statusDot');
   const statusText = $('statusText');
-  const latValue = $('latValue');
-  const lonValue = $('lonValue');
+  const diagPosition = $('diagPosition');
   const accVal = $('accVal');
   const altVal = $('altVal');
   const spdVal = $('spdVal');
@@ -191,6 +181,7 @@
   const osmLink = $('osmLink');
   const googleMapsLink = $('googleMapsLink');
   const geocodeBtn = $('geocodeBtn');
+  const copyAddressBtn = $('copyAddressBtn');
   const infoToggle = $('infoToggle');
   const infoContent = $('infoContent');
   const infoToggleIcon = $('infoToggleIcon');
@@ -262,12 +253,13 @@
     poiBtn.disabled = false;
   }
 
-  let pollInterval = null;
+  let watchId = null;
+  let renderInterval = null;
   let countdownInterval = null;
   let lastPos = null;
   let lastRawPos = null;
   let geocoding = false;
-  let prevFixForSpeed = null;
+  let recentFixes = []; // relevés des ~1.2 dernières secondes, pour moyenner la vitesse
   let lastKnownSpeedKmh = null;
   let lastSpeedSource = null; // 'device' | 'calculated'
   let fixCount = 0;
@@ -283,17 +275,21 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  // Beaucoup d'appareils ne renseignent pas coords.speed : on la recalcule
-  // nous-mêmes à partir de la distance parcourue entre deux relevés GPS réels.
+  // Beaucoup d'appareils ne renseignent pas coords.speed de façon fiable : on la
+  // recalcule nous-mêmes en moyennant la distance parcourue sur la dernière seconde
+  // environ, à partir de tous les relevés GPS réels reçus pendant cette fenêtre.
   function computeSpeedKmh(pos) {
     if (pos.coords.speed != null && !Number.isNaN(pos.coords.speed)) {
       lastSpeedSource = 'device';
       return pos.coords.speed * 3.6;
     }
-    if (prevFixForSpeed) {
-      const dt = (pos.timestamp - prevFixForSpeed.timestamp) / 1000;
-      if (dt >= 1) {
-        const dist = haversine(prevFixForSpeed.lat, prevFixForSpeed.lon, pos.coords.latitude, pos.coords.longitude);
+    recentFixes.push({ lat: pos.coords.latitude, lon: pos.coords.longitude, t: pos.timestamp });
+    recentFixes = recentFixes.filter((f) => pos.timestamp - f.t <= 1200);
+    if (recentFixes.length >= 2) {
+      const first = recentFixes[0];
+      const dt = (pos.timestamp - first.t) / 1000;
+      if (dt >= 0.3) {
+        const dist = haversine(first.lat, first.lon, pos.coords.latitude, pos.coords.longitude);
         lastSpeedSource = 'calculated';
         return (dist / dt) * 3.6;
       }
@@ -351,12 +347,34 @@
       addrSource.textContent = source === 'gps' ? 'Coordonnées GPS' : 'Point sélectionné sur la carte';
       addrSource.classList.remove('dim');
       addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
+      copyAddressBtn.disabled = !(adresse || commune);
     } catch (e) {
       addrStatus.textContent = 'Indisponible';
     } finally {
       geocoding = false;
     }
   }
+
+  copyAddressBtn.addEventListener('click', async () => {
+    const lines = [];
+    const rue = addrAdresse.textContent !== '—' ? addrAdresse.textContent : (addrLieuDit.textContent !== '—' ? addrLieuDit.textContent : null);
+    if (rue) lines.push(rue);
+    const cpCommune = [addrCP.textContent !== '—' ? addrCP.textContent : '', addrCommune.textContent !== '—' ? addrCommune.textContent : ''].filter(Boolean).join(' ');
+    if (cpCommune) lines.push(cpCommune);
+    if (addrPays.textContent !== '—') lines.push(addrPays.textContent);
+
+    const text = lines.join('\n');
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = copyAddressBtn.textContent;
+      copyAddressBtn.textContent = 'Adresse copiée ✓';
+      setTimeout(() => { copyAddressBtn.textContent = original; }, 2000);
+    } catch (e) {
+      copyAddressBtn.textContent = 'Copie impossible';
+      setTimeout(() => { copyAddressBtn.textContent = "Copier l'adresse"; }, 2000);
+    }
+  });
 
   geocodeBtn.addEventListener('click', () => {
     if (!lastPos) return;
@@ -372,10 +390,17 @@
     doGeocode(lat, lng, 'carte');
   });
 
+  function getReferencePoint() {
+    if (lastQueriedPoint) return lastQueriedPoint;
+    if (lastPos) return { lat: lastPos.coords.latitude, lon: lastPos.coords.longitude };
+    return null;
+  }
+
   // --- Comparaison d'altitude (IGN / Géoplateforme, RGE ALTI) ---
   altCompareBtn.addEventListener('click', async () => {
-    if (!lastQueriedPoint) return;
-    const { lat, lon } = lastQueriedPoint;
+    const point = getReferencePoint();
+    if (!point) return;
+    const { lat, lon } = point;
     altCompareStatus.textContent = 'Recherche…';
     try {
       const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
@@ -410,7 +435,8 @@
         altDiffVal.classList.add('dim');
       }
 
-      altCompareStatus.textContent = 'Point comparé : ' + (addrSource.textContent || 'dernier point sélectionné');
+      const sourceLabel = lastQueriedPoint ? (addrSource.textContent && addrSource.textContent !== '—' ? addrSource.textContent : 'dernier point sélectionné') : 'position GPS actuelle';
+      altCompareStatus.textContent = 'Point comparé : ' + sourceLabel;
     } catch (e) {
       altCompareStatus.textContent = 'Service IGN indisponible';
     }
@@ -432,8 +458,9 @@
   }
 
   poiBtn.addEventListener('click', async () => {
-    if (!lastQueriedPoint) return;
-    const { lat, lon } = lastQueriedPoint;
+    const point = getReferencePoint();
+    if (!point) return;
+    const { lat, lon } = point;
     poiStatus.textContent = 'Recherche…';
     poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche en cours…</td></tr>';
     try {
@@ -477,10 +504,8 @@
     lastPos = pos;
     const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading } = pos.coords;
 
-    latValue.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtCoord(Math.abs(latitude));
-    latValue.classList.remove('placeholder');
-    lonValue.textContent = (longitude >= 0 ? 'E ' : 'O ') + fmtCoord(Math.abs(longitude));
-    lonValue.classList.remove('placeholder');
+    diagPosition.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtCoord(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtCoord(Math.abs(longitude));
+    diagPosition.classList.remove('dim', 'placeholder');
 
     accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
     accVal.classList.remove('dim');
@@ -502,12 +527,14 @@
     diagFixAge.classList.toggle('dim', ageSec == null);
     diagFixCount.textContent = String(fixCount);
     diagFixCount.classList.remove('dim');
-    diagSpeedSource.textContent = lastSpeedSource === 'device' ? 'Capteur de l\'appareil' : (lastSpeedSource === 'calculated' ? 'Calculée (approx.)' : '—');
+    diagSpeedSource.textContent = lastSpeedSource === 'device' ? 'Capteur de l\'appareil' : (lastSpeedSource === 'calculated' ? 'Calculée, moyennée sur ~1 s' : '—');
     diagSpeedSource.classList.toggle('dim', !lastSpeedSource);
     diagRawAcc.textContent = accuracy != null ? accuracy.toFixed(1) + ' m' : '—';
     diagRawAcc.classList.toggle('dim', accuracy == null);
 
     geocodeBtn.disabled = false;
+    altCompareBtn.disabled = false;
+    poiBtn.disabled = false;
     setStatus('live', 'Localisation GPS active');
   }
 
@@ -517,7 +544,8 @@
     else if (err.code === err.POSITION_UNAVAILABLE) msg = 'Position indisponible';
     else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
     setStatus('err', msg);
-    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     autoStopCountdown.textContent = '';
     locateBtn.textContent = 'Activer la localisation GPS';
@@ -525,29 +553,6 @@
     geocodeBtn.disabled = true;
     diagFixState.textContent = 'Erreur';
     diagFixState.classList.add('dim');
-  }
-
-  function pollPosition() {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        fixCount++;
-        lastKnownSpeedKmh = computeSpeedKmh(pos);
-        prevFixForSpeed = { lat: pos.coords.latitude, lon: pos.coords.longitude, timestamp: pos.timestamp };
-        lastFixReceivedAt = Date.now();
-        lastRawPos = pos;
-        locateBtn.textContent = 'Désactiver la localisation GPS';
-        locateBtn.disabled = false;
-        updateUI(pos);
-      },
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) { handleError(err); return; }
-        // Signal momentanément perdu : on ne coupe pas le suivi, on retentera au prochain relevé.
-        setStatus('err', err.code === err.TIMEOUT ? 'Délai dépassé, nouvelle tentative…' : 'Signal GPS perdu, nouvelle tentative…');
-        diagFixState.textContent = 'Signal perdu';
-        diagFixState.classList.add('dim');
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
-    );
   }
 
   function updateCountdownDisplay() {
@@ -565,13 +570,41 @@
     locateBtn.textContent = 'Recherche en cours…';
     locateBtn.disabled = true;
     fixCount = 0;
-    prevFixForSpeed = null;
+    recentFixes = [];
     lastKnownSpeedKmh = null;
     lastSpeedSource = null;
     diagFixCount.textContent = '0';
 
-    pollPosition();
-    pollInterval = setInterval(pollPosition, 1000);
+    // watchPosition maintient le récepteur GPS actif en continu : c'est ce qui lui
+    // permet d'affiner sa précision au fil du temps. Des appels ponctuels répétés
+    // (getCurrentPosition en boucle) ont tendance à ne renvoyer que des positions
+    // grossières (réseau/wifi), le récepteur GPS n'ayant jamais le temps de "verrouiller".
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        fixCount++;
+        lastKnownSpeedKmh = computeSpeedKmh(pos);
+        lastFixReceivedAt = Date.now();
+        lastRawPos = pos;
+        locateBtn.textContent = 'Désactiver la localisation GPS';
+        locateBtn.disabled = false;
+        updateUI(pos);
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) { handleError(err); return; }
+        // Signal momentanément perdu : watchPosition continue de tourner en arrière-plan,
+        // on ne coupe pas le suivi, il reprendra de lui-même au prochain relevé valide.
+        setStatus('err', err.code === err.TIMEOUT ? 'Délai dépassé, nouvelle tentative…' : 'Signal GPS perdu, nouvelle tentative…');
+        diagFixState.textContent = 'Signal perdu';
+        diagFixState.classList.add('dim');
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+    );
+
+    // L'affichage se rafraîchit chaque seconde à partir du dernier relevé connu,
+    // indépendamment de la cadence réelle (souvent plus rapide) des relevés GPS.
+    renderInterval = setInterval(() => {
+      if (lastRawPos) updateUI(lastRawPos);
+    }, 1000);
 
     if (!keepAliveCheckbox.checked) {
       autoStopRemaining = AUTO_STOP_SECONDS;
@@ -590,7 +623,8 @@
   }
 
   function stopWatch() {
-    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     autoStopCountdown.textContent = '';
     setStatus('idle', 'Localisation désactivée');
@@ -601,12 +635,12 @@
     diagFixState.classList.add('dim');
     lastPos = null;
     lastRawPos = null;
-    prevFixForSpeed = null;
+    recentFixes = [];
     lastKnownSpeedKmh = null;
   }
 
   keepAliveCheckbox.addEventListener('change', () => {
-    if (!pollInterval) return; // pas de suivi actif, rien à faire tout de suite
+    if (watchId == null) return; // pas de suivi actif, rien à faire tout de suite
     if (keepAliveCheckbox.checked) {
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
       autoStopCountdown.textContent = '';
@@ -624,7 +658,7 @@
     }
   });
 
-  locateBtn.addEventListener('click', () => { if (pollInterval) stopWatch(); else startWatch(); });
+  locateBtn.addEventListener('click', () => { if (watchId != null) stopWatch(); else startWatch(); });
 
   diagToggle.addEventListener('click', () => {
     const expanded = diagToggle.getAttribute('aria-expanded') === 'true';

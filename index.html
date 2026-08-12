@@ -25,7 +25,7 @@
 <div class="wrap">
   <header>
     <div class="eyebrow">OuSuisJe · outils de localisation</div>
-    <h1>Où êtes-vous, à quelle adresse ?</h1>
+    <h1>Retrouvez l'adresse, et plus encore !</h1>
     <p class="sub">Vous pouvez aussi trouver une adresse sans utiliser le GPS : cliquez simplement sur la carte plus bas.</p>
   </header>
 
@@ -135,6 +135,30 @@
   </div>
   <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
 
+  <button id="oeCompareBtn" class="btn-secondary" disabled>Comparer avec Open-Elevation</button>
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Comparaison d'altitude — Open-Elevation</span>
+      <span id="oeCompareStatus">—</span>
+    </div>
+    <div class="addr-row"><span class="k">Altitude GPS</span><span id="oeGpsVal" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Altitude Open-Elevation</span><span id="oeVal" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Écart</span><span id="oeDiffVal" class="v dim">—</span></div>
+  </div>
+  <p class="osm-credit">Altitude : service public <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (données SRTM)</p>
+
+  <button id="otdCompareBtn" class="btn-secondary" disabled>Comparer avec OpenTopoData</button>
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Comparaison d'altitude — OpenTopoData</span>
+      <span id="otdCompareStatus">—</span>
+    </div>
+    <div class="addr-row"><span class="k">Altitude GPS</span><span id="otdGpsVal" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Altitude OpenTopoData</span><span id="otdVal" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Écart</span><span id="otdDiffVal" class="v dim">—</span></div>
+  </div>
+  <p class="osm-credit">Altitude : <a class="inline" href="https://www.opentopodata.org" target="_blank" rel="noopener">OpenTopoData</a> (jeu de données SRTM 30 m)</p>
+
   <div class="info-panel">
     <button id="infoToggle" class="info-toggle" aria-expanded="true">
       <span>Confidentialité des données</span>
@@ -143,7 +167,7 @@
     <div id="infoContent" class="info-content">
       <p>Si la localisation GPS est activée, aucune information n'est envoyée à ousuisje.fun : le traitement se fait entièrement en local, sur votre appareil (ce site peut fonctionner comme une application hors ligne si vous l'ajoutez à l'écran d'accueil).</p>
       <p>Si le géocodage inverse est activé pour trouver les informations administratives (commune, département, etc.), aucune information n'est envoyée à ousuisje.fun, mais seulement au service Nominatim d'OpenStreetMap (ne fonctionne pas hors ligne).</p>
-      <p>La comparaison d'altitude interroge le service géoplateforme de l'IGN, et la recherche de points d'intérêt interroge l'API Overpass d'OpenStreetMap — dans les deux cas, uniquement les coordonnées du point sélectionné sont envoyées, directement depuis votre navigateur, sans passer par ousuisje.fun (ne fonctionnent pas hors ligne).</p>
+      <p>La comparaison d'altitude interroge le service géoplateforme de l'IGN, Open-Elevation ou OpenTopoData selon le bouton utilisé, et la recherche de points d'intérêt interroge l'API Overpass d'OpenStreetMap — dans tous les cas, uniquement les coordonnées du point sélectionné sont envoyées, directement depuis votre navigateur, sans passer par ousuisje.fun (ne fonctionnent pas hors ligne).</p>
     </div>
   </div>
 
@@ -216,6 +240,18 @@
   const altIgnVal = $('altIgnVal');
   const altDiffVal = $('altDiffVal');
 
+  const oeCompareBtn = $('oeCompareBtn');
+  const oeCompareStatus = $('oeCompareStatus');
+  const oeGpsVal = $('oeGpsVal');
+  const oeVal = $('oeVal');
+  const oeDiffVal = $('oeDiffVal');
+
+  const otdCompareBtn = $('otdCompareBtn');
+  const otdCompareStatus = $('otdCompareStatus');
+  const otdGpsVal = $('otdGpsVal');
+  const otdVal = $('otdVal');
+  const otdDiffVal = $('otdDiffVal');
+
   const poiBtn = $('poiBtn');
   const poiStatus = $('poiStatus');
   const poiTableBody = $('poiTableBody');
@@ -255,11 +291,13 @@
     googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
     lastQueriedPoint = { lat: latitude, lon: longitude };
     altCompareBtn.disabled = false;
+    oeCompareBtn.disabled = false;
+    otdCompareBtn.disabled = false;
     poiBtn.disabled = false;
   }
 
   let watchId = null;
-  let pollTimerId = null;
+  let restartTimerId = null;
   let renderInterval = null;
   let countdownInterval = null;
   let lastPos = null;
@@ -274,7 +312,6 @@
   const AUTO_STOP_SECONDS = 100;
   const isFirefox = /firefox/i.test(navigator.userAgent);
   const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
-  const POLL_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 8000, accuracyMode: 'precise' };
 
   function haversine(lat1, lon1, lat2, lon2) {
     const R = 6371000;
@@ -405,51 +442,74 @@
     return null;
   }
 
-  // --- Comparaison d'altitude (IGN / Géoplateforme, RGE ALTI) ---
-  altCompareBtn.addEventListener('click', async () => {
+  // --- Sources d'altitude ---
+  async function fetchIGNAltitude(lat, lon) {
+    const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
+    const data = await res.json();
+    const raw = data && data.elevations ? data.elevations[0] : null;
+    const val = (raw != null && typeof raw === 'object') ? raw.z : raw;
+    return (val != null && val > -9999) ? val : null;
+  }
+
+  async function fetchOpenElevationAltitude(lat, lon) {
+    const res = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`);
+    const data = await res.json();
+    const val = data && data.results && data.results[0] ? data.results[0].elevation : null;
+    return val != null ? val : null;
+  }
+
+  async function fetchOpenTopoDataAltitude(lat, lon) {
+    const res = await fetch(`https://api.opentopodata.org/v1/srtm30m?locations=${lat},${lon}`);
+    const data = await res.json();
+    const val = data && data.results && data.results[0] ? data.results[0].elevation : null;
+    return val != null ? val : null;
+  }
+
+  // --- Comparaison d'altitude générique, réutilisée pour les 3 sources ---
+  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, sourceLabel, fetchFn) {
     const point = getReferencePoint();
     if (!point) return;
     const { lat, lon } = point;
-    altCompareStatus.textContent = 'Recherche…';
+    statusEl.textContent = 'Recherche…';
     try {
-      const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
-      const data = await res.json();
-      const raw = data && data.elevations ? data.elevations[0] : null;
-      const ignAlt = (raw != null && typeof raw === 'object') ? raw.z : raw;
-
+      const elevation = await fetchFn(lat, lon);
       const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude : null;
 
       if (gpsAlt != null) {
-        altGpsVal.textContent = Math.round(gpsAlt) + ' m';
-        altGpsVal.classList.remove('dim');
+        gpsEl.textContent = Math.round(gpsAlt) + ' m';
+        gpsEl.classList.remove('dim');
       } else {
-        altGpsVal.textContent = 'Non fournie par le GPS';
-        altGpsVal.classList.add('dim');
+        gpsEl.textContent = 'Non fournie par le GPS';
+        gpsEl.classList.add('dim');
       }
 
-      if (ignAlt != null && ignAlt > -9999) {
-        altIgnVal.textContent = Math.round(ignAlt) + ' m';
-        altIgnVal.classList.remove('dim');
+      if (elevation != null) {
+        sourceEl.textContent = Math.round(elevation) + ' m';
+        sourceEl.classList.remove('dim');
       } else {
-        altIgnVal.textContent = 'Indisponible pour ce point';
-        altIgnVal.classList.add('dim');
+        sourceEl.textContent = 'Indisponible pour ce point';
+        sourceEl.classList.add('dim');
       }
 
-      if (gpsAlt != null && ignAlt != null && ignAlt > -9999) {
-        const diff = gpsAlt - ignAlt;
-        altDiffVal.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
-        altDiffVal.classList.remove('dim');
+      if (gpsAlt != null && elevation != null) {
+        const diff = gpsAlt - elevation;
+        diffEl.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+        diffEl.classList.remove('dim');
       } else {
-        altDiffVal.textContent = '—';
-        altDiffVal.classList.add('dim');
+        diffEl.textContent = '—';
+        diffEl.classList.add('dim');
       }
 
-      const sourceLabel = lastQueriedPoint ? (addrSource.textContent && addrSource.textContent !== '—' ? addrSource.textContent : 'dernier point sélectionné') : 'position GPS actuelle';
-      altCompareStatus.textContent = 'Point comparé : ' + sourceLabel;
+      const pointLabel = lastQueriedPoint ? (addrSource.textContent && addrSource.textContent !== '—' ? addrSource.textContent : 'dernier point sélectionné') : 'position GPS actuelle';
+      statusEl.textContent = 'Point comparé : ' + pointLabel;
     } catch (e) {
-      altCompareStatus.textContent = 'Service IGN indisponible';
+      statusEl.textContent = 'Service ' + sourceLabel + ' indisponible';
     }
-  });
+  }
+
+  altCompareBtn.addEventListener('click', () => runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude));
+  oeCompareBtn.addEventListener('click', () => runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude));
+  otdCompareBtn.addEventListener('click', () => runAltitudeCompare(otdCompareStatus, otdGpsVal, otdVal, otdDiffVal, 'OpenTopoData', fetchOpenTopoDataAltitude));
 
   // --- Points d'intérêt à proximité (Overpass API) ---
   function bearingTo(lat1, lon1, lat2, lon2) {
@@ -551,6 +611,8 @@
 
     geocodeBtn.disabled = false;
     altCompareBtn.disabled = false;
+    oeCompareBtn.disabled = false;
+    otdCompareBtn.disabled = false;
     poiBtn.disabled = false;
     setStatus('live', 'Localisation GPS active');
   }
@@ -562,7 +624,7 @@
     else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
     setStatus('err', msg);
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-    if (pollTimerId != null) { clearInterval(pollTimerId); pollTimerId = null; }
+    if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
     if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     autoStopCountdown.textContent = '';
@@ -577,7 +639,7 @@
     autoStopCountdown.textContent = autoStopRemaining > 0 ? `Arrêt automatique dans ${autoStopRemaining} s` : '';
   }
 
-  function isTrackingActive() { return watchId != null || pollTimerId != null; }
+  function isTrackingActive() { return watchId != null; }
 
   function handleFix(pos) {
     fixCount++;
@@ -597,8 +659,9 @@
     diagFixState.classList.add('dim');
   }
 
-  function pollOnce() {
-    navigator.geolocation.getCurrentPosition(handleFix, handleFixError, POLL_OPTIONS);
+  function beginWatch() {
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(handleFix, handleFixError, WATCH_OPTIONS);
   }
 
   function startWatch() {
@@ -617,18 +680,17 @@
     lastSpeedSource = null;
     diagFixCount.textContent = '0';
 
+    // watchPosition maintient le récepteur GPS actif en continu, ce qui lui permet
+    // d'affiner sa précision au fil du temps — supérieur à des appels ponctuels répétés.
+    beginWatch();
+
     if (isFirefox) {
-      // Sur Firefox, un simple watchPosition semble laisser le récepteur GPS en
-      // veille et ne converge pas vers une bonne précision. Des appels répétés et
-      // explicites via getCurrentPosition (une vraie nouvelle demande à chaque
-      // fois) obtiennent de meilleurs résultats dans la pratique sur ce navigateur.
-      pollOnce();
-      pollTimerId = setInterval(pollOnce, 1000);
-    } else {
-      // Sur les autres navigateurs (Chrome...), watchPosition maintient le
-      // récepteur GPS actif en continu, ce qui lui permet d'affiner sa précision
-      // au fil du temps — supérieur à des appels ponctuels répétés.
-      watchId = navigator.geolocation.watchPosition(handleFix, handleFixError, WATCH_OPTIONS);
+      // Sur certains Firefox mobiles, watchPosition semble parfois se figer sur sa
+      // toute première position (souvent grossière, réseau/wifi) sans jamais la
+      // rafraîchir. On relance périodiquement un nouveau watch : ça force une
+      // nouvelle négociation avec le fournisseur de localisation du système, sans
+      // perdre le bénéfice d'un suivi continu entre chaque relance.
+      restartTimerId = setInterval(beginWatch, 20000);
     }
 
     // L'affichage se rafraîchit chaque seconde à partir du dernier relevé connu,
@@ -655,7 +717,7 @@
 
   function stopWatch() {
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-    if (pollTimerId != null) { clearInterval(pollTimerId); pollTimerId = null; }
+    if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
     if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     autoStopCountdown.textContent = '';

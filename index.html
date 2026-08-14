@@ -50,26 +50,20 @@
       <div class="label">Altitude GPS</div>
       <div id="altVal" class="value dim">—</div>
     </div>
-    <div class="cell">
-      <div class="label">Heure GPS</div>
-      <div id="tsVal" class="value dim">—</div>
-    </div>
-    <div class="cell">
-      <div class="label">Précision altitude GPS</div>
-      <div id="altAccVal" class="value dim">—</div>
-    </div>
   </div>
   <p id="accuracyWarning" class="accuracy-warning" style="display:none;"></p>
 
   <div class="info-panel">
     <button id="diagToggle" class="info-toggle" aria-expanded="false">
-      <span>Détails technique GPS</span>
+      <span>Détails techniques GPS</span>
       <span id="diagToggleIcon" class="info-toggle-icon">▼</span>
     </button>
     <div id="diagContent" class="info-content collapsed">
       <div class="addr-row"><span class="k">Position GPS</span><span id="diagPosition" class="v dim placeholder">—</span></div>
       <div class="addr-row"><span class="k">Vitesse</span><span id="spdVal" class="v dim">—</span></div>
       <div class="addr-row"><span class="k">Cap</span><span id="hdgVal" class="v dim">—</span></div>
+      <div class="addr-row"><span class="k">Heure GPS</span><span id="tsVal" class="v dim">—</span></div>
+      <div class="addr-row"><span class="k">Précision altitude GPS</span><span id="altAccVal" class="v dim">—</span></div>
       <div class="addr-row"><span class="k">État du fix</span><span id="diagFixState" class="v dim">—</span></div>
       <div class="addr-row"><span class="k">Âge du relevé</span><span id="diagFixAge" class="v dim">—</span></div>
       <div class="addr-row"><span class="k">Relevés reçus</span><span id="diagFixCount" class="v dim">0</span></div>
@@ -84,7 +78,7 @@
     <span id="sourceBadgeDot" class="source-badge-dot"></span>
     <span id="sourceBadgeText">Aucun point sélectionné pour l'instant</span>
   </div>
-  <p class="badge-hint">Point utilisé pour les outils ci-dessous.</p>
+  <p class="badge-hint">(Point utilisé pour les outils de localisation.)</p>
 
   <div class="addr-panel">
     <div class="addr-head">
@@ -176,6 +170,8 @@
   <div class="actions">
     <button id="installBtn" class="btn-secondary">Ajouter à l'écran d'accueil</button>
     <p id="installNote" class="install-note"></p>
+    <button id="shareBtn" class="btn-secondary">Partager OuSuisJe</button>
+    <p id="shareNote" class="install-note"></p>
   </div>
 
   <p class="feedback-note">Une suggestion, un bug à signaler ? N'hésitez pas à écrire à l'adresse indiquée dans les <a href="mentions-legales.html" class="inline">mentions légales</a>.</p>
@@ -873,6 +869,32 @@
     infoToggle.setAttribute('aria-expanded', String(!expanded));
     infoContent.classList.toggle('collapsed', expanded);
     infoToggleIcon.textContent = expanded ? '▼' : '▲';
+  });
+
+  // --- Partage de l'application ---
+  const shareBtn = $('shareBtn');
+  const shareNote = $('shareNote');
+  shareBtn.addEventListener('click', async () => {
+    const shareData = {
+      title: 'OuSuisJe',
+      text: "OuSuisJe — retrouvez votre adresse, l'altitude et les points d'intérêt autour de vous.",
+      url: window.location.origin + window.location.pathname
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (e) {
+        // L'utilisateur a annulé le partage, ou l'action a échoué : rien à faire.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+      shareNote.textContent = 'Lien copié ✓';
+      setTimeout(() => { shareNote.textContent = ''; }, 2500);
+    } catch (e) {
+      shareNote.textContent = shareData.url;
+    }
   });
 
   // --- Compteur de visites ---

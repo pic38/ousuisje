@@ -78,13 +78,13 @@
     </div>
   </div>
 
+  <button id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
+
   <div id="sourceBadge" class="source-badge source-badge-none">
     <span id="sourceBadgeDot" class="source-badge-dot"></span>
     <span id="sourceBadgeText">Aucun point sélectionné pour l'instant</span>
   </div>
-  <p class="badge-hint">C'est ce point qui est utilisé par l'adresse, l'altitude et les points d'intérêt ci-dessous.</p>
-
-  <button id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
+  <p class="badge-hint">Point utilisé pour les outils ci-dessous.</p>
 
   <div class="addr-panel">
     <div class="addr-head">
@@ -117,7 +117,7 @@
       <span>Points d'intérêt à proximité</span>
       <span id="poiStatus">—</span>
     </div>
-    <table class="poi-table">
+    <table id="poiTable" class="poi-table">
       <thead>
         <tr><th>Point</th><th>Distance</th><th>Direction</th></tr>
       </thead>
@@ -242,6 +242,7 @@
 
   const poiBtn = $('poiBtn');
   const poiStatus = $('poiStatus');
+  const poiTable = $('poiTable');
   const poiTableBody = $('poiTableBody');
 
   // --- Carte OSM (Leaflet) ---
@@ -387,15 +388,18 @@
 
   function fmtCoord(v) { return v.toFixed(6) + '°'; }
 
-  function setAddrField(el, value) {
+  function setAddrField(el, value, colorClass) {
     el.textContent = value || '—';
     el.classList.toggle('dim', !value);
+    el.classList.remove('v-amber', 'v-teal');
+    if (colorClass) el.classList.add(colorClass);
   }
 
   async function doGeocode(latitude, longitude, source) {
     if (geocoding) return;
     geocoding = true;
     addrStatus.textContent = 'Recherche…';
+    const colorClass = source === 'gps' ? 'v-amber' : 'v-teal';
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
         headers: { 'Accept-Language': 'fr' }
@@ -419,13 +423,13 @@
         departement = `${departement} (${deptNum})`;
       }
 
-      setAddrField(addrAdresse, adresse);
-      setAddrField(addrLieuDit, lieuDit);
-      setAddrField(addrCP, codePostal);
-      setAddrField(addrCommune, commune);
-      setAddrField(addrDept, departement);
-      setAddrField(addrRegion, region);
-      setAddrField(addrPays, pays);
+      setAddrField(addrAdresse, adresse, colorClass);
+      setAddrField(addrLieuDit, lieuDit, colorClass);
+      setAddrField(addrCP, codePostal, colorClass);
+      setAddrField(addrCommune, commune, colorClass);
+      setAddrField(addrDept, departement, colorClass);
+      setAddrField(addrRegion, region, colorClass);
+      setAddrField(addrPays, pays, colorClass);
 
       addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
       copyAddressBtn.disabled = !(adresse || commune);
@@ -505,6 +509,7 @@
       return;
     }
     const { lat, lon } = point;
+    const pointColorClass = point.source === 'carte' ? 'v-teal' : 'v-amber';
     statusEl.textContent = 'Recherche…';
     try {
       const elevation = await fetchFn(lat, lon);
@@ -517,10 +522,14 @@
         gpsEl.textContent = 'Non fournie par le GPS';
         gpsEl.classList.add('dim');
       }
+      gpsEl.classList.remove('v-amber', 'v-teal');
+      gpsEl.classList.add('v-amber');
 
+      sourceEl.classList.remove('v-amber', 'v-teal');
       if (elevation != null) {
         sourceEl.textContent = Math.round(elevation) + ' m';
         sourceEl.classList.remove('dim');
+        sourceEl.classList.add(pointColorClass);
       } else {
         sourceEl.textContent = 'Indisponible pour ce point';
         sourceEl.classList.add('dim');
@@ -566,6 +575,8 @@
       return;
     }
     const { lat, lon } = point;
+    poiTable.classList.remove('source-gps', 'source-carte');
+    poiTable.classList.add(point.source === 'carte' ? 'source-carte' : 'source-gps');
     poiStatus.textContent = 'Recherche…';
     poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche en cours…</td></tr>';
     try {

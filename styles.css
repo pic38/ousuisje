@@ -288,6 +288,9 @@ h1 {
 .addr-row .k { color: var(--muted); }
 .addr-row .v { font-weight: 600; text-align: right; }
 .addr-row .v.dim { color: var(--muted); font-weight: 400; }
+.addr-row .v.v-amber { color: var(--amber); }
+.addr-row .v.v-teal { color: var(--teal); }
+.addr-row .v.dim.v-amber, .addr-row .v.dim.v-teal { color: var(--muted); font-weight: 400; }
 
 /* --- POI table --- */
 .poi-table {
@@ -314,6 +317,8 @@ h1 {
 }
 .poi-table tbody tr:last-child td { border-bottom: none; }
 .poi-table tbody td.dim { color: var(--muted); text-align: center; }
+.poi-table.source-gps tbody td:first-child { color: var(--amber); }
+.poi-table.source-carte tbody td:first-child { color: var(--teal); }
 
 /* --- Buttons --- */
 .actions { display: flex; flex-direction: column; gap: 10px; }

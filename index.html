@@ -51,11 +51,11 @@
       <div id="altVal" class="value dim">—</div>
     </div>
     <div class="cell">
-      <div class="label">Horodatage</div>
+      <div class="label">Heure GPS</div>
       <div id="tsVal" class="value dim">—</div>
     </div>
     <div class="cell">
-      <div class="label">Précision altitude</div>
+      <div class="label">Précision altitude GPS</div>
       <div id="altAccVal" class="value dim">—</div>
     </div>
   </div>
@@ -249,6 +249,29 @@
   const map = L.map('map', { zoomControl: true, attributionControl: false });
   map.fitBounds([[41.2, -5.3], [51.2, 9.7]]); // France entière par défaut
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+  // Bouton de recentrage sur la position GPS, sous les contrôles de zoom.
+  const RecenterControl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd: function () {
+      const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control recenter-control');
+      const link = L.DomUtil.create('a', 'recenter-control-btn', container);
+      link.href = '#';
+      link.title = 'Recentrer sur ma position GPS';
+      link.innerHTML = '⌖';
+      L.DomEvent.on(link, 'click', L.DomEvent.stopPropagation)
+        .on(link, 'click', L.DomEvent.preventDefault)
+        .on(link, 'click', () => {
+          if (gpsMarker) {
+            map.setView(gpsMarker.getLatLng(), Math.max(map.getZoom(), 15));
+          } else if (lastPos) {
+            map.setView([lastPos.coords.latitude, lastPos.coords.longitude], 15);
+          }
+        });
+      return container;
+    }
+  });
+  map.addControl(new RecenterControl());
   const gpsMarkerIcon = L.divIcon({
     className: 'gps-marker',
     html: '<span class="gps-marker-dot"></span>',
@@ -313,7 +336,7 @@
       gpsAccuracyCircle = null;
     }
     if (!hasCenteredOnGps) {
-      map.setView(latlng, 17);
+      map.setView(latlng, 15);
       hasCenteredOnGps = true;
     }
   }

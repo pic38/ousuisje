@@ -78,23 +78,13 @@
     </div>
   </div>
 
-  <div class="map-wrap">
-    <div id="map"></div>
-    <div class="map-footer">
-      <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse, cela mettra à jour les champs ci-dessus.</span>
-      <a id="googleMapsLink" class="map-link" href="https://www.google.com/maps" target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
-      <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir dans OpenStreetMap ↗</a>
-    </div>
-  </div>
-  <p class="osm-credit">Carte et adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
-
   <div id="sourceBadge" class="source-badge source-badge-none">
     <span id="sourceBadgeDot" class="source-badge-dot"></span>
     <span id="sourceBadgeText">Aucun point sélectionné pour l'instant</span>
   </div>
   <p class="badge-hint">C'est ce point qui est utilisé par l'adresse, l'altitude et les points d'intérêt ci-dessous.</p>
 
-  <button id="geocodeBtn" class="btn-secondary" disabled>Trouver l'adresse correspondant à ma localisation GPS</button>
+  <button id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
 
   <div class="addr-panel">
     <div class="addr-head">
@@ -111,7 +101,17 @@
   </div>
   <button id="copyAddressBtn" class="btn-secondary" disabled>Copier l'adresse</button>
 
-  <button id="poiBtn" class="btn-secondary" disabled>Points d'intérêt à proximité</button>
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-footer">
+      <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse, cela mettra à jour les champs ci-dessus.</span>
+      <a id="googleMapsLink" class="map-link" href="https://www.google.com/maps" target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
+      <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir dans OpenStreetMap ↗</a>
+    </div>
+  </div>
+  <p class="osm-credit">Carte et adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+
+  <button id="poiBtn" class="btn-secondary">Points d'intérêt à proximité</button>
   <div class="addr-panel">
     <div class="addr-head">
       <span>Points d'intérêt à proximité</span>
@@ -128,7 +128,7 @@
   </div>
   <p class="osm-credit">Points d'intérêt : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
 
-  <button id="altCompareBtn" class="btn-secondary" disabled>Altitude IGN (plus précis, France uniquement)</button>
+  <button id="altCompareBtn" class="btn-secondary">Altitude IGN (plus précis, France uniquement)</button>
   <div class="addr-panel">
     <div class="addr-head">
       <span>Comparaison d'altitude — IGN</span>
@@ -140,7 +140,7 @@
   </div>
   <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
 
-  <button id="oeCompareBtn" class="btn-secondary" disabled>Altitude Open-Elevation</button>
+  <button id="oeCompareBtn" class="btn-secondary">Altitude Open-Elevation</button>
   <div class="addr-panel">
     <div class="addr-head">
       <span>Comparaison d'altitude — Open-Elevation</span>
@@ -261,7 +261,9 @@
   let gpsMarker = null;
   let gpsAccuracyCircle = null;
   let clickMarker = null;
-  let lastQueriedPoint = null; // { lat, lon, source: 'gps' | 'carte' }
+  let lastQueriedPoint = null; // { lat, lon, source: 'gps' | 'carte' } — dernière action explicite de l'utilisateur
+  let lastClickPoint = null; // { lat, lon } — dernier point cliqué sur la carte, conservé indépendamment
+  let hasCenteredOnGps = false;
 
   function updateSourceBadge() {
     sourceBadge.classList.remove('source-badge-gps', 'source-badge-carte', 'source-badge-none');
@@ -283,18 +285,14 @@
     return 'point sélectionné';
   }
 
-  function enableDependentActions() {
-    altCompareBtn.disabled = false;
-    oeCompareBtn.disabled = false;
-    poiBtn.disabled = false;
-  }
-
   function updateExternalLinks(latitude, longitude) {
     osmLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
     googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
   }
 
-  // Point GPS : marqueur ambre avec cercle de précision, toujours à la position en direct.
+  // Marqueur GPS : purement visuel, mis à jour en continu à chaque relevé — ne
+  // modifie jamais lastQueriedPoint pour ne pas écraser une sélection manuelle
+  // faite entre-temps sur la carte. Centre la carte une seule fois, à l'activation.
   function placeGpsMarker(latitude, longitude, accuracy) {
     const latlng = [latitude, longitude];
     if (!gpsMarker) {
@@ -313,13 +311,14 @@
       map.removeLayer(gpsAccuracyCircle);
       gpsAccuracyCircle = null;
     }
-    updateExternalLinks(latitude, longitude);
-    lastQueriedPoint = { lat: latitude, lon: longitude, source: 'gps' };
-    enableDependentActions();
-    updateSourceBadge();
+    if (!hasCenteredOnGps) {
+      map.setView(latlng, 17);
+      hasCenteredOnGps = true;
+    }
   }
 
   // Point manuel : marqueur turquoise distinct, posé où l'on clique sur la carte.
+  // C'est une action explicite : elle devient la référence pour l'adresse/les POI.
   function placeClickMarker(latitude, longitude) {
     const latlng = [latitude, longitude];
     if (!clickMarker) {
@@ -329,9 +328,10 @@
     }
     updateExternalLinks(latitude, longitude);
     lastQueriedPoint = { lat: latitude, lon: longitude, source: 'carte' };
-    enableDependentActions();
+    lastClickPoint = { lat: latitude, lon: longitude };
     updateSourceBadge();
   }
+
 
   let watchId = null;
   let restartTimerId = null;
@@ -458,10 +458,14 @@
   });
 
   geocodeBtn.addEventListener('click', () => {
-    if (!lastPos) return;
-    const { latitude, longitude, accuracy } = lastPos.coords;
-    placeGpsMarker(latitude, longitude, accuracy);
-    map.setView([latitude, longitude], 17);
+    if (!lastPos) {
+      addrStatus.textContent = "Activez d'abord la localisation GPS.";
+      addrStatus.classList.remove('dim');
+      return;
+    }
+    const { latitude, longitude } = lastPos.coords;
+    lastQueriedPoint = { lat: latitude, lon: longitude, source: 'gps' };
+    updateSourceBadge();
     doGeocode(latitude, longitude, 'gps');
   });
 
@@ -496,7 +500,10 @@
   // --- Comparaison d'altitude générique, réutilisée pour chaque source ---
   async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, sourceLabel, fetchFn) {
     const point = getReferencePoint();
-    if (!point) return;
+    if (!point) {
+      statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
     const { lat, lon } = point;
     statusEl.textContent = 'Recherche…';
     try {
@@ -554,7 +561,10 @@
 
   poiBtn.addEventListener('click', async () => {
     const point = getReferencePoint();
-    if (!point) return;
+    if (!point) {
+      poiStatus.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
     const { lat, lon } = point;
     poiStatus.textContent = 'Recherche…';
     poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche en cours…</td></tr>';
@@ -635,10 +645,7 @@
     diagRawAcc.textContent = accuracy != null ? accuracy.toFixed(1) + ' m' : '—';
     diagRawAcc.classList.toggle('dim', accuracy == null);
 
-    geocodeBtn.disabled = false;
-    altCompareBtn.disabled = false;
-    oeCompareBtn.disabled = false;
-    poiBtn.disabled = false;
+    placeGpsMarker(latitude, longitude, accuracy);
     updateSourceBadge();
     setStatus('live', 'Localisation GPS active');
   }
@@ -656,7 +663,6 @@
     autoStopCountdown.textContent = '';
     locateBtn.textContent = 'Activer la localisation GPS';
     locateBtn.disabled = false;
-    geocodeBtn.disabled = true;
     diagFixState.textContent = 'Erreur';
     diagFixState.classList.add('dim');
   }
@@ -750,11 +756,8 @@
     setStatus('idle', 'Localisation désactivée');
     locateBtn.textContent = 'Activer la localisation GPS';
     locateBtn.disabled = false;
-    geocodeBtn.disabled = true;
-    diagFixState.textContent = 'Inactif';
+    diagFixState.textContent = lastPos ? 'Inactif — dernière position conservée' : 'Inactif';
     diagFixState.classList.add('dim');
-    lastPos = null;
-    lastRawPos = null;
     recentFixes = [];
     lastKnownSpeedKmh = null;
     updateSourceBadge();

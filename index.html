@@ -345,7 +345,6 @@
   let countdownInterval = null;
   let lastPos = null;
   let lastRawPos = null;
-  let geocoding = false;
   let recentFixes = []; // relevés des ~1.2 dernières secondes, pour moyenner la vitesse
   let lastKnownSpeedKmh = null;
   let lastSpeedSource = null; // 'device' | 'calculated'
@@ -400,16 +399,35 @@
     if (colorClass) el.classList.add(colorClass);
   }
 
+  // --- Limitation de débit Nominatim (politique d'usage : 1 requête/seconde max) ---
+  let lastNominatimCallAt = 0;
+  let geocodeRequestId = 0;
+
+  async function fetchNominatim(url, options, onWait) {
+    const wait = Math.max(0, 3000 - (Date.now() - lastNominatimCallAt));
+    if (wait > 0) {
+      if (onWait) onWait();
+      await new Promise((resolve) => setTimeout(resolve, wait));
+    }
+    lastNominatimCallAt = Date.now();
+    return fetch(url, options);
+  }
+
   async function doGeocode(latitude, longitude, source) {
-    if (geocoding) return;
-    geocoding = true;
-    addrStatus.textContent = 'Recherche…';
+    const requestId = ++geocodeRequestId;
     const colorClass = source === 'gps' ? 'v-amber' : 'v-teal';
+    addrStatus.textContent = 'Recherche…';
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
-        headers: { 'Accept-Language': 'fr' }
-      });
+      const res = await fetchNominatim(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+        { headers: { 'Accept-Language': 'fr' } },
+        () => { addrStatus.textContent = 'Patientez…'; }
+      );
+      // Une recherche plus récente a pris le relais entre-temps : on abandonne ce résultat.
+      if (requestId !== geocodeRequestId) return;
+
       const data = await res.json();
+      if (requestId !== geocodeRequestId) return;
       const addr = data.address || {};
 
       const adresse = [addr.house_number, addr.road].filter(Boolean).join(' ')
@@ -439,9 +457,7 @@
       addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
       copyAddressBtn.disabled = !(adresse || commune);
     } catch (e) {
-      addrStatus.textContent = 'Indisponible';
-    } finally {
-      geocoding = false;
+      if (requestId === geocodeRequestId) addrStatus.textContent = 'Indisponible';
     }
   }
 

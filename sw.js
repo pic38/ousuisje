@@ -1,8 +1,9 @@
-const CACHE_NAME = "ousuisje-cache-v22";
+const CACHE_NAME = "ousuisje-cache-v23";
 const ASSETS = [
   "./",
   "./index.html",
   "./about.html",
+  "./beta.html",
   "./confidentialite.html",
   "./mentions-legales.html",
   "./styles.css",
@@ -39,7 +40,9 @@ self.addEventListener("fetch", (event) => {
     url.includes("countapi.mileshilliard.com") ||
     url.includes("data.geopf.fr") ||
     url.includes("overpass-api.de") ||
-    url.includes("api.open-elevation.com")
+    url.includes("api.open-elevation.com") ||
+    url.includes("api.rainviewer.com") ||
+    url.includes("tilecache.rainviewer.com")
   ) return;
 
   event.respondWith(

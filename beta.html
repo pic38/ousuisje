@@ -52,39 +52,6 @@
   </div>
   <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
 
-  <button id="antennaDownloadBtn" class="btn-secondary">Télécharger la base des antennes (~19 Mo)</button>
-  <div class="addr-panel">
-    <div class="addr-head">
-      <span>Base de données antennes</span>
-      <span id="antennaDbStatus">Non téléchargée</span>
-    </div>
-    <div class="addr-row"><span class="k">Dernière mise à jour</span><span id="antennaDbDate" class="v dim">—</span></div>
-    <div class="addr-row"><span class="k">Nombre de sites</span><span id="antennaDbCount" class="v dim">—</span></div>
-  </div>
-
-  <div class="map-wrap">
-    <div id="antennaMap"></div>
-    <div class="map-footer">
-      <span class="map-hint">Antenne la plus proche de chacun des 4 opérateurs, autour de votre position.</span>
-    </div>
-  </div>
-
-  <div class="addr-panel">
-    <div class="addr-head">
-      <span>Antennes les plus proches</span>
-      <span id="antennaSearchStatus">—</span>
-    </div>
-    <table class="poi-table">
-      <thead>
-        <tr><th>Opérateur</th><th>Distance</th><th>Direction</th></tr>
-      </thead>
-      <tbody id="antennaTableBody">
-        <tr><td colspan="3" class="dim">Téléchargez la base, puis activez la localisation</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="osm-credit">Antennes : © <a class="inline" href="https://www.arcep.fr" target="_blank" rel="noopener">Arcep</a> — jeu de données « Mon Réseau Mobile », mis à jour trimestriellement</p>
-
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
 
@@ -117,7 +84,6 @@
     iconSize: [16, 16]
   });
   let gpsMarker = null;
-  let lastUserPos = null;
 
   // --- Géolocalisation simple (ponctuelle, pas de suivi continu sur cette page) ---
   locateBtn.addEventListener('click', () => {
@@ -131,7 +97,6 @@
       (pos) => {
         const { latitude, longitude } = pos.coords;
         const latlng = [latitude, longitude];
-        lastUserPos = { lat: latitude, lon: longitude };
         if (!gpsMarker) {
           gpsMarker = L.marker(latlng, { icon: gpsMarkerIcon }).addTo(map);
         } else {
@@ -141,7 +106,6 @@
         map.setView(latlng, 7);
         setStatus('live', 'Position trouvée');
         locateBtn.disabled = false;
-        searchNearestAntennas();
       },
       (err) => {
         let msg = 'Erreur de localisation';
@@ -222,239 +186,6 @@
 
   loadRadar();
 
-  // --- Antennes relais (Arcep, jeu de données "Mon Réseau Mobile") ---
-  const antennaDownloadBtn = $('antennaDownloadBtn');
-  const antennaDbStatus = $('antennaDbStatus');
-  const antennaDbDate = $('antennaDbDate');
-  const antennaDbCount = $('antennaDbCount');
-  const antennaSearchStatus = $('antennaSearchStatus');
-  const antennaTableBody = $('antennaTableBody');
-
-  const ANTENNA_CSV_URL = 'https://data.arcep.fr/mobile/sites/last/2026_T1_sites_Metropole.csv';
-  const ANTENNA_DB_NAME = 'ousuisje-antennas';
-  const ANTENNA_STORE = 'data';
-  const OPERATORS = ['Orange', 'SFR', 'Bouygues Telecom', 'Free Mobile'];
-
-  let antennaRecords = null; // tableau en mémoire une fois chargé
-
-  function haversine(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  function bearingTo(lat1, lon1, lat2, lon2) {
-    const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
-    const y = Math.sin(Δλ) * Math.cos(φ2);
-    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-    const deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    const points = ['Nord', 'Nord-Est', 'Est', 'Sud-Est', 'Sud', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'];
-    return points[Math.round(deg / 45) % 8];
-  }
-
-  function fmtDistance(m) {
-    return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
-  }
-
-  function normalizeOperator(nomOp) {
-    const n = (nomOp || '').toLowerCase();
-    if (n.includes('orange')) return 'Orange';
-    if (n.includes('sfr')) return 'SFR';
-    if (n.includes('bouygues')) return 'Bouygues Telecom';
-    if (n.includes('free')) return 'Free Mobile';
-    return null;
-  }
-
-  // --- Petite couche de stockage IndexedDB (une seule entrée : le tableau complet) ---
-  function openAntennaDb() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(ANTENNA_DB_NAME, 1);
-      req.onupgradeneeded = () => { req.result.createObjectStore(ANTENNA_STORE); };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  async function idbGet(key) {
-    const db = await openAntennaDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(ANTENNA_STORE, 'readonly');
-      const req = tx.objectStore(ANTENNA_STORE).get(key);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  async function idbSet(key, value) {
-    const db = await openAntennaDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(ANTENNA_STORE, 'readwrite');
-      tx.objectStore(ANTENNA_STORE).put(value, key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-
-  // --- Analyse (très simple) du CSV Arcep : séparateur ";", décimales avec "," ---
-  function parseAntennaCsv(text) {
-    const lines = text.split(/\r?\n/).filter(Boolean);
-    if (lines.length < 2) return [];
-    const header = lines[0].split(';');
-    const idx = (name) => header.indexOf(name);
-    const iOp = idx('nom_op');
-    const iLat = idx('latitude');
-    const iLon = idx('longitude');
-    const iCommune = idx('nom_com');
-    const iDept = idx('nom_dep');
-    const i2g = idx('site_2g');
-    const i3g = idx('site_3g');
-    const i4g = idx('site_4g');
-    const i5g = idx('site_5g');
-
-    const records = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(';');
-      const lat = parseFloat(cols[iLat]?.replace(',', '.'));
-      const lon = parseFloat(cols[iLon]?.replace(',', '.'));
-      if (!isFinite(lat) || !isFinite(lon)) continue;
-      const operator = normalizeOperator(cols[iOp]);
-      if (!operator) continue;
-      records.push({
-        op: operator,
-        lat, lon,
-        commune: cols[iCommune] || '',
-        dept: cols[iDept] || '',
-        tech: [
-          cols[i2g] === '1' ? '2G' : null,
-          cols[i3g] === '1' ? '3G' : null,
-          cols[i4g] === '1' ? '4G' : null,
-          cols[i5g] === '1' ? '5G' : null
-        ].filter(Boolean).join('/')
-      });
-    }
-    return records;
-  }
-
-  function updateAntennaDbInfo(records, date) {
-    antennaDbCount.textContent = records.length.toLocaleString('fr-FR');
-    antennaDbCount.classList.remove('dim');
-    antennaDbDate.textContent = date;
-    antennaDbDate.classList.remove('dim');
-    antennaDbStatus.textContent = 'Téléchargée';
-  }
-
-  async function downloadAntennaDb() {
-    antennaDownloadBtn.disabled = true;
-    antennaDbStatus.textContent = 'Téléchargement…';
-    try {
-      const res = await fetch(ANTENNA_CSV_URL);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const total = Number(res.headers.get('Content-Length')) || 0;
-      const reader = res.body.getReader();
-      const chunks = [];
-      let received = 0;
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        received += value.length;
-        if (total) {
-          const pct = Math.round((received / total) * 100);
-          antennaDbStatus.textContent = `Téléchargement… ${pct} %`;
-        } else {
-          antennaDbStatus.textContent = `Téléchargement… ${Math.round(received / 1e6)} Mo`;
-        }
-      }
-      const text = new TextDecoder('utf-8').decode(
-        chunks.reduce((acc, c) => { const n = new Uint8Array(acc.length + c.length); n.set(acc); n.set(c, acc.length); return n; }, new Uint8Array())
-      );
-      antennaDbStatus.textContent = 'Analyse du fichier…';
-      const records = parseAntennaCsv(text);
-      const date = new Date().toLocaleDateString('fr-FR');
-      await idbSet('records', records);
-      await idbSet('date', date);
-      antennaRecords = records;
-      updateAntennaDbInfo(records, date);
-      antennaDownloadBtn.textContent = 'Mettre à jour la base des antennes';
-      searchNearestAntennas();
-    } catch (e) {
-      antennaDbStatus.textContent = "Échec du téléchargement — le serveur de l'Arcep bloque peut-être les requêtes depuis un site tiers (CORS). Vous pouvez consulter les données directement sur arcep.fr.";
-    } finally {
-      antennaDownloadBtn.disabled = false;
-    }
-  }
-
-  antennaDownloadBtn.addEventListener('click', downloadAntennaDb);
-
-  async function loadStoredAntennaDb() {
-    try {
-      const [records, date] = await Promise.all([idbGet('records'), idbGet('date')]);
-      if (records && records.length) {
-        antennaRecords = records;
-        updateAntennaDbInfo(records, date || 'inconnue');
-        antennaDownloadBtn.textContent = 'Mettre à jour la base des antennes';
-      }
-    } catch (e) {
-      // Pas de base stockée pour l'instant : rien à faire.
-    }
-  }
-
-  loadStoredAntennaDb();
-
-  // --- Carte dédiée aux antennes ---
-  const antennaMap = L.map('antennaMap', { zoomControl: true, attributionControl: false });
-  antennaMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(antennaMap);
-  const antennaGpsMarkerIcon = L.divIcon({ className: 'gps-marker', html: '<span class="gps-marker-dot"></span>', iconSize: [16, 16] });
-  const antennaOperatorIcon = L.divIcon({ className: 'click-marker', html: '<span class="click-marker-dot"></span>', iconSize: [14, 14] });
-  let antennaGpsMarker = null;
-  let antennaOperatorMarkers = [];
-
-  function searchNearestAntennas() {
-    if (!lastUserPos) {
-      antennaSearchStatus.textContent = "Activez d'abord la localisation, en haut de page.";
-      return;
-    }
-    if (!antennaRecords || antennaRecords.length === 0) {
-      antennaSearchStatus.textContent = "Téléchargez d'abord la base des antennes.";
-      return;
-    }
-    const { lat, lon } = lastUserPos;
-    antennaSearchStatus.textContent = 'Recherche…';
-
-    const nearestByOperator = {};
-    for (const record of antennaRecords) {
-      const d = haversine(lat, lon, record.lat, record.lon);
-      if (!nearestByOperator[record.op] || d < nearestByOperator[record.op].distance) {
-        nearestByOperator[record.op] = { ...record, distance: d };
-      }
-    }
-
-    antennaOperatorMarkers.forEach((m) => antennaMap.removeLayer(m));
-    antennaOperatorMarkers = [];
-
-    const rows = OPERATORS.map((op) => {
-      const found = nearestByOperator[op];
-      if (!found) return `<tr><td>${op}</td><td colspan="2" class="dim">Aucune antenne trouvée</td></tr>`;
-      const marker = L.marker([found.lat, found.lon], { icon: antennaOperatorIcon }).bindPopup(`<strong>${op}</strong><br>${found.commune} (${found.tech || 'technologie non précisée'})`);
-      marker.addTo(antennaMap);
-      antennaOperatorMarkers.push(marker);
-      const bearing = bearingTo(lat, lon, found.lat, found.lon);
-      return `<tr><td>${op}</td><td>${fmtDistance(found.distance)}</td><td>${bearing}</td></tr>`;
-    });
-    antennaTableBody.innerHTML = rows.join('');
-    antennaSearchStatus.textContent = 'Résultats autour de votre position';
-
-    if (!antennaGpsMarker) {
-      antennaGpsMarker = L.marker([lat, lon], { icon: antennaGpsMarkerIcon }).addTo(antennaMap);
-    } else {
-      antennaGpsMarker.setLatLng([lat, lon]);
-    }
-    antennaMap.setView([lat, lon], 12);
-  }
 })();
 </script>
 </body>

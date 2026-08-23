@@ -49,12 +49,14 @@
         <input type="range" id="radarOpacity" min="20" max="100" value="75" style="accent-color: var(--teal);" />
       </span>
     </div>
+    <div style="padding: 10px 16px 14px;">
+      <label class="keep-alive-toggle">
+        <input type="checkbox" id="showForecastCheckbox" />
+        <span>Afficher aussi la prévision à 30 min</span>
+      </label>
+    </div>
   </div>
   <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
-
-  <div class="callout-beta">
-    Le dégradé utilisé ici est la palette bleue gratuite fournie par RainViewer — pas la palette arc-en-ciel (bleu/vert/jaune/orange/rouge) habituelle des radars comme celui de Météo60. Une vraie palette « officielle » façon Météo-France nécessiterait une clé d'API personnelle sur <a class="inline" href="https://portail-api.meteofrance.fr" target="_blank" rel="noopener">portail-api.meteofrance.fr</a>. Dites-moi si vous voulez qu'on pousse dans cette direction.
-  </div>
 
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
@@ -125,7 +127,12 @@
   // --- Radar de précipitations (RainViewer) ---
   const RADAR_COLOR = 2; // Universal Blue : seule palette proposée gratuitement par l'API
   const RADAR_OPTIONS_SUFFIX = '1_1'; // lissé (1), neige affichée (1)
-  let radarFrames = [];
+  const PAST_FRAME_COUNT = 12; // au lieu de 6 — l'intervalle entre deux relevés reste fixé par RainViewer (~10 min), pas la densité
+  const showForecastCheckbox = $('showForecastCheckbox');
+
+  let rawPastFrames = [];
+  let rawNowcastFrames = [];
+  let radarFrames = []; // { time, path, isForecast }
   let radarLayers = [];
   let currentFrame = 0;
   let playTimer = null;
@@ -141,8 +148,9 @@
     radarLayers.forEach((layer, i) => {
       layer.setOpacity(i === currentFrame ? currentOpacity : 0);
     });
-    const time = radarFrames[currentFrame].time * 1000;
-    radarTimestamp.textContent = new Date(time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const frame = radarFrames[currentFrame];
+    const label = new Date(frame.time * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    radarTimestamp.textContent = frame.isForecast ? 'Prévision ' + label : label;
   }
 
   function stopPlayback() {
@@ -167,21 +175,35 @@
     showFrame(currentFrame);
   });
 
+  function rebuildLayers() {
+    stopPlayback();
+    radarLayers.forEach((layer) => map.removeLayer(layer));
+
+    const pastFrames = rawPastFrames.slice(-PAST_FRAME_COUNT).map((f) => ({ ...f, isForecast: false }));
+    // Prévision : ~30 min, à raison d'un relevé toutes les ~10 min chez RainViewer → les 3 premiers.
+    const forecastFrames = showForecastCheckbox.checked ? rawNowcastFrames.slice(0, 3).map((f) => ({ ...f, isForecast: true })) : [];
+
+    radarFrames = pastFrames.concat(forecastFrames);
+    if (radarFrames.length === 0) {
+      radarTimestamp.textContent = 'Indisponible';
+      return;
+    }
+    radarLayers = radarFrames.map((frame) =>
+      L.tileLayer(frameTileUrl(frame), { opacity: 0, zIndex: 400, maxZoom: 19 }).addTo(map)
+    );
+    // Reprend sur le dernier relevé passé (le plus récent réel), même si la prévision est affichée.
+    showFrame(pastFrames.length - 1);
+  }
+
+  showForecastCheckbox.addEventListener('change', rebuildLayers);
+
   async function loadRadar() {
     try {
       const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
       const data = await res.json();
-      const allPast = data.radar && data.radar.past ? data.radar.past : [];
-      // La dernière heure environ : les relevés arrivent toutes les ~10 min, donc les 6 derniers.
-      radarFrames = allPast.slice(-6);
-      if (radarFrames.length === 0) {
-        radarTimestamp.textContent = 'Indisponible';
-        return;
-      }
-      radarLayers = radarFrames.map((frame) =>
-        L.tileLayer(frameTileUrl(frame), { opacity: 0, zIndex: 400, maxZoom: 19 }).addTo(map)
-      );
-      showFrame(radarLayers.length - 1); // démarre sur le relevé le plus récent
+      rawPastFrames = data.radar && data.radar.past ? data.radar.past : [];
+      rawNowcastFrames = data.radar && data.radar.nowcast ? data.radar.nowcast : [];
+      rebuildLayers();
     } catch (e) {
       radarTimestamp.textContent = 'Radar indisponible';
     }

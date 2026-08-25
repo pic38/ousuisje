@@ -62,6 +62,13 @@
   </div>
   <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). La commune est une estimation par proximité : elle peut être erronée près d'une frontière communale.</p>
 
+  <div class="map-wrap">
+    <div id="offlineMap"></div>
+    <div class="map-footer">
+      <span class="map-hint">Contour du département (exact, en teal) et zone indicative de la commune (cercle approximatif en ambre — pas son vrai contour, dont les données ne sont pas embarquées hors ligne).</span>
+    </div>
+  </div>
+
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
 
@@ -97,6 +104,14 @@
     iconSize: [16, 16]
   });
   let gpsMarker = null;
+
+  // --- Carte département / commune hors ligne (Leaflet séparée, sous le panneau dédié) ---
+  const offlineMap = L.map('offlineMap', { zoomControl: true, attributionControl: false });
+  offlineMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(offlineMap);
+  let offlineDeptLayer = null;
+  let offlineCommuneCircle = null;
+  let offlineGpsMarker = null;
 
   // --- Géolocalisation simple (ponctuelle, pas de suivi continu sur cette page) ---
   locateBtn.addEventListener('click', () => {
@@ -239,13 +254,15 @@
     return null;
   }
 
-  // Commune la plus proche par distance au centroïde (approximation, pas de vrais contours communaux).
-  function findCommuneApprox(lat, lon) {
+  // Trouve la commune (du jeu de centroïdes) la plus proche d'un point, en excluant
+  // éventuellement un code commune (utile pour trouver la voisine la plus proche d'une commune donnée).
+  function nearestCommuneEntry(lat, lon, excludeCode) {
     if (!offlineCommunes || offlineCommunes.length === 0) return null;
     const coslat = Math.cos(lat * Math.PI / 180);
     let best = null;
     let bestD = Infinity;
     for (const c of offlineCommunes) {
+      if (excludeCode && c[0] === excludeCode) continue;
       const dLat = c[2] - lat;
       const dLon = (c[3] - lon) * coslat;
       const d = dLat * dLat + dLon * dLon;
@@ -253,7 +270,22 @@
     }
     if (!best) return null;
     const distanceKm = Math.sqrt(bestD) * 111.32; // 1° de latitude ≈ 111,32 km
-    return { code: best[0], nom: best[1], distanceKm };
+    return { code: best[0], nom: best[1], lat: best[2], lon: best[3], distanceKm };
+  }
+
+  // Commune la plus proche du point GPS, par distance au centroïde (approximation, pas de vrais contours communaux).
+  function findCommuneApprox(lat, lon) {
+    return nearestCommuneEntry(lat, lon, null);
+  }
+
+  // Rayon indicatif (en mètres) pour le cercle de commune : la moitié de la distance à la
+  // commune voisine la plus proche, façon cellule de Voronoï. Purement approximatif — ce n'est
+  // pas le vrai contour communal, juste un ordre de grandeur (borné pour rester lisible).
+  function communeIndicativeRadiusMeters(commune) {
+    const neighbor = nearestCommuneEntry(commune.lat, commune.lon, commune.code);
+    if (!neighbor) return 1500;
+    const radiusM = (neighbor.distanceKm * 1000) / 2;
+    return Math.min(Math.max(radiusM, 300), 15000);
   }
 
   async function loadOfflineGeoData() {
@@ -272,6 +304,36 @@
       });
     })();
     return offlineDataPromise;
+  }
+
+  // Dessine le contour du département (teal) sur la carte dédiée.
+  function drawDeptOnMap(code) {
+    if (offlineDeptLayer) { offlineMap.removeLayer(offlineDeptLayer); offlineDeptLayer = null; }
+    const entry = offlineDepts[code];
+    if (!entry) return null;
+    const polys = entry.p.map((poly) =>
+      L.polygon(
+        poly.map((ring) => ring.map(([lon, lat]) => [lat, lon])),
+        { color: '#4FD1C5', weight: 2, fillColor: '#4FD1C5', fillOpacity: 0.08 }
+      )
+    );
+    offlineDeptLayer = L.featureGroup(polys).addTo(offlineMap);
+    return offlineDeptLayer;
+  }
+
+  // Dessine le cercle indicatif de la commune (ambre) sur la carte dédiée.
+  function drawCommuneOnMap(commune) {
+    if (offlineCommuneCircle) { offlineMap.removeLayer(offlineCommuneCircle); offlineCommuneCircle = null; }
+    const radiusM = communeIndicativeRadiusMeters(commune);
+    offlineCommuneCircle = L.circle([commune.lat, commune.lon], {
+      radius: radiusM,
+      color: '#E8A33D',
+      weight: 2,
+      dashArray: '6 6',
+      fillColor: '#E8A33D',
+      fillOpacity: 0.1
+    }).addTo(offlineMap);
+    return offlineCommuneCircle;
   }
 
   async function updateOfflineGeo(lat, lon) {
@@ -293,6 +355,24 @@
       }
       offlineGeoStatus.textContent = 'Hors ligne ✓';
       offlineGeoStatus.classList.remove('dim');
+
+      if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }
+      offlineGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(offlineMap);
+
+      const boundsToFit = [];
+      if (dept) {
+        const deptLayer = drawDeptOnMap(dept.code);
+        if (deptLayer) boundsToFit.push(deptLayer.getBounds());
+      }
+      if (commune) {
+        const communeCircle = drawCommuneOnMap(commune);
+        boundsToFit.push(communeCircle.getBounds());
+      }
+      if (boundsToFit.length > 0) {
+        let combined = boundsToFit[0];
+        for (let i = 1; i < boundsToFit.length; i++) combined = combined.extend(boundsToFit[i]);
+        offlineMap.fitBounds(combined, { padding: [16, 16] });
+      }
     } catch (e) {
       offlineGeoStatus.textContent = 'Données indisponibles';
     }

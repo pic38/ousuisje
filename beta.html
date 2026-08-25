@@ -52,6 +52,16 @@
   </div>
   <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
 
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Département et commune hors ligne</span>
+      <span id="offlineGeoStatus" class="dim">Chargement des données…</span>
+    </div>
+    <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Commune (approximative)</span><span id="offlineCommune" class="v dim">—</span></div>
+  </div>
+  <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). La commune est une estimation par proximité : elle peut être erronée près d'une frontière communale.</p>
+
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
 
@@ -67,6 +77,9 @@
   const radarPlay = $('radarPlay');
   const radarNext = $('radarNext');
   const radarOpacity = $('radarOpacity');
+  const offlineGeoStatus = $('offlineGeoStatus');
+  const offlineDeptEl = $('offlineDept');
+  const offlineCommuneEl = $('offlineCommune');
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -106,6 +119,7 @@
         map.setView(latlng, 7);
         setStatus('live', 'Position trouvée');
         locateBtn.disabled = false;
+        updateOfflineGeo(latitude, longitude);
       },
       (err) => {
         let msg = 'Erreur de localisation';
@@ -185,6 +199,109 @@
   }
 
   loadRadar();
+
+  // --- Département et commune hors ligne (données pré-téléchargées) ---
+  const OFFLINE_DEPT_URL = 'data/departements.min.json';
+  const OFFLINE_COMMUNES_URL = 'data/communes.min.csv';
+
+  let offlineDepts = null; // { code: { n: nom, p: [ [ring, ring...], ... ] } }
+  let offlineCommunes = null; // [ [code, nom, lat, lon], ... ]
+  let offlineDataPromise = null;
+
+  // Ray casting standard (règle even-odd) sur un anneau [ [lon,lat], ... ]
+  function pointInRing(x, y, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1];
+      const xj = ring[j][0], yj = ring[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  // Un point est dans un polygone s'il est dans l'anneau extérieur et hors de tous les trous.
+  // Gère aussi les MultiPolygon (ex : enclave de Valréas, rattachée au Vaucluse).
+  function findDepartement(lon, lat) {
+    if (!offlineDepts) return null;
+    for (const code in offlineDepts) {
+      const entry = offlineDepts[code];
+      for (const poly of entry.p) {
+        if (!pointInRing(lon, lat, poly[0])) continue;
+        let inHole = false;
+        for (let h = 1; h < poly.length; h++) {
+          if (pointInRing(lon, lat, poly[h])) { inHole = true; break; }
+        }
+        if (!inHole) return { code, nom: entry.n };
+      }
+    }
+    return null;
+  }
+
+  // Commune la plus proche par distance au centroïde (approximation, pas de vrais contours communaux).
+  function findCommuneApprox(lat, lon) {
+    if (!offlineCommunes || offlineCommunes.length === 0) return null;
+    const coslat = Math.cos(lat * Math.PI / 180);
+    let best = null;
+    let bestD = Infinity;
+    for (const c of offlineCommunes) {
+      const dLat = c[2] - lat;
+      const dLon = (c[3] - lon) * coslat;
+      const d = dLat * dLat + dLon * dLon;
+      if (d < bestD) { bestD = d; best = c; }
+    }
+    if (!best) return null;
+    const distanceKm = Math.sqrt(bestD) * 111.32; // 1° de latitude ≈ 111,32 km
+    return { code: best[0], nom: best[1], distanceKm };
+  }
+
+  async function loadOfflineGeoData() {
+    if (offlineDataPromise) return offlineDataPromise;
+    offlineDataPromise = (async () => {
+      const [deptRes, communesRes] = await Promise.all([
+        fetch(OFFLINE_DEPT_URL),
+        fetch(OFFLINE_COMMUNES_URL)
+      ]);
+      if (!deptRes.ok || !communesRes.ok) throw new Error('offline geo data unavailable');
+      offlineDepts = await deptRes.json();
+      const text = await communesRes.text();
+      offlineCommunes = text.split('\n').filter(Boolean).map((line) => {
+        const parts = line.split(';');
+        return [parts[0], parts[1], parseFloat(parts[2]), parseFloat(parts[3])];
+      });
+    })();
+    return offlineDataPromise;
+  }
+
+  async function updateOfflineGeo(lat, lon) {
+    offlineGeoStatus.textContent = 'Calcul…';
+    try {
+      await loadOfflineGeoData();
+      const dept = findDepartement(lon, lat);
+      offlineDeptEl.textContent = dept ? `${dept.nom} (${dept.code})` : 'Introuvable';
+      offlineDeptEl.classList.toggle('dim', !dept);
+
+      const commune = findCommuneApprox(lat, lon);
+      if (commune) {
+        const distTxt = commune.distanceKm < 1 ? '< 1 km' : `~${commune.distanceKm.toFixed(1)} km`;
+        offlineCommuneEl.textContent = `${commune.nom} (${distTxt} du centre)`;
+        offlineCommuneEl.classList.remove('dim');
+      } else {
+        offlineCommuneEl.textContent = 'Introuvable';
+        offlineCommuneEl.classList.add('dim');
+      }
+      offlineGeoStatus.textContent = 'Hors ligne ✓';
+      offlineGeoStatus.classList.remove('dim');
+    } catch (e) {
+      offlineGeoStatus.textContent = 'Données indisponibles';
+    }
+  }
+
+  // Pré-chargement dès l'ouverture de la page pour que ce soit prêt même sans réseau ensuite.
+  loadOfflineGeoData()
+    .then(() => { offlineGeoStatus.textContent = 'Prêt'; })
+    .catch(() => { offlineGeoStatus.textContent = 'Données indisponibles'; });
 
 })();
 </script>

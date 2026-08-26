@@ -75,11 +75,11 @@
 
   <button id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
 
-  <div id="sourceBadge" class="source-badge source-badge-none">
+  <div id="sourceBadge" class="source-badge source-badge-none is-hidden">
     <span id="sourceBadgeDot" class="source-badge-dot"></span>
     <span id="sourceBadgeText">Aucun point sélectionné pour l'instant</span>
   </div>
-  <p class="badge-hint">(Point utilisé pour les outils de localisation.)</p>
+  <p id="badgeHint" class="badge-hint is-hidden">(Point utilisé pour les outils de localisation.)</p>
 
   <div class="addr-panel">
     <div class="addr-head">
@@ -187,6 +187,7 @@
   const locateBtn = $('locateBtn');
   const sourceBadge = $('sourceBadge');
   const sourceBadgeText = $('sourceBadgeText');
+  const badgeHint = $('badgeHint');
   const keepAliveCheckbox = $('keepAliveCheckbox');
   const autoStopCountdown = $('autoStopCountdown');
   const osmLink = $('osmLink');
@@ -274,16 +275,23 @@
   let hasCenteredOnGps = false;
 
   function updateSourceBadge() {
+    // Le badge ne s'affiche qu'après une action explicite de l'utilisateur
+    // (bouton "Trouver l'adresse" ou clic sur la carte) — jamais du simple
+    // fait que le GPS soit actif.
+    if (!lastQueriedPoint) {
+      sourceBadge.classList.add('is-hidden');
+      badgeHint.classList.add('is-hidden');
+      return;
+    }
+    sourceBadge.classList.remove('is-hidden');
+    badgeHint.classList.remove('is-hidden');
     sourceBadge.classList.remove('source-badge-gps', 'source-badge-carte', 'source-badge-none');
-    if (lastQueriedPoint && lastQueriedPoint.source === 'carte') {
+    if (lastQueriedPoint.source === 'carte') {
       sourceBadge.classList.add('source-badge-carte');
       sourceBadgeText.textContent = 'Point sélectionné sur la carte';
-    } else if ((lastQueriedPoint && lastQueriedPoint.source === 'gps') || lastPos) {
+    } else {
       sourceBadge.classList.add('source-badge-gps');
       sourceBadgeText.textContent = 'Position GPS';
-    } else {
-      sourceBadge.classList.add('source-badge-none');
-      sourceBadgeText.textContent = "Aucun point sélectionné pour l'instant";
     }
   }
 

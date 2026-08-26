@@ -266,6 +266,10 @@ h1 {
   color: var(--muted);
   margin-top: -8px;
 }
+.source-badge.is-hidden,
+.badge-hint.is-hidden {
+  display: none;
+}
 
 /* --- Address panel --- */
 .addr-panel {

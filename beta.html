@@ -76,14 +76,16 @@
     </div>
     <div class="addr-row">
       <span class="k">Version simplifiée</span>
-      <span class="v" style="display:flex; justify-content:flex-end;">
-        <button id="downloadSimplifiee" class="btn-secondary" style="padding:8px 14px;">Télécharger (~6,7 Mo)</button>
+      <span class="v" style="display:flex; align-items:center; justify-content:flex-end; gap:10px;">
+        <span id="statusSimplifiee" class="dim" style="font-size:12.5px; white-space:nowrap;">Non téléchargée</span>
+        <button id="downloadSimplifiee" class="btn-secondary" style="padding:8px 14px; white-space:nowrap;">Télécharger (~6,7 Mo)</button>
       </span>
     </div>
     <div class="addr-row">
       <span class="k">Pleine précision</span>
-      <span class="v" style="display:flex; justify-content:flex-end;">
-        <button id="downloadPrecise" class="btn-secondary" style="padding:8px 14px;">Télécharger (~16 Mo)</button>
+      <span class="v" style="display:flex; align-items:center; justify-content:flex-end; gap:10px;">
+        <span id="statusPrecise" class="dim" style="font-size:12.5px; white-space:nowrap;">Non téléchargée</span>
+        <button id="downloadPrecise" class="btn-secondary" style="padding:8px 14px; white-space:nowrap;">Télécharger (~16 Mo)</button>
       </span>
     </div>
   </div>
@@ -112,6 +114,8 @@
   const contoursStatusEl = $('contoursStatus');
   const downloadSimplifieeBtn = $('downloadSimplifiee');
   const downloadPreciseBtn = $('downloadPrecise');
+  const tierButtons = { simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
+  const tierStatusEls = { simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -324,28 +328,41 @@
     simplifiee: {
       url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes-version-simplifiee.geojson',
       label: 'version simplifiée',
-      sizeLabel: '6,7 Mo'
+      downloadSizeLabel: '6,7 Mo', // taille transférée (le fichier est servi compressé en gzip)
+      rawSizeBytes: 19342488       // taille réelle une fois décompressée : c'est ce que compte le navigateur,
+                                    // donc la base du calcul de progression (le Content-Length gzip donnerait >100%)
     },
     precise: {
       url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson',
       label: 'pleine précision',
-      sizeLabel: '16 Mo'
+      downloadSizeLabel: '16 Mo',
+      rawSizeBytes: 45291317
     }
   };
-  const CONTOURS_TIER_STORAGE_KEY = 'ousuisje_commune_contours_tier';
+  const CONTOURS_ACTIVE_STORAGE_KEY = 'ousuisje_commune_contours_tier';
+  const CONTOURS_DOWNLOADED_STORAGE_KEY = 'ousuisje_commune_contours_downloaded';
 
   let communeContoursByDept = null; // Map(code départemental -> [{ code, nom, geometry }, ...])
-  let communeContoursTier = null;
+  let communeContoursTier = null; // version actuellement active pour la recherche de commune
   let communeContoursLoading = false;
-  let lastOfflinePoint = null; // { lat, lon } — dernier point calculé, pour rafraîchir après un téléchargement
+  let lastOfflinePoint = null; // { lat, lon } — dernier point calculé, pour rafraîchir après une activation
 
-  // Lit un flux réseau progressivement pour pouvoir afficher une progression ;
-  // repli silencieux si content-length ou le stream ne sont pas disponibles (ex: réponse de cache).
-  async function fetchTextWithProgress(url, onProgress) {
+  function loadDownloadedTiers() {
+    try {
+      const raw = localStorage.getItem(CONTOURS_DOWNLOADED_STORAGE_KEY);
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch (e) {
+      return new Set();
+    }
+  }
+  let communeContoursDownloaded = loadDownloadedTiers(); // tiers déjà téléchargés au moins une fois (peuvent être réactivés sans retéléchargement réseau, servis par le cache du service worker)
+
+  // Lit un flux réseau progressivement pour pouvoir afficher une progression, calculée
+  // contre la taille réelle décompressée attendue (voir rawSizeBytes ci-dessus).
+  async function fetchTextWithProgress(url, expectedTotal, onProgress) {
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const total = Number(res.headers.get('content-length')) || 0;
-    if (!res.body || !total) return res.text();
+    if (!res.body) return res.text();
     const reader = res.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let received = 0;
@@ -355,7 +372,7 @@
       if (done) break;
       received += value.length;
       text += decoder.decode(value, { stream: true });
-      onProgress(received / total);
+      onProgress(Math.min(received / expectedTotal, 1));
     }
     text += decoder.decode();
     return text;
@@ -393,6 +410,46 @@
     return null;
   }
 
+  function updateOverallContoursStatus() {
+    if (communeContoursTier) {
+      contoursStatusEl.textContent = `Actif : ${CONTOUR_TIERS[communeContoursTier].label} ✓`;
+      contoursStatusEl.classList.remove('dim');
+    } else {
+      contoursStatusEl.textContent = 'Non téléchargés';
+      contoursStatusEl.classList.add('dim');
+    }
+  }
+
+  // Reflète l'état de chaque version dans son bouton et son texte de statut :
+  // à télécharger, déjà téléchargée mais inactive (activable), ou active.
+  function updateTierUI(tier) {
+    const conf = CONTOUR_TIERS[tier];
+    const btn = tierButtons[tier];
+    const statusEl = tierStatusEls[tier];
+    if (communeContoursTier === tier) {
+      btn.textContent = 'Actif ✓';
+      btn.disabled = true;
+      statusEl.textContent = 'Téléchargée et active';
+      statusEl.classList.remove('dim');
+    } else if (communeContoursDownloaded.has(tier)) {
+      btn.textContent = 'Activer';
+      btn.disabled = false;
+      statusEl.textContent = 'Téléchargée ✓ (inactive)';
+      statusEl.classList.remove('dim');
+    } else {
+      btn.textContent = `Télécharger (${conf.downloadSizeLabel})`;
+      btn.disabled = false;
+      statusEl.textContent = 'Non téléchargée';
+      statusEl.classList.add('dim');
+    }
+  }
+
+  function refreshContoursUI() {
+    updateOverallContoursStatus();
+    updateTierUI('simplifiee');
+    updateTierUI('precise');
+  }
+
   function setContoursButtonsDisabled(disabled) {
     downloadSimplifieeBtn.disabled = disabled;
     downloadPreciseBtn.disabled = disabled;
@@ -401,37 +458,44 @@
   async function downloadCommuneContours(tier) {
     if (communeContoursLoading) return;
     const conf = CONTOUR_TIERS[tier];
+    const alreadyDownloaded = communeContoursDownloaded.has(tier);
     communeContoursLoading = true;
     setContoursButtonsDisabled(true);
-    contoursStatusEl.classList.remove('dim');
-    contoursStatusEl.textContent = `Téléchargement (${conf.label})… 0%`;
+    const statusEl = tierStatusEls[tier];
+    statusEl.classList.remove('dim');
+    statusEl.textContent = alreadyDownloaded ? 'Activation…' : 'Téléchargement… 0%';
     try {
-      const text = await fetchTextWithProgress(conf.url, (frac) => {
-        contoursStatusEl.textContent = `Téléchargement (${conf.label})… ${Math.round(frac * 100)}% de ${conf.sizeLabel}`;
+      const text = await fetchTextWithProgress(conf.url, conf.rawSizeBytes, (frac) => {
+        if (alreadyDownloaded) return; // déjà en cache local, pas de vraie progression réseau à afficher
+        const pct = Math.round(frac * 100);
+        statusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
       });
+      statusEl.textContent = 'Analyse du fichier…';
       const geojson = JSON.parse(text);
       communeContoursByDept = indexCommuneContours(geojson);
       communeContoursTier = tier;
-      localStorage.setItem(CONTOURS_TIER_STORAGE_KEY, tier);
-      contoursStatusEl.textContent = `Actif : ${conf.label} ✓`;
+      communeContoursDownloaded.add(tier);
+      localStorage.setItem(CONTOURS_DOWNLOADED_STORAGE_KEY, JSON.stringify([...communeContoursDownloaded]));
+      localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, tier);
       if (lastOfflinePoint) updateOfflineGeo(lastOfflinePoint.lat, lastOfflinePoint.lon);
     } catch (e) {
-      contoursStatusEl.textContent = communeContoursTier
-        ? `Échec du téléchargement — ${CONTOUR_TIERS[communeContoursTier].label} toujours active`
-        : 'Téléchargement impossible (pas de connexion ?)';
+      statusEl.textContent = alreadyDownloaded ? 'Échec de l\'activation' : 'Échec du téléchargement';
     } finally {
       communeContoursLoading = false;
       setContoursButtonsDisabled(false);
+      refreshContoursUI();
     }
   }
 
   downloadSimplifieeBtn.addEventListener('click', () => downloadCommuneContours('simplifiee'));
   downloadPreciseBtn.addEventListener('click', () => downloadCommuneContours('precise'));
 
-  // Si une version a déjà été téléchargée lors d'une visite précédente, on la
-  // recharge (servie depuis le cache du service worker si hors ligne).
-  const savedTier = localStorage.getItem(CONTOURS_TIER_STORAGE_KEY);
-  if (savedTier && CONTOUR_TIERS[savedTier]) downloadCommuneContours(savedTier);
+  refreshContoursUI();
+
+  // Si une version était active lors d'une visite précédente, on la recharge
+  // (servie depuis le cache du service worker si hors ligne).
+  const savedActiveTier = localStorage.getItem(CONTOURS_ACTIVE_STORAGE_KEY);
+  if (savedActiveTier && CONTOUR_TIERS[savedActiveTier]) downloadCommuneContours(savedActiveTier);
 
   async function loadOfflineGeoData() {
     if (offlineDataPromise) return offlineDataPromise;

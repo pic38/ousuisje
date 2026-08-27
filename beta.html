@@ -58,16 +58,38 @@
       <span id="offlineGeoStatus" class="dim">Chargement des données…</span>
     </div>
     <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
-    <div class="addr-row"><span class="k">Commune (approximative)</span><span id="offlineCommune" class="v dim">—</span></div>
+    <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
   </div>
-  <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). La commune est une estimation par proximité : elle peut être erronée près d'une frontière communale.</p>
+  <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). Par défaut, la commune est une estimation par proximité au centre-bourg : elle peut être erronée près d'une frontière communale — voir ci-dessous pour télécharger les vrais contours.</p>
 
   <div class="map-wrap">
     <div id="offlineMap"></div>
     <div class="map-footer">
-      <span class="map-hint">Contour du département (exact, en teal) et zone indicative de la commune (cercle approximatif en ambre — pas son vrai contour, dont les données ne sont pas embarquées hors ligne).</span>
+      <span class="map-hint">Contour du département (exact, en teal). Commune en ambre : cercle indicatif par défaut, ou contour exact une fois les données précises téléchargées ci-dessous.</span>
     </div>
   </div>
+
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Contours précis des communes (optionnel)</span>
+      <span id="contoursStatus" class="dim">Non téléchargés</span>
+    </div>
+    <div class="addr-row">
+      <span class="k">Version simplifiée</span>
+      <span class="v" style="display:flex; justify-content:flex-end;">
+        <button id="downloadSimplifiee" class="btn-secondary" style="padding:8px 14px;">Télécharger (~6,7 Mo)</button>
+      </span>
+    </div>
+    <div class="addr-row">
+      <span class="k">Pleine précision</span>
+      <span class="v" style="display:flex; justify-content:flex-end;">
+        <button id="downloadPrecise" class="btn-secondary" style="padding:8px 14px;">Télécharger (~16 Mo)</button>
+      </span>
+    </div>
+  </div>
+  <p class="osm-credit">
+    Les deux versions viennent du même tracé source (IGN Admin Express), simplifié différemment pour réduire la taille du fichier (projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>). La <strong>version simplifiée</strong> ne garde qu'environ 5% des points du tracé d'origine : les grandes lignes sont fidèles, mais les détails fins (petites presqu'îles, méandres serrés) peuvent être coupés, avec une erreur possible sur une bande de quelques dizaines de mètres près de ces zones. La <strong>pleine précision</strong> garde environ 25% des points et colle au tracé réel à environ 1 mètre près partout, pour un téléchargement ~2,4x plus lourd. Une fois téléchargée, une version remplace l'estimation par proximité par le vrai contour de la commune, y compris hors connexion — jusqu'à la prochaine mise à jour de l'app, qui vide le cache et redemande un téléchargement.
+  </p>
 
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
@@ -87,6 +109,9 @@
   const offlineGeoStatus = $('offlineGeoStatus');
   const offlineDeptEl = $('offlineDept');
   const offlineCommuneEl = $('offlineCommune');
+  const contoursStatusEl = $('contoursStatus');
+  const downloadSimplifieeBtn = $('downloadSimplifiee');
+  const downloadPreciseBtn = $('downloadPrecise');
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -110,7 +135,7 @@
   offlineMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(offlineMap);
   let offlineDeptLayer = null;
-  let offlineCommuneCircle = null;
+  let offlineCommuneLayer = null;
   let offlineGpsMarker = null;
 
   // --- Géolocalisation simple (ponctuelle, pas de suivi continu sur cette page) ---
@@ -236,20 +261,26 @@
     return inside;
   }
 
-  // Un point est dans un polygone s'il est dans l'anneau extérieur et hors de tous les trous.
+  // Un point est dans un polygone (liste de polygones, chacun [anneau extérieur, trous...])
+  // s'il est dans l'anneau extérieur d'au moins un polygone et hors de tous ses trous.
+  function pointInPolygons(lon, lat, polys) {
+    for (const poly of polys) {
+      if (!pointInRing(lon, lat, poly[0])) continue;
+      let inHole = false;
+      for (let h = 1; h < poly.length; h++) {
+        if (pointInRing(lon, lat, poly[h])) { inHole = true; break; }
+      }
+      if (!inHole) return true;
+    }
+    return false;
+  }
+
   // Gère aussi les MultiPolygon (ex : enclave de Valréas, rattachée au Vaucluse).
   function findDepartement(lon, lat) {
     if (!offlineDepts) return null;
     for (const code in offlineDepts) {
       const entry = offlineDepts[code];
-      for (const poly of entry.p) {
-        if (!pointInRing(lon, lat, poly[0])) continue;
-        let inHole = false;
-        for (let h = 1; h < poly.length; h++) {
-          if (pointInRing(lon, lat, poly[h])) { inHole = true; break; }
-        }
-        if (!inHole) return { code, nom: entry.n };
-      }
+      if (pointInPolygons(lon, lat, entry.p)) return { code, nom: entry.n };
     }
     return null;
   }
@@ -288,6 +319,120 @@
     return Math.min(Math.max(radiusM, 300), 15000);
   }
 
+  // --- Contours précis des communes (téléchargement optionnel, à la demande) ---
+  const CONTOUR_TIERS = {
+    simplifiee: {
+      url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes-version-simplifiee.geojson',
+      label: 'version simplifiée',
+      sizeLabel: '6,7 Mo'
+    },
+    precise: {
+      url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson',
+      label: 'pleine précision',
+      sizeLabel: '16 Mo'
+    }
+  };
+  const CONTOURS_TIER_STORAGE_KEY = 'ousuisje_commune_contours_tier';
+
+  let communeContoursByDept = null; // Map(code départemental -> [{ code, nom, geometry }, ...])
+  let communeContoursTier = null;
+  let communeContoursLoading = false;
+  let lastOfflinePoint = null; // { lat, lon } — dernier point calculé, pour rafraîchir après un téléchargement
+
+  // Lit un flux réseau progressivement pour pouvoir afficher une progression ;
+  // repli silencieux si content-length ou le stream ne sont pas disponibles (ex: réponse de cache).
+  async function fetchTextWithProgress(url, onProgress) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const total = Number(res.headers.get('content-length')) || 0;
+    if (!res.body || !total) return res.text();
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let received = 0;
+    let text = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.length;
+      text += decoder.decode(value, { stream: true });
+      onProgress(received / total);
+    }
+    text += decoder.decode();
+    return text;
+  }
+
+  function geojsonToPolys(geometry) {
+    if (!geometry) return [];
+    if (geometry.type === 'Polygon') return [geometry.coordinates];
+    if (geometry.type === 'MultiPolygon') return geometry.coordinates;
+    return [];
+  }
+
+  // Indexe par département (2 premiers caractères du code INSEE, ex: "67", "2A")
+  // pour ne comparer un point qu'aux communes du département déjà trouvé.
+  function indexCommuneContours(geojson) {
+    const byDept = new Map();
+    for (const feature of geojson.features) {
+      const code = feature.properties && feature.properties.code;
+      const nom = feature.properties && feature.properties.nom;
+      if (!code || !feature.geometry) continue;
+      const deptCode = code.slice(0, 2);
+      if (!byDept.has(deptCode)) byDept.set(deptCode, []);
+      byDept.get(deptCode).push({ code, nom, geometry: feature.geometry });
+    }
+    return byDept;
+  }
+
+  function findCommuneExact(lon, lat, deptCode) {
+    if (!communeContoursByDept) return null;
+    const candidates = communeContoursByDept.get(deptCode);
+    if (!candidates) return null;
+    for (const c of candidates) {
+      if (pointInPolygons(lon, lat, geojsonToPolys(c.geometry))) return c;
+    }
+    return null;
+  }
+
+  function setContoursButtonsDisabled(disabled) {
+    downloadSimplifieeBtn.disabled = disabled;
+    downloadPreciseBtn.disabled = disabled;
+  }
+
+  async function downloadCommuneContours(tier) {
+    if (communeContoursLoading) return;
+    const conf = CONTOUR_TIERS[tier];
+    communeContoursLoading = true;
+    setContoursButtonsDisabled(true);
+    contoursStatusEl.classList.remove('dim');
+    contoursStatusEl.textContent = `Téléchargement (${conf.label})… 0%`;
+    try {
+      const text = await fetchTextWithProgress(conf.url, (frac) => {
+        contoursStatusEl.textContent = `Téléchargement (${conf.label})… ${Math.round(frac * 100)}% de ${conf.sizeLabel}`;
+      });
+      const geojson = JSON.parse(text);
+      communeContoursByDept = indexCommuneContours(geojson);
+      communeContoursTier = tier;
+      localStorage.setItem(CONTOURS_TIER_STORAGE_KEY, tier);
+      contoursStatusEl.textContent = `Actif : ${conf.label} ✓`;
+      if (lastOfflinePoint) updateOfflineGeo(lastOfflinePoint.lat, lastOfflinePoint.lon);
+    } catch (e) {
+      contoursStatusEl.textContent = communeContoursTier
+        ? `Échec du téléchargement — ${CONTOUR_TIERS[communeContoursTier].label} toujours active`
+        : 'Téléchargement impossible (pas de connexion ?)';
+    } finally {
+      communeContoursLoading = false;
+      setContoursButtonsDisabled(false);
+    }
+  }
+
+  downloadSimplifieeBtn.addEventListener('click', () => downloadCommuneContours('simplifiee'));
+  downloadPreciseBtn.addEventListener('click', () => downloadCommuneContours('precise'));
+
+  // Si une version a déjà été téléchargée lors d'une visite précédente, on la
+  // recharge (servie depuis le cache du service worker si hors ligne).
+  const savedTier = localStorage.getItem(CONTOURS_TIER_STORAGE_KEY);
+  if (savedTier && CONTOUR_TIERS[savedTier]) downloadCommuneContours(savedTier);
+
   async function loadOfflineGeoData() {
     if (offlineDataPromise) return offlineDataPromise;
     offlineDataPromise = (async () => {
@@ -321,11 +466,11 @@
     return offlineDeptLayer;
   }
 
-  // Dessine le cercle indicatif de la commune (ambre) sur la carte dédiée.
-  function drawCommuneOnMap(commune) {
-    if (offlineCommuneCircle) { offlineMap.removeLayer(offlineCommuneCircle); offlineCommuneCircle = null; }
+  // Dessine le cercle indicatif de la commune (ambre, pointillés) — approximation par proximité.
+  function drawCommuneCircleOnMap(commune) {
+    if (offlineCommuneLayer) { offlineMap.removeLayer(offlineCommuneLayer); offlineCommuneLayer = null; }
     const radiusM = communeIndicativeRadiusMeters(commune);
-    offlineCommuneCircle = L.circle([commune.lat, commune.lon], {
+    offlineCommuneLayer = L.circle([commune.lat, commune.lon], {
       radius: radiusM,
       color: '#E8A33D',
       weight: 2,
@@ -333,10 +478,24 @@
       fillColor: '#E8A33D',
       fillOpacity: 0.1
     }).addTo(offlineMap);
-    return offlineCommuneCircle;
+    return offlineCommuneLayer;
+  }
+
+  // Dessine le vrai contour de la commune (ambre, plein) — données précises téléchargées.
+  function drawCommuneExactOnMap(commune) {
+    if (offlineCommuneLayer) { offlineMap.removeLayer(offlineCommuneLayer); offlineCommuneLayer = null; }
+    const polys = geojsonToPolys(commune.geometry).map((poly) =>
+      L.polygon(
+        poly.map((ring) => ring.map(([lon, lat]) => [lat, lon])),
+        { color: '#E8A33D', weight: 2, fillColor: '#E8A33D', fillOpacity: 0.14 }
+      )
+    );
+    offlineCommuneLayer = L.featureGroup(polys).addTo(offlineMap);
+    return offlineCommuneLayer;
   }
 
   async function updateOfflineGeo(lat, lon) {
+    lastOfflinePoint = { lat, lon };
     offlineGeoStatus.textContent = 'Calcul…';
     try {
       await loadOfflineGeoData();
@@ -344,10 +503,15 @@
       offlineDeptEl.textContent = dept ? `${dept.nom} (${dept.code})` : 'Introuvable';
       offlineDeptEl.classList.toggle('dim', !dept);
 
-      const commune = findCommuneApprox(lat, lon);
+      let commune = dept ? findCommuneExact(lon, lat, dept.code) : null;
+      const communeExact = !!commune;
+      if (!commune) commune = findCommuneApprox(lat, lon);
+
       if (commune) {
-        const distTxt = commune.distanceKm < 1 ? '< 1 km' : `~${commune.distanceKm.toFixed(1)} km`;
-        offlineCommuneEl.textContent = `${commune.nom} (${distTxt} du centre)`;
+        const suffix = communeExact
+          ? ' (contour exact)'
+          : commune.distanceKm < 1 ? ' (estimation, < 1 km du centre)' : ` (estimation, ~${commune.distanceKm.toFixed(1)} km du centre)`;
+        offlineCommuneEl.textContent = commune.nom + suffix;
         offlineCommuneEl.classList.remove('dim');
       } else {
         offlineCommuneEl.textContent = 'Introuvable';
@@ -365,8 +529,8 @@
         if (deptLayer) boundsToFit.push(deptLayer.getBounds());
       }
       if (commune) {
-        const communeCircle = drawCommuneOnMap(commune);
-        boundsToFit.push(communeCircle.getBounds());
+        const communeLayer = communeExact ? drawCommuneExactOnMap(commune) : drawCommuneCircleOnMap(commune);
+        boundsToFit.push(communeLayer.getBounds());
       }
       if (boundsToFit.length > 0) {
         let combined = boundsToFit[0];

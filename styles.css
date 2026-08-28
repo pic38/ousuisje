@@ -576,7 +576,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .osm-credit a { color: #5b6b85; }
 
 footer { text-align: center; font-size: 11px; color: #4A5568; font-family: var(--mono); letter-spacing: 0.04em; padding-top: 4px; }
-.footer-nav { display: flex; justify-content: center; gap: 14px; margin-bottom: 8px; font-family: var(--sans); letter-spacing: normal; }
+.footer-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin-bottom: 8px; font-family: var(--sans); letter-spacing: normal; }
 .footer-nav a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; font-size: 12px; }
 .footer-nav a:hover { color: var(--text); }
 

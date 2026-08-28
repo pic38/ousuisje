@@ -435,12 +435,12 @@
     if (communeContoursTier === tier) {
       btn.textContent = 'Actif ✓';
       btn.disabled = true;
-      statusEl.textContent = 'Téléchargée et active';
+      statusEl.textContent = 'Téléchargée, active';
       statusEl.classList.remove('dim');
     } else if (communeContoursDownloaded.has(tier)) {
       btn.textContent = 'Activer';
       btn.disabled = false;
-      statusEl.textContent = 'Téléchargée ✓ (inactive)';
+      statusEl.textContent = 'Téléchargée, inactive';
       statusEl.classList.remove('dim');
     } else {
       btn.textContent = `Télécharger (${conf.downloadSizeLabel})`;

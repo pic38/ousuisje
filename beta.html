@@ -76,12 +76,7 @@
           <span class="map-hint">Contour du département (exact, en teal). Commune en ambre : cercle indicatif par défaut, ou contour exact une fois les données précises téléchargées ci-dessous.</span>
         </div>
       </div>
-    </div>
-  </details>
 
-  <details class="feature">
-    <summary class="feature-summary"><span>Contours précis des communes (optionnel)</span><span class="feature-chevron">▾</span></summary>
-    <div class="feature-body">
       <div class="addr-panel">
         <div class="addr-head">
           <span>Contours précis des communes (optionnel)</span>
@@ -164,6 +159,36 @@
     </div>
   </details>
 
+  <details class="feature">
+    <summary class="feature-summary"><span>Escape games à proximité</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button id="escapeGamesBtn" class="btn-secondary">Chercher les escape games à proximité</button>
+
+      <div class="map-wrap">
+        <div id="escapeGamesMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Les 10 escape games les plus proches de la position GPS.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Escape games à proximité</span>
+          <span id="escapeGamesStatus">—</span>
+        </div>
+        <table id="escapeGamesTable" class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="escapeGamesTableBody">
+            <tr><td colspan="2" class="dim">Cliquez sur « Me localiser » puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Escape games : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
 
@@ -192,6 +217,9 @@
   const downloadAntennasBtn = $('downloadAntennas');
   const antennasSearchStatusEl = $('antennasSearchStatus');
   const antennasTableBody = $('antennasTableBody');
+  const escapeGamesBtn = $('escapeGamesBtn');
+  const escapeGamesStatusEl = $('escapeGamesStatus');
+  const escapeGamesTableBody = $('escapeGamesTableBody');
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -224,6 +252,13 @@
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(antennaMap);
   let antennaGpsMarker = null;
   let antennaMarkers = [];
+
+  // --- Carte des escape games à proximité (Leaflet séparée) ---
+  const escapeGamesMap = L.map('escapeGamesMap', { zoomControl: true, attributionControl: false });
+  escapeGamesMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(escapeGamesMap);
+  let escapeGamesGpsMarker = null;
+  let escapeGamesMarkers = [];
 
   // --- Géolocalisation simple (ponctuelle, pas de suivi continu sur cette page) ---
   locateBtn.addEventListener('click', () => {
@@ -715,6 +750,82 @@
 
   downloadAntennasBtn.addEventListener('click', downloadAntennas);
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
+
+  // --- Escape games à proximité (recherche en direct, OpenStreetMap/Overpass) ---
+  const ESCAPE_GAMES_RADIUS_M = 20000;
+  const ESCAPE_GAMES_MAX_RESULTS = 10;
+  const ESCAPE_GAMES_COLOR = '#8B5CF6';
+
+  function distanceMetersApprox(lat1, lon1, lat2, lon2) {
+    const coslat = Math.cos(lat1 * Math.PI / 180);
+    const dLat = lat2 - lat1;
+    const dLon = (lon2 - lon1) * coslat;
+    return Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
+  }
+
+  function clearEscapeGamesMarkers() {
+    escapeGamesMarkers.forEach((m) => escapeGamesMap.removeLayer(m));
+    escapeGamesMarkers = [];
+  }
+
+  escapeGamesBtn.addEventListener('click', async () => {
+    if (!lastOfflinePoint) {
+      escapeGamesStatusEl.textContent = "Cliquez d'abord sur « Me localiser »";
+      return;
+    }
+    const { lat, lon } = lastOfflinePoint;
+    escapeGamesBtn.disabled = true;
+    escapeGamesStatusEl.textContent = 'Recherche…';
+
+    if (escapeGamesGpsMarker) { escapeGamesMap.removeLayer(escapeGamesGpsMarker); }
+    escapeGamesGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(escapeGamesMap);
+
+    try {
+      const query = `[out:json][timeout:20];(node["leisure"="escape_game"](around:${ESCAPE_GAMES_RADIUS_M},${lat},${lon});way["leisure"="escape_game"](around:${ESCAPE_GAMES_RADIUS_M},${lat},${lon}););out center 200;`;
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+      const data = await res.json();
+
+      const items = (data.elements || [])
+        .map((el) => {
+          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+          if (elat == null || elon == null) return null;
+          const name = (el.tags && el.tags.name) || 'Escape game';
+          return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon) };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.distM - b.distM)
+        .slice(0, ESCAPE_GAMES_MAX_RESULTS);
+
+      clearEscapeGamesMarkers();
+      const bounds = [[lat, lon]];
+
+      if (items.length === 0) {
+        escapeGamesTableBody.innerHTML = `<tr><td colspan="2" class="dim">Aucun escape game trouvé dans un rayon de ${ESCAPE_GAMES_RADIUS_M / 1000} km</td></tr>`;
+      } else {
+        escapeGamesTableBody.innerHTML = items.map((it) => `
+          <tr>
+            <td>${it.name}</td>
+            <td>${fmtDistanceM(it.distM)}</td>
+          </tr>
+        `).join('');
+        for (const it of items) {
+          const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: ESCAPE_GAMES_COLOR, weight: 2, fillColor: ESCAPE_GAMES_COLOR, fillOpacity: 0.6 })
+            .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)}`)
+            .addTo(escapeGamesMap);
+          escapeGamesMarkers.push(marker);
+          bounds.push([it.lat, it.lon]);
+        }
+      }
+      escapeGamesStatusEl.textContent = `${items.length} résultat(s) · rayon ${ESCAPE_GAMES_RADIUS_M / 1000} km`;
+      escapeGamesMap.fitBounds(bounds, { padding: [24, 24] });
+    } catch (e) {
+      escapeGamesStatusEl.textContent = 'Service Overpass indisponible';
+      escapeGamesTableBody.innerHTML = '<tr><td colspan="2" class="dim">Recherche impossible pour le moment</td></tr>';
+    } finally {
+      escapeGamesBtn.disabled = false;
+    }
+  });
 
   async function loadOfflineGeoData() {
     if (offlineDataPromise) return offlineDataPromise;

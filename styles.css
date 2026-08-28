@@ -31,6 +31,44 @@ body {
 .wrap { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 22px; flex: 1; }
 
 header { text-align: center; padding-top: 6px; }
+
+/* --- Sections dépliables (fonctionnalités bêta) --- */
+details.feature { width: 100%; }
+.feature-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  user-select: none;
+}
+.feature-summary::-webkit-details-marker { display: none; }
+.feature-summary::marker { content: ""; }
+.feature-summary:hover { background: var(--surface-2); }
+.feature-chevron { color: var(--teal); font-size: 12px; flex-shrink: 0; transition: transform 0.15s ease; }
+details.feature[open] > .feature-summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: none;
+}
+details.feature[open] > .feature-summary .feature-chevron { transform: rotate(180deg); }
+.feature-body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-top: none;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
 .eyebrow {
   font-family: var(--mono);
   font-size: 11px;

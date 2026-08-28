@@ -27,122 +27,142 @@
     <span id="statusText">En attente</span>
   </div>
 
-  <div class="map-wrap">
-    <div id="map"></div>
-    <div class="map-footer">
-      <span class="map-hint">Radar de précipitations en filigrane sur la carte OpenStreetMap.</span>
-    </div>
-  </div>
+  <details class="feature">
+    <summary class="feature-summary"><span>Radar de précipitations</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="map-wrap">
+        <div id="map"></div>
+        <div class="map-footer">
+          <span class="map-hint">Radar de précipitations en filigrane sur la carte OpenStreetMap.</span>
+        </div>
+      </div>
 
-  <div class="addr-panel">
-    <div class="addr-head">
-      <span>Radar de précipitations</span>
-      <span id="radarTimestamp">Chargement…</span>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Radar de précipitations</span>
+          <span id="radarTimestamp">Chargement…</span>
+        </div>
+        <div style="padding: 12px 16px; display:flex; align-items:center; justify-content:center; gap:10px;">
+          <button id="radarPrev" class="btn-secondary" style="padding:10px 14px;">◂</button>
+          <button id="radarPlay" class="btn-primary" style="padding:10px 20px;">▶ Lecture</button>
+          <button id="radarNext" class="btn-secondary" style="padding:10px 14px;">▸</button>
+        </div>
+        <div class="addr-row"><span class="k">Opacité du radar</span>
+          <span class="v" style="display:flex; align-items:center; gap:8px;">
+            <input type="range" id="radarOpacity" min="20" max="100" value="75" style="accent-color: var(--teal);" />
+          </span>
+        </div>
+      </div>
+      <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
     </div>
-    <div style="padding: 12px 16px; display:flex; align-items:center; justify-content:center; gap:10px;">
-      <button id="radarPrev" class="btn-secondary" style="padding:10px 14px;">◂</button>
-      <button id="radarPlay" class="btn-primary" style="padding:10px 20px;">▶ Lecture</button>
-      <button id="radarNext" class="btn-secondary" style="padding:10px 14px;">▸</button>
-    </div>
-    <div class="addr-row"><span class="k">Opacité du radar</span>
-      <span class="v" style="display:flex; align-items:center; gap:8px;">
-        <input type="range" id="radarOpacity" min="20" max="100" value="75" style="accent-color: var(--teal);" />
-      </span>
-    </div>
-  </div>
-  <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+  </details>
 
-  <div class="addr-panel">
-    <div class="addr-head">
-      <span>Département et commune hors ligne</span>
-      <span id="offlineGeoStatus" class="dim">Chargement des données…</span>
-    </div>
-    <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
-    <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
-  </div>
-  <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). Par défaut, la commune est une estimation par proximité au centre-bourg : elle peut être erronée près d'une frontière communale — voir ci-dessous pour télécharger les vrais contours.</p>
+  <details class="feature">
+    <summary class="feature-summary"><span>Département et commune hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Département et commune hors ligne</span>
+          <span id="offlineGeoStatus" class="dim">Chargement des données…</span>
+        </div>
+        <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
+      </div>
+      <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). Par défaut, la commune est une estimation par proximité au centre-bourg : elle peut être erronée près d'une frontière communale — voir ci-dessous pour télécharger les vrais contours.</p>
 
-  <div class="map-wrap">
-    <div id="offlineMap"></div>
-    <div class="map-footer">
-      <span class="map-hint">Contour du département (exact, en teal). Commune en ambre : cercle indicatif par défaut, ou contour exact une fois les données précises téléchargées ci-dessous.</span>
+      <div class="map-wrap">
+        <div id="offlineMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Contour du département (exact, en teal). Commune en ambre : cercle indicatif par défaut, ou contour exact une fois les données précises téléchargées ci-dessous.</span>
+        </div>
+      </div>
     </div>
-  </div>
+  </details>
 
-  <div class="addr-panel">
-    <div class="addr-head">
-      <span>Contours précis des communes (optionnel)</span>
-      <span id="contoursStatus" class="dim">Non téléchargés</span>
+  <details class="feature">
+    <summary class="feature-summary"><span>Contours précis des communes (optionnel)</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Contours précis des communes (optionnel)</span>
+          <span id="contoursStatus" class="dim">Non téléchargés</span>
+        </div>
+        <table class="contours-table">
+          <colgroup>
+            <col class="col-version"><col class="col-status"><col class="col-action">
+          </colgroup>
+          <thead>
+            <tr><th>Version</th><th>Statut</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Simplifiée (6,7 Mo)</td>
+              <td id="statusSimplifiee" class="dim">Non téléchargée</td>
+              <td><button id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
+            </tr>
+            <tr>
+              <td>Pleine précision (16 Mo)</td>
+              <td id="statusPrecise" class="dim">Non téléchargée</td>
+              <td><button id="downloadPrecise" class="btn-secondary">Télécharger</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">
+        Les deux versions viennent du même tracé source (IGN Admin Express), simplifié différemment pour réduire la taille du fichier (projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>). La <strong>version simplifiée</strong> ne garde qu'environ 5% des points du tracé d'origine : les grandes lignes sont fidèles, mais les détails fins (petites presqu'îles, méandres serrés) peuvent être coupés, avec une erreur possible sur une bande de quelques dizaines de mètres près de ces zones. La <strong>pleine précision</strong> garde environ 25% des points et colle au tracé réel à environ 1 mètre près partout, pour un téléchargement ~2,4x plus lourd. Une fois téléchargée, une version remplace l'estimation par proximité par le vrai contour de la commune, y compris hors connexion — jusqu'à la prochaine mise à jour de l'app, qui vide le cache et redemande un téléchargement.
+      </p>
     </div>
-    <table class="contours-table">
-      <colgroup>
-        <col class="col-version"><col class="col-status"><col class="col-action">
-      </colgroup>
-      <thead>
-        <tr><th>Version</th><th>Statut</th><th></th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Simplifiée (6,7 Mo)</td>
-          <td id="statusSimplifiee" class="dim">Non téléchargée</td>
-          <td><button id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
-        </tr>
-        <tr>
-          <td>Pleine précision (16 Mo)</td>
-          <td id="statusPrecise" class="dim">Non téléchargée</td>
-          <td><button id="downloadPrecise" class="btn-secondary">Télécharger</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="osm-credit">
-    Les deux versions viennent du même tracé source (IGN Admin Express), simplifié différemment pour réduire la taille du fichier (projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>). La <strong>version simplifiée</strong> ne garde qu'environ 5% des points du tracé d'origine : les grandes lignes sont fidèles, mais les détails fins (petites presqu'îles, méandres serrés) peuvent être coupés, avec une erreur possible sur une bande de quelques dizaines de mètres près de ces zones. La <strong>pleine précision</strong> garde environ 25% des points et colle au tracé réel à environ 1 mètre près partout, pour un téléchargement ~2,4x plus lourd. Une fois téléchargée, une version remplace l'estimation par proximité par le vrai contour de la commune, y compris hors connexion — jusqu'à la prochaine mise à jour de l'app, qui vide le cache et redemande un téléchargement.
-  </p>
+  </details>
 
-  <div class="addr-panel">
-    <div class="addr-head">
-      <span>Antennes relais ANFR (hors ligne, sur demande)</span>
-      <span id="antennasDlStatus" class="dim">Non téléchargées</span>
-    </div>
-    <table class="contours-table">
-      <colgroup>
-        <col class="col-version"><col class="col-status"><col class="col-action">
-      </colgroup>
-      <thead>
-        <tr><th>Jeu de données</th><th>Statut</th><th></th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Sites ANFR, 4 opérateurs (1,3 Mo)</td>
-          <td id="antennasRowStatus" class="dim">Non téléchargées</td>
-          <td><button id="downloadAntennas" class="btn-secondary">Télécharger</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). L'API officielle n'étant pas interrogeable directement depuis un navigateur, ce fichier est un instantané figé (127 000 sites, capturé le 28/08/2026 — ANFR met à jour sa base chaque semaine) préparé à l'avance plutôt qu'une requête en direct — les nouveaux sites ou désaffectations récents peuvent manquer.</p>
+  <details class="feature">
+    <summary class="feature-summary"><span>Antennes relais ANFR</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Antennes relais ANFR (hors ligne, sur demande)</span>
+          <span id="antennasDlStatus" class="dim">Non téléchargées</span>
+        </div>
+        <table class="contours-table">
+          <colgroup>
+            <col class="col-version"><col class="col-status"><col class="col-action">
+          </colgroup>
+          <thead>
+            <tr><th>Jeu de données</th><th>Statut</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sites ANFR, 4 opérateurs (1,3 Mo)</td>
+              <td id="antennasRowStatus" class="dim">Non téléchargées</td>
+              <td><button id="downloadAntennas" class="btn-secondary">Télécharger</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). L'API officielle n'étant pas interrogeable directement depuis un navigateur, ce fichier est un instantané figé (127 000 sites, capturé le 28/08/2026 — ANFR met à jour sa base chaque semaine) préparé à l'avance plutôt qu'une requête en direct — les nouveaux sites ou désaffectations récents peuvent manquer.</p>
 
-  <div class="map-wrap">
-    <div id="antennaMap"></div>
-    <div class="map-footer">
-      <span class="map-hint"><span style="color:#FF7900;">●</span> Orange <span style="color:#E2001A;">●</span> SFR <span style="color:#0055A4;">●</span> Bouygues Telecom <span style="color:#CD0067;">●</span> Free Mobile</span>
-    </div>
-  </div>
+      <div class="map-wrap">
+        <div id="antennaMap"></div>
+        <div class="map-footer">
+          <span class="map-hint"><span style="color:#FF7900;">●</span> Orange <span style="color:#E2001A;">●</span> SFR <span style="color:#0055A4;">●</span> Bouygues Telecom <span style="color:#2FB344;">●</span> Free Mobile</span>
+        </div>
+      </div>
 
-  <div class="addr-panel">
-    <div class="addr-head">
-      <span>Antennes à proximité</span>
-      <span id="antennasSearchStatus">—</span>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Antennes à proximité</span>
+          <span id="antennasSearchStatus">—</span>
+        </div>
+        <table id="antennasTable" class="poi-table">
+          <thead>
+            <tr><th>Opérateur</th><th>Générations</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="antennasTableBody">
+            <tr><td colspan="3" class="dim">Téléchargez les données puis cliquez sur « Me localiser »</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <table id="antennasTable" class="poi-table">
-      <thead>
-        <tr><th>Opérateur</th><th>Générations</th><th>Distance</th></tr>
-      </thead>
-      <tbody id="antennasTableBody">
-        <tr><td colspan="3" class="dim">Téléchargez les données puis cliquez sur « Me localiser »</td></tr>
-      </tbody>
-    </table>
-  </div>
+  </details>
 
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
@@ -222,8 +242,8 @@
         } else {
           gpsMarker.setLatLng(latlng);
         }
-        // Zoom choisi pour laisser voir environ un quart de la France autour du point.
-        map.setView(latlng, 7);
+        // Zoom choisi pour laisser voir une bonne partie de la France autour du point.
+        map.setView(latlng, 6);
         setStatus('live', 'Position trouvée');
         locateBtn.disabled = false;
         updateOfflineGeo(latitude, longitude);
@@ -566,12 +586,12 @@
   const ANTENNAS_RAW_BYTES = 6071089;
   const ANTENNAS_DOWNLOADED_STORAGE_KEY = 'ousuisje_anfr_antennas_downloaded';
   const ANTENNA_RADIUS_M = 5000;
-  const ANTENNA_MAX_RESULTS = 40;
+  const ANTENNA_MAX_RESULTS = 20;
   const OPERATOR_COLORS = {
     'ORANGE': '#FF7900',
     'SFR': '#E2001A',
     'BOUYGUES TELECOM': '#0055A4',
-    'FREE MOBILE': '#CD0067'
+    'FREE MOBILE': '#2FB344'
   };
   const ANTENNA_DEFAULT_COLOR = '#8892A6';
 
@@ -799,6 +819,7 @@
         let combined = boundsToFit[0];
         for (let i = 1; i < boundsToFit.length; i++) combined = combined.extend(boundsToFit[i]);
         offlineMap.fitBounds(combined, { padding: [16, 16] });
+        offlineMap.setZoom(offlineMap.getZoom() + 1); // un cran de zoom en plus par rapport à l'ajustement automatique
       }
     } catch (e) {
       offlineGeoStatus.textContent = 'Données indisponibles';

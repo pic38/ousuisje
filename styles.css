@@ -335,6 +335,45 @@ h1 {
 .poi-table.source-gps tbody td:first-child { color: var(--amber); }
 .poi-table.source-carte tbody td:first-child { color: var(--teal); }
 
+/* --- Contours table (largeurs de colonnes fixes : le texte de statut ne
+   doit jamais déplacer le bouton) --- */
+.contours-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.contours-table col.col-version { width: 30%; }
+.contours-table col.col-status { width: 38%; }
+.contours-table col.col-action { width: 32%; }
+.contours-table thead th {
+  text-align: left;
+  padding: 10px 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.contours-table tbody td {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  vertical-align: middle;
+}
+.contours-table tbody tr:last-child td { border-bottom: none; }
+.contours-table tbody td.dim { color: var(--muted); font-weight: 400; }
+.contours-table tbody td:last-child { text-align: right; }
+.contours-table .btn-secondary {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* --- Buttons --- */
 .actions { display: flex; flex-direction: column; gap: 10px; }
 button {

@@ -74,20 +74,26 @@
       <span>Contours précis des communes (optionnel)</span>
       <span id="contoursStatus" class="dim">Non téléchargés</span>
     </div>
-    <div class="addr-row">
-      <span class="k">Version simplifiée</span>
-      <span class="v" style="display:flex; align-items:center; justify-content:flex-end; gap:10px;">
-        <span id="statusSimplifiee" class="dim" style="font-size:12.5px; white-space:nowrap;">Non téléchargée</span>
-        <button id="downloadSimplifiee" class="btn-secondary" style="padding:8px 14px; white-space:nowrap;">Télécharger (~6,7 Mo)</button>
-      </span>
-    </div>
-    <div class="addr-row">
-      <span class="k">Pleine précision</span>
-      <span class="v" style="display:flex; align-items:center; justify-content:flex-end; gap:10px;">
-        <span id="statusPrecise" class="dim" style="font-size:12.5px; white-space:nowrap;">Non téléchargée</span>
-        <button id="downloadPrecise" class="btn-secondary" style="padding:8px 14px; white-space:nowrap;">Télécharger (~16 Mo)</button>
-      </span>
-    </div>
+    <table class="contours-table">
+      <colgroup>
+        <col class="col-version"><col class="col-status"><col class="col-action">
+      </colgroup>
+      <thead>
+        <tr><th>Version</th><th>Statut</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Simplifiée</td>
+          <td id="statusSimplifiee" class="dim">Non téléchargée</td>
+          <td><button id="downloadSimplifiee" class="btn-secondary">Télécharger (~6,7 Mo)</button></td>
+        </tr>
+        <tr>
+          <td>Pleine précision</td>
+          <td id="statusPrecise" class="dim">Non téléchargée</td>
+          <td><button id="downloadPrecise" class="btn-secondary">Télécharger (~16 Mo)</button></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   <p class="osm-credit">
     Les deux versions viennent du même tracé source (IGN Admin Express), simplifié différemment pour réduire la taille du fichier (projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>). La <strong>version simplifiée</strong> ne garde qu'environ 5% des points du tracé d'origine : les grandes lignes sont fidèles, mais les détails fins (petites presqu'îles, méandres serrés) peuvent être coupés, avec une erreur possible sur une bande de quelques dizaines de mètres près de ces zones. La <strong>pleine précision</strong> garde environ 25% des points et colle au tracé réel à environ 1 mètre près partout, pour un téléchargement ~2,4x plus lourd. Une fois téléchargée, une version remplace l'estimation par proximité par le vrai contour de la commune, y compris hors connexion — jusqu'à la prochaine mise à jour de l'app, qui vide le cache et redemande un téléchargement.
@@ -523,7 +529,7 @@
     const polys = entry.p.map((poly) =>
       L.polygon(
         poly.map((ring) => ring.map(([lon, lat]) => [lat, lon])),
-        { color: '#4FD1C5', weight: 2, fillColor: '#4FD1C5', fillOpacity: 0.08 }
+        { color: '#12695C', weight: 3, fillColor: '#12695C', fillOpacity: 0.12 }
       )
     );
     offlineDeptLayer = L.featureGroup(polys).addTo(offlineMap);
@@ -536,11 +542,11 @@
     const radiusM = communeIndicativeRadiusMeters(commune);
     offlineCommuneLayer = L.circle([commune.lat, commune.lon], {
       radius: radiusM,
-      color: '#E8A33D',
-      weight: 2,
+      color: '#95600F',
+      weight: 3,
       dashArray: '6 6',
-      fillColor: '#E8A33D',
-      fillOpacity: 0.1
+      fillColor: '#95600F',
+      fillOpacity: 0.14
     }).addTo(offlineMap);
     return offlineCommuneLayer;
   }
@@ -551,7 +557,7 @@
     const polys = geojsonToPolys(commune.geometry).map((poly) =>
       L.polygon(
         poly.map((ring) => ring.map(([lon, lat]) => [lat, lon])),
-        { color: '#E8A33D', weight: 2, fillColor: '#E8A33D', fillOpacity: 0.14 }
+        { color: '#95600F', weight: 3, fillColor: '#95600F', fillOpacity: 0.18 }
       )
     );
     offlineCommuneLayer = L.featureGroup(polys).addTo(offlineMap);

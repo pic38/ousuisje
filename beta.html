@@ -107,6 +107,11 @@
           </thead>
           <tbody>
             <tr>
+              <td>Départements + centroïdes de communes (1,4 Mo)</td>
+              <td class="dim">Téléchargées, actives (automatique)</td>
+              <td></td>
+            </tr>
+            <tr>
               <td>Simplifiée (6,7 Mo)</td>
               <td id="statusSimplifiee" class="dim">Non téléchargée</td>
               <td><button id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
@@ -162,6 +167,12 @@
         <div class="addr-head">
           <span>Antennes à proximité</span>
           <span id="antennasSearchStatus">—</span>
+        </div>
+        <div id="antennaOperatorFilter" class="operator-filter">
+          <label class="operator-filter-check"><input type="checkbox" data-op="ORANGE" checked><span class="operator-dot" style="background:#FF7900;"></span>Orange</label>
+          <label class="operator-filter-check"><input type="checkbox" data-op="SFR" checked><span class="operator-dot" style="background:#E2001A;"></span>SFR</label>
+          <label class="operator-filter-check"><input type="checkbox" data-op="BOUYGUES TELECOM" checked><span class="operator-dot" style="background:#0055A4;"></span>Bouygues</label>
+          <label class="operator-filter-check"><input type="checkbox" data-op="FREE MOBILE" checked><span class="operator-dot" style="background:#2FB344;"></span>Free</label>
         </div>
         <table id="antennasTable" class="poi-table">
           <thead>
@@ -413,12 +424,13 @@
     statusText.textContent = label;
   }
 
-  // Bouton de recentrage sur la position GPS, sous les contrôles de zoom — sur
-  // toutes les cartes de la page, réutilise la dernière position connue
-  // (lastOfflinePoint, alimentée par « Me localiser »).
+  // Contrôles de zoom + bouton de recentrage sur la position GPS, groupés en bas à
+  // droite de chaque carte — sur toutes les cartes de la page. Le recentrage
+  // réutilise la dernière position connue (lastOfflinePoint, alimentée par « Me localiser »).
   function addRecenterControl(targetMap) {
+    if (targetMap.zoomControl) targetMap.zoomControl.setPosition('bottomright');
     const RecenterControl = L.Control.extend({
-      options: { position: 'topleft' },
+      options: { position: 'bottomright' },
       onAdd: function () {
         const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control recenter-control');
         const link = L.DomUtil.create('a', 'recenter-control-btn', container);
@@ -856,6 +868,16 @@
 
   let antennaSites = null; // [{ id, lat, lon, op, gens:[...] }, ...] — un opérateur par site (pas de mât partagé dans ce jeu de données)
   let antennasLoading = false;
+  let antennaOperatorFilter = new Set(Object.keys(OPERATOR_COLORS)); // opérateurs affichés ; tous par défaut
+
+  const antennaOperatorFilterEl = $('antennaOperatorFilter');
+  Array.from(antennaOperatorFilterEl.querySelectorAll('input[type="checkbox"]')).forEach((cb) => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) antennaOperatorFilter.add(cb.dataset.op);
+      else antennaOperatorFilter.delete(cb.dataset.op);
+      if (lastOfflinePoint) updateAntennasNearby(lastOfflinePoint.lat, lastOfflinePoint.lon);
+    });
+  });
 
   function parseAntennasCsv(text) {
     const out = [];
@@ -898,6 +920,7 @@
     const coslat = Math.cos(lat * Math.PI / 180);
     const results = [];
     for (const s of antennaSites) {
+      if (!antennaOperatorFilter.has(s.op)) continue;
       const dLat = s.lat - lat;
       const dLon = (s.lon - lon) * coslat;
       const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320; // 1° de latitude ≈ 111,32 km
@@ -1203,20 +1226,17 @@
       if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }
       offlineGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(offlineMap);
 
-      const boundsToFit = [];
-      if (dept) {
-        const deptLayer = drawDeptOnMap(dept.code);
-        if (deptLayer) boundsToFit.push(deptLayer.getBounds());
-      }
-      if (commune) {
-        const communeLayer = communeExact ? drawCommuneExactOnMap(commune) : drawCommuneCircleOnMap(commune);
-        boundsToFit.push(communeLayer.getBounds());
-      }
-      if (boundsToFit.length > 0) {
-        let combined = boundsToFit[0];
-        for (let i = 1; i < boundsToFit.length; i++) combined = combined.extend(boundsToFit[i]);
-        offlineMap.fitBounds(combined, { padding: [16, 16] });
-        offlineMap.setZoom(offlineMap.getZoom() + 1); // un cran de zoom en plus par rapport à l'ajustement automatique
+      const deptLayer = dept ? drawDeptOnMap(dept.code) : null;
+      const communeLayer = commune ? (communeExact ? drawCommuneExactOnMap(commune) : drawCommuneCircleOnMap(commune)) : null;
+
+      // Cadrage sur la commune (repère principal), un peu dézoomé pour le contexte —
+      // le département reste dessiné mais ne pilote plus le zoom (sinon la vue restait
+      // à l'échelle du département, bien trop large par rapport à la commune).
+      if (communeLayer) {
+        offlineMap.fitBounds(communeLayer.getBounds(), { padding: [16, 16] });
+        offlineMap.setZoom(Math.max(offlineMap.getZoom() - 1, 0));
+      } else if (deptLayer) {
+        offlineMap.fitBounds(deptLayer.getBounds(), { padding: [16, 16] });
       }
     } catch (e) {
       offlineGeoStatus.textContent = 'Données indisponibles';

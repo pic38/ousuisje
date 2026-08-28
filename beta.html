@@ -189,6 +189,96 @@
     </div>
   </details>
 
+  <details class="feature">
+    <summary class="feature-summary"><span>Piscines à proximité</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button id="poolsBtn" class="btn-secondary">Chercher les piscines à proximité</button>
+
+      <div class="map-wrap">
+        <div id="poolsMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Les 10 piscines publiques les plus proches de la position GPS.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Piscines à proximité</span>
+          <span id="poolsStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="poolsTableBody">
+            <tr><td colspan="2" class="dim">Cliquez sur « Me localiser » puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Piscines : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature">
+    <summary class="feature-summary"><span>Sites d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button id="climbingSitesBtn" class="btn-secondary">Chercher les sites d'escalade à proximité</button>
+
+      <div class="map-wrap">
+        <div id="climbingSitesMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Les 10 sites d'escalade extérieurs (falaises, blocs) les plus proches, dans un rayon de 50 km.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Sites d'escalade à proximité</span>
+          <span id="climbingSitesStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="climbingSitesTableBody">
+            <tr><td colspan="2" class="dim">Cliquez sur « Me localiser » puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Sites d'escalade : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature">
+    <summary class="feature-summary"><span>Salles d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button id="climbingGymsBtn" class="btn-secondary">Chercher les salles d'escalade à proximité</button>
+
+      <div class="map-wrap">
+        <div id="climbingGymsMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Les 10 salles d'escalade (bloc, voie) les plus proches de la position GPS.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Salles d'escalade à proximité</span>
+          <span id="climbingGymsStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="climbingGymsTableBody">
+            <tr><td colspan="2" class="dim">Cliquez sur « Me localiser » puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Salles d'escalade : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
 
@@ -220,6 +310,15 @@
   const escapeGamesBtn = $('escapeGamesBtn');
   const escapeGamesStatusEl = $('escapeGamesStatus');
   const escapeGamesTableBody = $('escapeGamesTableBody');
+  const poolsBtn = $('poolsBtn');
+  const poolsStatusEl = $('poolsStatus');
+  const poolsTableBody = $('poolsTableBody');
+  const climbingSitesBtn = $('climbingSitesBtn');
+  const climbingSitesStatusEl = $('climbingSitesStatus');
+  const climbingSitesTableBody = $('climbingSitesTableBody');
+  const climbingGymsBtn = $('climbingGymsBtn');
+  const climbingGymsStatusEl = $('climbingGymsStatus');
+  const climbingGymsTableBody = $('climbingGymsTableBody');
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -253,12 +352,17 @@
   let antennaGpsMarker = null;
   let antennaMarkers = [];
 
-  // --- Carte des escape games à proximité (Leaflet séparée) ---
-  const escapeGamesMap = L.map('escapeGamesMap', { zoomControl: true, attributionControl: false });
-  escapeGamesMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(escapeGamesMap);
-  let escapeGamesGpsMarker = null;
-  let escapeGamesMarkers = [];
+  // --- Cartes des points d'intérêt à proximité (Leaflet séparées, une par fonctionnalité) ---
+  function initNearbyMap(id) {
+    const m = L.map(id, { zoomControl: true, attributionControl: false });
+    m.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
+    return m;
+  }
+  const escapeGamesMap = initNearbyMap('escapeGamesMap');
+  const poolsMap = initNearbyMap('poolsMap');
+  const climbingSitesMap = initNearbyMap('climbingSitesMap');
+  const climbingGymsMap = initNearbyMap('climbingGymsMap');
 
   // --- Géolocalisation simple (ponctuelle, pas de suivi continu sur cette page) ---
   locateBtn.addEventListener('click', () => {
@@ -751,11 +855,7 @@
   downloadAntennasBtn.addEventListener('click', downloadAntennas);
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
-  // --- Escape games à proximité (recherche en direct, OpenStreetMap/Overpass) ---
-  const ESCAPE_GAMES_RADIUS_M = 20000;
-  const ESCAPE_GAMES_MAX_RESULTS = 10;
-  const ESCAPE_GAMES_COLOR = '#8B5CF6';
-
+  // --- Points d'intérêt à proximité, en direct via Overpass (escape games, piscines, escalade) ---
   function distanceMetersApprox(lat1, lon1, lat2, lon2) {
     const coslat = Math.cos(lat1 * Math.PI / 180);
     const dLat = lat2 - lat1;
@@ -763,68 +863,128 @@
     return Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
   }
 
-  function clearEscapeGamesMarkers() {
-    escapeGamesMarkers.forEach((m) => escapeGamesMap.removeLayer(m));
-    escapeGamesMarkers = [];
+  // Factory générique : branche un bouton + statut + tableau + carte dédiée sur une
+  // recherche Overpass, en réutilisant la dernière position connue (lastOfflinePoint).
+  function setupNearbyOverpassFeature(config) {
+    const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel } = config;
+    let markers = [];
+    let gpsMarker = null;
+
+    btn.addEventListener('click', async () => {
+      if (!lastOfflinePoint) {
+        statusEl.textContent = "Cliquez d'abord sur « Me localiser »";
+        return;
+      }
+      const { lat, lon } = lastOfflinePoint;
+      btn.disabled = true;
+      statusEl.textContent = 'Recherche…';
+
+      if (gpsMarker) { map.removeLayer(gpsMarker); }
+      gpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(map);
+
+      try {
+        const query = buildQuery(lat, lon, radiusM);
+        const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+        const data = await res.json();
+
+        const items = (data.elements || [])
+          .map((el) => {
+            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+            if (elat == null || elon == null) return null;
+            const name = (el.tags && el.tags.name) || defaultName;
+            return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon) };
+          })
+          .filter(Boolean)
+          .sort((a, b) => a.distM - b.distM)
+          .slice(0, maxResults);
+
+        markers.forEach((m) => map.removeLayer(m));
+        markers = [];
+        const bounds = [[lat, lon]];
+
+        if (items.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="2" class="dim">${emptyLabel} dans un rayon de ${radiusM / 1000} km</td></tr>`;
+        } else {
+          tableBody.innerHTML = items.map((it) => `
+            <tr>
+              <td>${it.name}</td>
+              <td>${fmtDistanceM(it.distM)}</td>
+            </tr>
+          `).join('');
+          for (const it of items) {
+            const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
+              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)}`)
+              .addTo(map);
+            markers.push(marker);
+            bounds.push([it.lat, it.lon]);
+          }
+        }
+        statusEl.textContent = `${items.length} résultat(s) · rayon ${radiusM / 1000} km`;
+        map.fitBounds(bounds, { padding: [24, 24] });
+      } catch (e) {
+        statusEl.textContent = 'Service Overpass indisponible';
+        tableBody.innerHTML = '<tr><td colspan="2" class="dim">Recherche impossible pour le moment</td></tr>';
+      } finally {
+        btn.disabled = false;
+      }
+    });
   }
 
-  escapeGamesBtn.addEventListener('click', async () => {
-    if (!lastOfflinePoint) {
-      escapeGamesStatusEl.textContent = "Cliquez d'abord sur « Me localiser »";
-      return;
-    }
-    const { lat, lon } = lastOfflinePoint;
-    escapeGamesBtn.disabled = true;
-    escapeGamesStatusEl.textContent = 'Recherche…';
+  setupNearbyOverpassFeature({
+    btn: escapeGamesBtn,
+    statusEl: escapeGamesStatusEl,
+    tableBody: escapeGamesTableBody,
+    map: escapeGamesMap,
+    color: '#8B5CF6',
+    radiusM: 20000,
+    maxResults: 10,
+    defaultName: 'Escape game',
+    emptyLabel: 'Aucun escape game trouvé',
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["leisure"="escape_game"](around:${r},${lat},${lon});way["leisure"="escape_game"](around:${r},${lat},${lon}););out center 200;`
+  });
 
-    if (escapeGamesGpsMarker) { escapeGamesMap.removeLayer(escapeGamesGpsMarker); }
-    escapeGamesGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(escapeGamesMap);
+  setupNearbyOverpassFeature({
+    btn: poolsBtn,
+    statusEl: poolsStatusEl,
+    tableBody: poolsTableBody,
+    map: poolsMap,
+    color: '#22A6D9',
+    radiusM: 20000,
+    maxResults: 10,
+    defaultName: 'Piscine',
+    emptyLabel: 'Aucune piscine trouvée',
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["leisure"="sports_centre"]["sport"~"swimming"](around:${r},${lat},${lon});way["leisure"="sports_centre"]["sport"~"swimming"](around:${r},${lat},${lon}););out center 200;`
+  });
 
-    try {
-      const query = `[out:json][timeout:20];(node["leisure"="escape_game"](around:${ESCAPE_GAMES_RADIUS_M},${lat},${lon});way["leisure"="escape_game"](around:${ESCAPE_GAMES_RADIUS_M},${lat},${lon}););out center 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
+  setupNearbyOverpassFeature({
+    btn: climbingSitesBtn,
+    statusEl: climbingSitesStatusEl,
+    tableBody: climbingSitesTableBody,
+    map: climbingSitesMap,
+    color: '#8D6E52',
+    radiusM: 50000,
+    maxResults: 10,
+    defaultName: "Site d'escalade",
+    emptyLabel: "Aucun site d'escalade trouvé",
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["climbing"="crag"](around:${r},${lat},${lon});way["climbing"="crag"](around:${r},${lat},${lon}););out center 200;`
+  });
 
-      const items = (data.elements || [])
-        .map((el) => {
-          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
-          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
-          if (elat == null || elon == null) return null;
-          const name = (el.tags && el.tags.name) || 'Escape game';
-          return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon) };
-        })
-        .filter(Boolean)
-        .sort((a, b) => a.distM - b.distM)
-        .slice(0, ESCAPE_GAMES_MAX_RESULTS);
-
-      clearEscapeGamesMarkers();
-      const bounds = [[lat, lon]];
-
-      if (items.length === 0) {
-        escapeGamesTableBody.innerHTML = `<tr><td colspan="2" class="dim">Aucun escape game trouvé dans un rayon de ${ESCAPE_GAMES_RADIUS_M / 1000} km</td></tr>`;
-      } else {
-        escapeGamesTableBody.innerHTML = items.map((it) => `
-          <tr>
-            <td>${it.name}</td>
-            <td>${fmtDistanceM(it.distM)}</td>
-          </tr>
-        `).join('');
-        for (const it of items) {
-          const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: ESCAPE_GAMES_COLOR, weight: 2, fillColor: ESCAPE_GAMES_COLOR, fillOpacity: 0.6 })
-            .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)}`)
-            .addTo(escapeGamesMap);
-          escapeGamesMarkers.push(marker);
-          bounds.push([it.lat, it.lon]);
-        }
-      }
-      escapeGamesStatusEl.textContent = `${items.length} résultat(s) · rayon ${ESCAPE_GAMES_RADIUS_M / 1000} km`;
-      escapeGamesMap.fitBounds(bounds, { padding: [24, 24] });
-    } catch (e) {
-      escapeGamesStatusEl.textContent = 'Service Overpass indisponible';
-      escapeGamesTableBody.innerHTML = '<tr><td colspan="2" class="dim">Recherche impossible pour le moment</td></tr>';
-    } finally {
-      escapeGamesBtn.disabled = false;
-    }
+  setupNearbyOverpassFeature({
+    btn: climbingGymsBtn,
+    statusEl: climbingGymsStatusEl,
+    tableBody: climbingGymsTableBody,
+    map: climbingGymsMap,
+    color: '#F2994A',
+    radiusM: 20000,
+    maxResults: 10,
+    defaultName: "Salle d'escalade",
+    emptyLabel: "Aucune salle d'escalade trouvée",
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon});way["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon}););out center 200;`
   });
 
   async function loadOfflineGeoData() {

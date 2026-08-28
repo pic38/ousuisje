@@ -110,7 +110,7 @@
   </details>
 
   <details class="feature">
-    <summary class="feature-summary"><span>Antennes relais ANFR</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Antennes relais (2G, 3G, 4G, 5G)</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <div class="addr-panel">
         <div class="addr-head">
@@ -457,7 +457,10 @@
         return;
       }
       radarLayers = radarFrames.map((frame) =>
-        L.tileLayer(frameTileUrl(frame), { opacity: 0, zIndex: 400, maxZoom: 19 }).addTo(map)
+        // RainViewer ne fournit des tuiles radar qu'jusqu'au niveau 7 (résolution native
+        // du radar) : maxNativeZoom fait réutiliser (agrandies) les tuiles du niveau 7
+        // au-delà, au lieu de demander des tuiles inexistantes ("zoom level not supported").
+        L.tileLayer(frameTileUrl(frame), { opacity: 0, zIndex: 400, maxZoom: 19, maxNativeZoom: 7 }).addTo(map)
       );
       showFrame(radarLayers.length - 1); // démarre sur le relevé le plus récent
     } catch (e) {

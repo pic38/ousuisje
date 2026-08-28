@@ -17,6 +17,10 @@
 <button id="settingsBtn" class="settings-btn" aria-label="Réglages" aria-expanded="false" aria-haspopup="true">⚙</button>
 <div id="settingsPanel" class="settings-panel is-hidden">
   <div class="settings-panel-title">Sections affichées</div>
+  <div class="settings-bulk">
+    <button id="settingsCheckAll" type="button" class="settings-bulk-btn">Tout cocher</button>
+    <button id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
+  </div>
   <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de précipitations</span></label>
   <label class="settings-check"><input type="checkbox" data-section="offline-geo" checked><span>Département et commune hors ligne</span></label>
   <label class="settings-check"><input type="checkbox" data-section="antennas" checked><span>Antennes relais (2G, 3G, 4G, 5G)</span></label>
@@ -380,6 +384,15 @@
     });
   });
 
+  function setAllSectionsVisibility(visible) {
+    const prefs = loadVisibilityPrefs();
+    sectionCheckboxes.forEach((cb) => { prefs[cb.dataset.section] = visible; });
+    localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+    applySectionVisibility();
+  }
+  $('settingsCheckAll').addEventListener('click', () => setAllSectionsVisibility(true));
+  $('settingsUncheckAll').addEventListener('click', () => setAllSectionsVisibility(false));
+
   settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const willOpen = settingsPanel.classList.contains('is-hidden');
@@ -400,10 +413,36 @@
     statusText.textContent = label;
   }
 
+  // Bouton de recentrage sur la position GPS, sous les contrôles de zoom — sur
+  // toutes les cartes de la page, réutilise la dernière position connue
+  // (lastOfflinePoint, alimentée par « Me localiser »).
+  function addRecenterControl(targetMap) {
+    const RecenterControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control recenter-control');
+        const link = L.DomUtil.create('a', 'recenter-control-btn', container);
+        link.href = '#';
+        link.title = 'Recentrer sur ma position GPS';
+        link.innerHTML = '⌖';
+        L.DomEvent.on(link, 'click', L.DomEvent.stopPropagation)
+          .on(link, 'click', L.DomEvent.preventDefault)
+          .on(link, 'click', () => {
+            if (lastOfflinePoint) {
+              targetMap.setView([lastOfflinePoint.lat, lastOfflinePoint.lon], Math.max(targetMap.getZoom(), 15));
+            }
+          });
+        return container;
+      }
+    });
+    targetMap.addControl(new RecenterControl());
+  }
+
   // --- Carte OSM (Leaflet), vue par défaut : France entière ---
   const map = L.map('map', { zoomControl: true, attributionControl: false });
   map.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  addRecenterControl(map);
 
   const gpsMarkerIcon = L.divIcon({
     className: 'gps-marker',
@@ -416,6 +455,7 @@
   const offlineMap = L.map('offlineMap', { zoomControl: true, attributionControl: false });
   offlineMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(offlineMap);
+  addRecenterControl(offlineMap);
   let offlineDeptLayer = null;
   let offlineCommuneLayer = null;
   let offlineGpsMarker = null;
@@ -424,6 +464,7 @@
   const antennaMap = L.map('antennaMap', { zoomControl: true, attributionControl: false });
   antennaMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(antennaMap);
+  addRecenterControl(antennaMap);
   let antennaGpsMarker = null;
   let antennaMarkers = [];
 
@@ -432,6 +473,7 @@
     const m = L.map(id, { zoomControl: true, attributionControl: false });
     m.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
+    addRecenterControl(m);
     return m;
   }
   const escapeGamesMap = initNearbyMap('escapeGamesMap');
@@ -843,6 +885,12 @@
     return d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km';
   }
 
+  // Lien "Y aller" inséré dans les popups de points : ouvre la navigation vers ce point
+  // dans l'app de cartes du téléphone (Google Maps sur Android, ou son site sur iOS/desktop).
+  function gotoLinkHtml(lat, lon) {
+    return `<a class="popup-goto" href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank" rel="noopener">Y aller →</a>`;
+  }
+
   // Recherche linéaire (approximation plane, cohérente avec le reste de la page) :
   // ~90 000 sites, largement assez rapide pour tourner à chaque localisation.
   function findNearbyAntennas(lat, lon, radiusM, maxResults) {
@@ -891,7 +939,7 @@
       for (const r of results) {
         const color = operatorColor(r.op);
         const marker = L.circleMarker([r.lat, r.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-          .bindPopup(`<strong>${r.op}</strong><br>${r.gens.join(', ')}<br>${fmtDistanceM(r.distM)}`)
+          .bindPopup(`<strong>${r.op}</strong><br>${r.gens.join(', ')}<br>${fmtDistanceM(r.distM)}<br>${gotoLinkHtml(r.lat, r.lon)}`)
           .addTo(antennaMap);
         antennaMarkers.push(marker);
         bounds.push([r.lat, r.lon]);
@@ -992,7 +1040,7 @@
           `).join('');
           for (const it of items) {
             const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)}`)
+              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)}<br>${gotoLinkHtml(it.lat, it.lon)}`)
               .addTo(map);
             markers.push(marker);
             bounds.push([it.lat, it.lon]);

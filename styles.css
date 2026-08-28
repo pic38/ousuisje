@@ -114,6 +114,24 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
   color: var(--muted);
   margin-bottom: 6px;
 }
+.settings-bulk {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.settings-bulk-btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--teal);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.settings-bulk-btn:hover { background: var(--bg); }
 .settings-check {
   display: flex;
   align-items: center;
@@ -297,6 +315,18 @@ h1 {
   text-decoration: none;
 }
 .recenter-control-btn:hover { background: #f4f4f4; }
+.leaflet-popup-content a.popup-goto {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 5px 10px;
+  background: var(--teal);
+  color: #06201C;
+  font-weight: 600;
+  font-size: 12.5px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.leaflet-popup-content a.popup-goto:hover { background: #6fe0d4; }
 
 /* --- Data grid --- */
 .grid {

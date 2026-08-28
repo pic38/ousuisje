@@ -69,6 +69,67 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
   border-bottom-left-radius: 14px;
   border-bottom-right-radius: 14px;
 }
+
+/* --- Réglages (choix des sections affichées) --- */
+.settings-btn {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: 12px;
+  z-index: 500;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 19px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.settings-btn:hover { background: var(--surface-2); }
+.settings-panel {
+  position: fixed;
+  top: calc(max(12px, env(safe-area-inset-top)) + 48px);
+  right: 12px;
+  z-index: 500;
+  width: min(290px, calc(100vw - 24px));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+}
+.settings-panel.is-hidden { display: none; }
+.settings-panel-title {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 2px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.settings-check input[type="checkbox"] {
+  accent-color: var(--teal);
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
 .eyebrow {
   font-family: var(--mono);
   font-size: 11px;

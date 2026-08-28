@@ -14,6 +14,18 @@
 </head>
 <body>
 
+<button id="settingsBtn" class="settings-btn" aria-label="Réglages" aria-expanded="false" aria-haspopup="true">⚙</button>
+<div id="settingsPanel" class="settings-panel is-hidden">
+  <div class="settings-panel-title">Sections affichées</div>
+  <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de précipitations</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="offline-geo" checked><span>Département et commune hors ligne</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="antennas" checked><span>Antennes relais (2G, 3G, 4G, 5G)</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="pools" checked><span>Piscines à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="climbing-sites" checked><span>Sites d'escalade à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade à proximité</span></label>
+</div>
+
 <div class="wrap">
   <header>
     <div class="eyebrow">OuSuisJe · bêta</div>
@@ -27,7 +39,7 @@
     <span id="statusText">En attente</span>
   </div>
 
-  <details class="feature">
+  <details class="feature" data-section="radar">
     <summary class="feature-summary"><span>Radar de précipitations</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <div class="map-wrap">
@@ -57,7 +69,7 @@
     </div>
   </details>
 
-  <details class="feature">
+  <details class="feature" data-section="offline-geo">
     <summary class="feature-summary"><span>Département et commune hors ligne</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <div class="addr-panel">
@@ -109,7 +121,7 @@
     </div>
   </details>
 
-  <details class="feature">
+  <details class="feature" data-section="antennas">
     <summary class="feature-summary"><span>Antennes relais (2G, 3G, 4G, 5G)</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <div class="addr-panel">
@@ -159,7 +171,7 @@
     </div>
   </details>
 
-  <details class="feature">
+  <details class="feature" data-section="escape-games">
     <summary class="feature-summary"><span>Escape games à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <button id="escapeGamesBtn" class="btn-secondary">Chercher les escape games à proximité</button>
@@ -189,7 +201,7 @@
     </div>
   </details>
 
-  <details class="feature">
+  <details class="feature" data-section="pools">
     <summary class="feature-summary"><span>Piscines à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <button id="poolsBtn" class="btn-secondary">Chercher les piscines à proximité</button>
@@ -219,7 +231,7 @@
     </div>
   </details>
 
-  <details class="feature">
+  <details class="feature" data-section="climbing-sites">
     <summary class="feature-summary"><span>Sites d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <button id="climbingSitesBtn" class="btn-secondary">Chercher les sites d'escalade à proximité</button>
@@ -249,7 +261,7 @@
     </div>
   </details>
 
-  <details class="feature">
+  <details class="feature" data-section="climbing-gyms">
     <summary class="feature-summary"><span>Salles d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <button id="climbingGymsBtn" class="btn-secondary">Chercher les salles d'escalade à proximité</button>
@@ -319,6 +331,69 @@
   const climbingGymsBtn = $('climbingGymsBtn');
   const climbingGymsStatusEl = $('climbingGymsStatus');
   const climbingGymsTableBody = $('climbingGymsTableBody');
+
+  // --- Sections dépliables : une seule ouverte à la fois, alignée en haut de l'écran ---
+  const featureSections = Array.from(document.querySelectorAll('details.feature'));
+  featureSections.forEach((section) => {
+    section.addEventListener('toggle', () => {
+      if (!section.open) return;
+      featureSections.forEach((other) => {
+        if (other !== section) other.open = false;
+      });
+      const top = section.getBoundingClientRect().top + window.scrollY - 8;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+
+  // --- Réglages : sections affichées, personnalisable et mémorisé ---
+  const SECTION_VISIBILITY_KEY = 'ousuisje_beta_visible_sections';
+  const settingsBtn = $('settingsBtn');
+  const settingsPanel = $('settingsPanel');
+  const sectionCheckboxes = Array.from(settingsPanel.querySelectorAll('input[type="checkbox"]'));
+
+  function loadVisibilityPrefs() {
+    try {
+      const raw = localStorage.getItem(SECTION_VISIBILITY_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function applySectionVisibility() {
+    const prefs = loadVisibilityPrefs();
+    featureSections.forEach((section) => {
+      const visible = prefs[section.dataset.section] !== false; // visible par défaut
+      section.style.display = visible ? '' : 'none';
+    });
+    sectionCheckboxes.forEach((cb) => {
+      cb.checked = prefs[cb.dataset.section] !== false;
+    });
+  }
+
+  sectionCheckboxes.forEach((cb) => {
+    cb.addEventListener('change', () => {
+      const prefs = loadVisibilityPrefs();
+      prefs[cb.dataset.section] = cb.checked;
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+      applySectionVisibility();
+    });
+  });
+
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = settingsPanel.classList.contains('is-hidden');
+    settingsPanel.classList.toggle('is-hidden', !willOpen);
+    settingsBtn.setAttribute('aria-expanded', String(willOpen));
+  });
+  document.addEventListener('click', (e) => {
+    if (settingsPanel.classList.contains('is-hidden')) return;
+    if (settingsPanel.contains(e.target) || e.target === settingsBtn) return;
+    settingsPanel.classList.add('is-hidden');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  applySectionVisibility();
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');

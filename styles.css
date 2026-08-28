@@ -343,9 +343,9 @@ h1 {
   border-collapse: collapse;
   font-size: 13px;
 }
-.contours-table col.col-version { width: 30%; }
-.contours-table col.col-status { width: 38%; }
-.contours-table col.col-action { width: 32%; }
+.contours-table col.col-version { width: 42%; }
+.contours-table col.col-status { width: 34%; }
+.contours-table col.col-action { width: 24%; }
 .contours-table thead th {
   text-align: left;
   padding: 10px 16px;

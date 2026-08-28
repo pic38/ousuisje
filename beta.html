@@ -99,6 +99,51 @@
     Les deux versions viennent du même tracé source (IGN Admin Express), simplifié différemment pour réduire la taille du fichier (projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>). La <strong>version simplifiée</strong> ne garde qu'environ 5% des points du tracé d'origine : les grandes lignes sont fidèles, mais les détails fins (petites presqu'îles, méandres serrés) peuvent être coupés, avec une erreur possible sur une bande de quelques dizaines de mètres près de ces zones. La <strong>pleine précision</strong> garde environ 25% des points et colle au tracé réel à environ 1 mètre près partout, pour un téléchargement ~2,4x plus lourd. Une fois téléchargée, une version remplace l'estimation par proximité par le vrai contour de la commune, y compris hors connexion — jusqu'à la prochaine mise à jour de l'app, qui vide le cache et redemande un téléchargement.
   </p>
 
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Antennes relais ANFR (hors ligne, sur demande)</span>
+      <span id="antennasDlStatus" class="dim">Non téléchargées</span>
+    </div>
+    <table class="contours-table">
+      <colgroup>
+        <col class="col-version"><col class="col-status"><col class="col-action">
+      </colgroup>
+      <thead>
+        <tr><th>Jeu de données</th><th>Statut</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sites ANFR (4 opérateurs)</td>
+          <td id="antennasRowStatus" class="dim">Non téléchargées</td>
+          <td><button id="downloadAntennas" class="btn-secondary">Télécharger (~1,3 Mo)</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). L'API officielle n'étant pas interrogeable directement depuis un navigateur, ce fichier est un instantané figé (127 000 sites, capturé le 28/08/2026 — ANFR met à jour sa base chaque semaine) préparé à l'avance plutôt qu'une requête en direct — les nouveaux sites ou désaffectations récents peuvent manquer.</p>
+
+  <div class="addr-panel">
+    <div class="addr-head">
+      <span>Antennes à proximité</span>
+      <span id="antennasSearchStatus">—</span>
+    </div>
+    <table id="antennasTable" class="poi-table">
+      <thead>
+        <tr><th>Opérateur</th><th>Générations</th><th>Distance</th></tr>
+      </thead>
+      <tbody id="antennasTableBody">
+        <tr><td colspan="3" class="dim">Téléchargez les données puis cliquez sur « Me localiser »</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="map-wrap">
+    <div id="antennaMap"></div>
+    <div class="map-footer">
+      <span class="map-hint"><span style="color:#FF7900;">●</span> Orange <span style="color:#E2001A;">●</span> SFR <span style="color:#0055A4;">●</span> Bouygues Telecom <span style="color:#CD0067;">●</span> Free Mobile</span>
+    </div>
+  </div>
+
   <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
 </div>
 
@@ -122,6 +167,11 @@
   const downloadPreciseBtn = $('downloadPrecise');
   const tierButtons = { simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
   const tierStatusEls = { simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
+  const antennasDlStatusEl = $('antennasDlStatus');
+  const antennasRowStatusEl = $('antennasRowStatus');
+  const downloadAntennasBtn = $('downloadAntennas');
+  const antennasSearchStatusEl = $('antennasSearchStatus');
+  const antennasTableBody = $('antennasTableBody');
 
   function setStatus(state, label) {
     statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
@@ -148,6 +198,13 @@
   let offlineCommuneLayer = null;
   let offlineGpsMarker = null;
 
+  // --- Carte des antennes relais ANFR (Leaflet séparée) ---
+  const antennaMap = L.map('antennaMap', { zoomControl: true, attributionControl: false });
+  antennaMap.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(antennaMap);
+  let antennaGpsMarker = null;
+  let antennaMarkers = [];
+
   // --- Géolocalisation simple (ponctuelle, pas de suivi continu sur cette page) ---
   locateBtn.addEventListener('click', () => {
     if (!('geolocation' in navigator)) {
@@ -170,6 +227,7 @@
         setStatus('live', 'Position trouvée');
         locateBtn.disabled = false;
         updateOfflineGeo(latitude, longitude);
+        updateAntennasNearby(latitude, longitude);
       },
       (err) => {
         let msg = 'Erreur de localisation';
@@ -502,6 +560,146 @@
   // (servie depuis le cache du service worker si hors ligne).
   const savedActiveTier = localStorage.getItem(CONTOURS_ACTIVE_STORAGE_KEY);
   if (savedActiveTier && CONTOUR_TIERS[savedActiveTier]) downloadCommuneContours(savedActiveTier);
+
+  // --- Antennes relais ANFR (téléchargement optionnel, à la demande) ---
+  // Instantané pré-traité (voir data/anfr-antennas.min.csv) : l'API officielle de
+  // l'ANFR ne peut pas être interrogée en direct depuis un navigateur (pas de CORS),
+  // contrairement à Nominatim/Overpass déjà utilisés ailleurs sur le site.
+  const ANTENNAS_URL = 'data/anfr-antennas.min.csv';
+  const ANTENNAS_RAW_BYTES = 6071089;
+  const ANTENNAS_DOWNLOAD_SIZE_LABEL = '1,3 Mo';
+  const ANTENNAS_DOWNLOADED_STORAGE_KEY = 'ousuisje_anfr_antennas_downloaded';
+  const ANTENNA_RADIUS_M = 5000;
+  const ANTENNA_MAX_RESULTS = 40;
+  const OPERATOR_COLORS = {
+    'ORANGE': '#FF7900',
+    'SFR': '#E2001A',
+    'BOUYGUES TELECOM': '#0055A4',
+    'FREE MOBILE': '#CD0067'
+  };
+  const ANTENNA_DEFAULT_COLOR = '#8892A6';
+
+  let antennaSites = null; // [{ id, lat, lon, op, gens:[...] }, ...] — un opérateur par site (pas de mât partagé dans ce jeu de données)
+  let antennasLoading = false;
+
+  function parseAntennasCsv(text) {
+    const out = [];
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      const parts = line.split(';');
+      const lat = parseFloat(parts[1]);
+      const lon = parseFloat(parts[2]);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
+      out.push({
+        id: parts[0],
+        lat: lat,
+        lon: lon,
+        op: parts[3] || '',
+        gens: parts[4] ? parts[4].split(',') : []
+      });
+    }
+    return out;
+  }
+
+  function operatorColor(op) {
+    return OPERATOR_COLORS[op] || ANTENNA_DEFAULT_COLOR;
+  }
+
+  function fmtDistanceM(d) {
+    return d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km';
+  }
+
+  // Recherche linéaire (approximation plane, cohérente avec le reste de la page) :
+  // ~90 000 sites, largement assez rapide pour tourner à chaque localisation.
+  function findNearbyAntennas(lat, lon, radiusM, maxResults) {
+    if (!antennaSites) return [];
+    const coslat = Math.cos(lat * Math.PI / 180);
+    const results = [];
+    for (const s of antennaSites) {
+      const dLat = s.lat - lat;
+      const dLon = (s.lon - lon) * coslat;
+      const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320; // 1° de latitude ≈ 111,32 km
+      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, op: s.op, gens: s.gens, distM: distM });
+    }
+    results.sort((a, b) => a.distM - b.distM);
+    return results.slice(0, maxResults);
+  }
+
+  function clearAntennaMarkers() {
+    antennaMarkers.forEach((m) => antennaMap.removeLayer(m));
+    antennaMarkers = [];
+  }
+
+  function updateAntennasNearby(lat, lon) {
+    if (antennaGpsMarker) { antennaMap.removeLayer(antennaGpsMarker); }
+    antennaGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(antennaMap);
+
+    if (!antennaSites) {
+      antennasSearchStatusEl.textContent = 'Téléchargez les données ci-dessus';
+      antennaMap.setView([lat, lon], 12);
+      return;
+    }
+
+    const results = findNearbyAntennas(lat, lon, ANTENNA_RADIUS_M, ANTENNA_MAX_RESULTS);
+    clearAntennaMarkers();
+    const bounds = [[lat, lon]];
+
+    if (results.length === 0) {
+      antennasTableBody.innerHTML = `<tr><td colspan="3" class="dim">Aucune antenne dans un rayon de ${ANTENNA_RADIUS_M / 1000} km</td></tr>`;
+    } else {
+      antennasTableBody.innerHTML = results.map((r) => `
+        <tr>
+          <td style="color:${operatorColor(r.op)};">${r.op}</td>
+          <td>${r.gens.join(', ')}</td>
+          <td>${fmtDistanceM(r.distM)}</td>
+        </tr>
+      `).join('');
+      for (const r of results) {
+        const color = operatorColor(r.op);
+        const marker = L.circleMarker([r.lat, r.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
+          .bindPopup(`<strong>${r.op}</strong><br>${r.gens.join(', ')}<br>${fmtDistanceM(r.distM)}`)
+          .addTo(antennaMap);
+        antennaMarkers.push(marker);
+        bounds.push([r.lat, r.lon]);
+      }
+    }
+    antennasSearchStatusEl.textContent = `Autour de : position GPS · ${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
+    antennaMap.fitBounds(bounds, { padding: [24, 24] });
+  }
+
+  async function downloadAntennas() {
+    if (antennasLoading) return;
+    const alreadyDownloaded = localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1';
+    antennasLoading = true;
+    downloadAntennasBtn.disabled = true;
+    antennasRowStatusEl.classList.remove('dim');
+    antennasRowStatusEl.textContent = alreadyDownloaded ? 'Chargement…' : 'Téléchargement… 0%';
+    try {
+      const text = await fetchTextWithProgress(ANTENNAS_URL, ANTENNAS_RAW_BYTES, (frac) => {
+        if (alreadyDownloaded) return;
+        const pct = Math.round(frac * 100);
+        antennasRowStatusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
+      });
+      antennasRowStatusEl.textContent = 'Analyse du fichier…';
+      antennaSites = parseAntennasCsv(text);
+      localStorage.setItem(ANTENNAS_DOWNLOADED_STORAGE_KEY, '1');
+      downloadAntennasBtn.textContent = 'Téléchargées';
+      antennasRowStatusEl.textContent = 'Téléchargées';
+      antennasDlStatusEl.textContent = 'Téléchargées';
+      antennasDlStatusEl.classList.remove('dim');
+      if (lastOfflinePoint) updateAntennasNearby(lastOfflinePoint.lat, lastOfflinePoint.lon);
+    } catch (e) {
+      antennasRowStatusEl.textContent = 'Échec du téléchargement';
+    } finally {
+      antennasLoading = false;
+      downloadAntennasBtn.disabled = !!antennaSites;
+    }
+  }
+
+  downloadAntennasBtn.textContent = `Télécharger (${ANTENNAS_DOWNLOAD_SIZE_LABEL})`;
+  downloadAntennasBtn.addEventListener('click', downloadAntennas);
+  if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
   async function loadOfflineGeoData() {
     if (offlineDataPromise) return offlineDataPromise;

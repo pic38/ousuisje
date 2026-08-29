@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Bêta — OuSuisJe</title>
+<meta name="theme-color" content="#0B1220" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<button id="settingsBtn" class="settings-btn" aria-label="Réglages" aria-expanded="false" aria-haspopup="true">⚙</button>
+<div id="settingsPanel" class="settings-panel is-hidden">
+  <div class="settings-panel-title">Sections affichées</div>
+  <div class="settings-bulk">
+    <button id="settingsResetDefault" type="button" class="settings-bulk-btn">Affichage par défaut</button>
+  </div>
+  <div class="settings-bulk">
+    <button id="settingsCheckAll" type="button" class="settings-bulk-btn">Tout cocher</button>
+    <button id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
+  </div>
+  <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte IGN</span></label>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">OuSuisJe · bêta</div>
+    <h1>Altitude depuis carte IGN</h1>
+  </header>
+
+  <button id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
+
+  <div class="status-line">
+    <span id="statusDot" class="dot"></span>
+    <span id="statusText">En attente</span>
+  </div>
+
+  <div class="grid">
+    <div class="cell">
+      <div class="label">Précision horizontale</div>
+      <div id="accVal" class="value dim">—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Altitude GPS</div>
+      <div id="altVal" class="value dim">—</div>
+    </div>
+  </div>
+  <p id="accuracyWarning" class="accuracy-warning" style="display:none;"></p>
+
+  <details class="feature" data-section="altitude" open>
+    <summary class="feature-summary"><span>Altitude depuis carte IGN</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button id="altCompareBtn" class="btn-secondary">Altitude IGN (plus précis, France uniquement)</button>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Comparaison d'altitude — IGN</span>
+          <span id="altCompareStatus">—</span>
+        </div>
+        <div class="addr-row"><span class="k">Altitude GPS</span><span id="altGpsVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude IGN (RGE ALTI)</span><span id="altIgnVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart</span><span id="altDiffVal" class="v dim">—</span></div>
+      </div>
+      <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
+
+      <button id="oeCompareBtn" class="btn-secondary">Altitude Open-Elevation (moins précis, Monde entier)</button>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Comparaison d'altitude — Open-Elevation</span>
+          <span id="oeCompareStatus">—</span>
+        </div>
+        <div class="addr-row"><span class="k">Altitude GPS</span><span id="oeGpsVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude Open-Elevation</span><span id="oeVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart</span><span id="oeDiffVal" class="v dim">—</span></div>
+      </div>
+      <p class="osm-credit">Altitude : service public <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (données SRTM)</p>
+    </div>
+  </details>
+
+  <footer>
+    <div class="footer-nav">
+      <a href="index.html">Accueil</a>
+      <a href="about.html">À propos</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+    </div>
+  </footer>
+
+  <div class="actions">
+    <button id="installBtn" class="btn-secondary">Ajouter à l'écran d'accueil</button>
+    <p id="installNote" class="install-note"></p>
+    <button id="shareBtn" class="btn-secondary">Partager OuSuisJe</button>
+    <p id="shareNote" class="install-note"></p>
+  </div>
+
+  <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  // --- Références DOM ---
+  const statusDot = $('statusDot');
+  const statusText = $('statusText');
+  const accVal = $('accVal');
+  const altVal = $('altVal');
+  const accuracyWarning = $('accuracyWarning');
+  const locateBtn = $('locateBtn');
+
+  const altCompareBtn = $('altCompareBtn');
+  const altCompareStatus = $('altCompareStatus');
+  const altGpsVal = $('altGpsVal');
+  const altIgnVal = $('altIgnVal');
+  const altDiffVal = $('altDiffVal');
+
+  const oeCompareBtn = $('oeCompareBtn');
+  const oeCompareStatus = $('oeCompareStatus');
+  const oeGpsVal = $('oeGpsVal');
+  const oeVal = $('oeVal');
+  const oeDiffVal = $('oeDiffVal');
+
+  // --- Sections dépliables : une seule ouverte à la fois, alignée en bas de l'écran ---
+  const featureSections = [];
+  function wireAccordionSection(section) {
+    featureSections.push(section);
+    section.addEventListener('toggle', () => {
+      if (!section.open) return;
+      featureSections.forEach((other) => {
+        if (other !== section) other.open = false;
+      });
+      const bottom = section.getBoundingClientRect().bottom + window.scrollY + 8;
+      const top = bottom - window.innerHeight;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  }
+  Array.from(document.querySelectorAll('details.feature')).forEach(wireAccordionSection);
+
+  // --- Réglages : sections affichées, personnalisable et mémorisé ---
+  const SECTION_VISIBILITY_KEY = 'ousuisje_beta_visible_sections';
+  const DEFAULT_HIDDEN_SECTIONS = new Set(); // aucune section masquée par défaut (une seule section sur cette page)
+  const settingsBtn = $('settingsBtn');
+  const settingsPanel = $('settingsPanel');
+  const sectionCheckboxes = [];
+  function wireVisibilityCheckbox(cb) {
+    sectionCheckboxes.push(cb);
+    cb.addEventListener('change', () => {
+      const prefs = loadVisibilityPrefs();
+      prefs[cb.dataset.section] = cb.checked;
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+      applySectionVisibility();
+    });
+  }
+
+  function defaultSectionVisible(id) {
+    return !DEFAULT_HIDDEN_SECTIONS.has(id);
+  }
+
+  function loadVisibilityPrefs() {
+    try {
+      const raw = localStorage.getItem(SECTION_VISIBILITY_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function isSectionVisible(id, prefs) {
+    const stored = prefs[id];
+    return stored !== undefined ? stored : defaultSectionVisible(id);
+  }
+
+  function applySectionVisibility() {
+    const prefs = loadVisibilityPrefs();
+    featureSections.forEach((section) => {
+      section.style.display = isSectionVisible(section.dataset.section, prefs) ? '' : 'none';
+    });
+    sectionCheckboxes.forEach((cb) => {
+      cb.checked = isSectionVisible(cb.dataset.section, prefs);
+    });
+  }
+
+  Array.from(settingsPanel.querySelectorAll('input[type="checkbox"]')).forEach(wireVisibilityCheckbox);
+
+  function setAllSectionsVisibility(visible) {
+    const prefs = loadVisibilityPrefs();
+    sectionCheckboxes.forEach((cb) => { prefs[cb.dataset.section] = visible; });
+    localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+    applySectionVisibility();
+  }
+  $('settingsCheckAll').addEventListener('click', () => setAllSectionsVisibility(true));
+  $('settingsUncheckAll').addEventListener('click', () => setAllSectionsVisibility(false));
+
+  $('settingsResetDefault').addEventListener('click', () => {
+    localStorage.removeItem(SECTION_VISIBILITY_KEY);
+    applySectionVisibility();
+  });
+
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = settingsPanel.classList.contains('is-hidden');
+    settingsPanel.classList.toggle('is-hidden', !willOpen);
+    settingsBtn.setAttribute('aria-expanded', String(willOpen));
+  });
+  document.addEventListener('click', (e) => {
+    if (settingsPanel.classList.contains('is-hidden')) return;
+    if (settingsPanel.contains(e.target) || e.target === settingsBtn) return;
+    settingsPanel.classList.add('is-hidden');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  applySectionVisibility();
+
+  // --- Position de référence : uniquement le GPS sur cette page (pas de carte) ---
+  let lastPos = null;
+  let watchId = null;
+  let restartTimerId = null;
+  const isFirefox = /firefox/i.test(navigator.userAgent);
+  const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
+
+  function getSourceLabel() {
+    return lastPos ? 'Position GPS' : 'point sélectionné';
+  }
+
+  function getReferencePoint() {
+    if (lastPos) return { lat: lastPos.coords.latitude, lon: lastPos.coords.longitude, source: 'gps' };
+    return null;
+  }
+
+  function setStatus(state, label) {
+    statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
+    statusText.textContent = label;
+  }
+
+  function isTrackingActive() { return watchId != null; }
+
+  function updateUI(pos) {
+    lastPos = pos;
+    const { accuracy, altitude } = pos.coords;
+
+    accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
+    accVal.classList.remove('dim');
+
+    if (accuracy != null && accuracy >= 50) {
+      accuracyWarning.textContent = `Précision faible (${Math.round(accuracy)} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil).`;
+      accuracyWarning.style.display = 'block';
+    } else {
+      accuracyWarning.style.display = 'none';
+    }
+    altVal.textContent = altitude != null ? Math.round(altitude) + ' m' : 'Non fournie';
+    altVal.classList.toggle('dim', altitude == null);
+
+    setStatus('live', 'Localisation GPS active');
+  }
+
+  function handleError(err) {
+    let msg = 'Erreur de localisation';
+    if (err.code === err.PERMISSION_DENIED) msg = 'Localisation refusée';
+    else if (err.code === err.POSITION_UNAVAILABLE) msg = 'Position indisponible';
+    else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
+    setStatus('err', msg);
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
+    locateBtn.textContent = 'Activer la localisation GPS';
+    locateBtn.disabled = false;
+  }
+
+  function handleFix(pos) {
+    locateBtn.textContent = 'Désactiver la localisation GPS';
+    locateBtn.disabled = false;
+    updateUI(pos);
+  }
+
+  function handleFixError(err) {
+    if (err.code === err.PERMISSION_DENIED) { handleError(err); return; }
+    setStatus('err', err.code === err.TIMEOUT ? 'Délai dépassé, nouvelle tentative…' : 'Signal GPS perdu, nouvelle tentative…');
+  }
+
+  function beginWatch() {
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(handleFix, handleFixError, WATCH_OPTIONS);
+  }
+
+  function startWatch() {
+    if (!('geolocation' in navigator)) {
+      setStatus('err', 'Non pris en charge');
+      locateBtn.disabled = true;
+      locateBtn.textContent = 'Indisponible sur cet appareil';
+      return;
+    }
+    setStatus('idle', 'Recherche du signal…');
+    locateBtn.textContent = 'Recherche en cours…';
+    locateBtn.disabled = true;
+
+    beginWatch();
+
+    if (isFirefox) {
+      restartTimerId = setInterval(beginWatch, 20000);
+    }
+  }
+
+  function stopWatch() {
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
+    setStatus('idle', 'Localisation désactivée');
+    locateBtn.textContent = 'Activer la localisation GPS';
+    locateBtn.disabled = false;
+  }
+
+  locateBtn.addEventListener('click', () => { if (isTrackingActive()) stopWatch(); else startWatch(); });
+
+  // --- Sources d'altitude ---
+  async function fetchIGNAltitude(lat, lon) {
+    const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
+    const data = await res.json();
+    const raw = data && data.elevations ? data.elevations[0] : null;
+    const val = (raw != null && typeof raw === 'object') ? raw.z : raw;
+    return (val != null && val > -9999) ? val : null;
+  }
+
+  async function fetchOpenElevationAltitude(lat, lon) {
+    const res = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`);
+    const data = await res.json();
+    const val = data && data.results && data.results[0] ? data.results[0].elevation : null;
+    return val != null ? val : null;
+  }
+
+  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, sourceLabel, fetchFn) {
+    const point = getReferencePoint();
+    if (!point) {
+      statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    const { lat, lon } = point;
+    const pointColorClass = point.source === 'carte' ? 'v-teal' : 'v-amber';
+    statusEl.textContent = 'Recherche…';
+    try {
+      const elevation = await fetchFn(lat, lon);
+      const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude : null;
+
+      if (gpsAlt != null) {
+        gpsEl.textContent = Math.round(gpsAlt) + ' m';
+        gpsEl.classList.remove('dim');
+      } else {
+        gpsEl.textContent = 'Non fournie par le GPS';
+        gpsEl.classList.add('dim');
+      }
+      gpsEl.classList.remove('v-amber', 'v-teal');
+      gpsEl.classList.add('v-amber');
+
+      sourceEl.classList.remove('v-amber', 'v-teal');
+      if (elevation != null) {
+        sourceEl.textContent = Math.round(elevation) + ' m';
+        sourceEl.classList.remove('dim');
+        sourceEl.classList.add(pointColorClass);
+      } else {
+        sourceEl.textContent = 'Indisponible pour ce point';
+        sourceEl.classList.add('dim');
+      }
+
+      if (gpsAlt != null && elevation != null) {
+        const diff = gpsAlt - elevation;
+        diffEl.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+        diffEl.classList.remove('dim');
+      } else {
+        diffEl.textContent = '—';
+        diffEl.classList.add('dim');
+      }
+
+      statusEl.textContent = 'Point comparé : ' + getSourceLabel();
+    } catch (e) {
+      statusEl.textContent = 'Service ' + sourceLabel + ' indisponible';
+    }
+  }
+
+  altCompareBtn.addEventListener('click', () => runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude));
+  oeCompareBtn.addEventListener('click', () => runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude));
+
+  // --- Service worker, installation, partage ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+
+  const installBtn = $('installBtn');
+  const installNote = $('installNote');
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none';
+        installNote.textContent = 'Application installée ✓';
+      }
+      deferredPrompt = null;
+    } else if (isIOS) {
+      installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
+    } else {
+      installNote.textContent = 'Ouvrez le menu de votre navigateur et choisissez « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».';
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    installNote.textContent = 'Application installée ✓';
+  });
+
+  if (isStandalone) {
+    installBtn.style.display = 'none';
+    installNote.textContent = 'Application installée ✓';
+  } else if (isIOS) {
+    installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
+  }
+
+  const shareBtn = $('shareBtn');
+  const shareNote = $('shareNote');
+  shareBtn.addEventListener('click', async () => {
+    const shareData = {
+      title: 'OuSuisJe',
+      text: "OuSuisJe — retrouvez votre adresse, l'altitude et les points d'intérêt autour de vous.",
+      url: 'https://www.ousuisje.fun/'
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (e) {
+        // Partage annulé ou échoué : rien à faire.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+      shareNote.textContent = 'Lien copié ✓';
+      setTimeout(() => { shareNote.textContent = ''; }, 2500);
+    } catch (e) {
+      shareNote.textContent = shareData.url;
+    }
+  });
+})();
+</script>
+</body>
+</html>

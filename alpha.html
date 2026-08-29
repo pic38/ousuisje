@@ -45,8 +45,7 @@
 <div class="wrap">
   <header>
     <div class="eyebrow">OuSuisJe · alpha</div>
-    <h1>Toutes les fonctionnalités</h1>
-    <p class="sub">Fusion de la page principale et des fonctionnalités bêta, organisées en sections dépliables — susceptible de changer sans préavis.</p>
+    <h1>Trouvez l'adresse et plus encore !</h1>
   </header>
 
   <button id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
@@ -745,10 +744,44 @@
     statusText.textContent = label;
   }
 
-  // Contrôles de zoom + bouton de recentrage, groupés en bas à droite de chaque carte —
-  // recentre sur la dernière position GPS reçue (indépendant d'un éventuel point cliqué).
+  const FRANCE_BOUNDS = [[41.2, -5.3], [51.2, 9.7]];
+
+  // Bouton "maison" : revient à la vue par défaut de cette carte — les derniers résultats
+  // à proximité si elle en a (bounds mémorisées dans targetMap._homeView), sinon la France
+  // entière. Chaque fonctionnalité met à jour targetMap._homeView à chaque nouvelle recherche.
+  function addHomeControl(targetMap) {
+    const HomeControl = L.Control.extend({
+      options: { position: 'bottomright' },
+      onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control home-control');
+        const link = L.DomUtil.create('a', 'home-control-btn', container);
+        link.href = '#';
+        link.title = 'Revenir à la vue par défaut';
+        link.innerHTML = '⌂';
+        L.DomEvent.on(link, 'click', L.DomEvent.stopPropagation)
+          .on(link, 'click', L.DomEvent.preventDefault)
+          .on(link, 'click', () => {
+            const view = targetMap._homeView;
+            if (view && view.bounds) {
+              targetMap.fitBounds(view.bounds, { padding: [24, 24] });
+            } else if (view && view.center) {
+              targetMap.setView(view.center, view.zoom || 6);
+            } else {
+              targetMap.fitBounds(FRANCE_BOUNDS);
+            }
+          });
+        return container;
+      }
+    });
+    targetMap.addControl(new HomeControl());
+  }
+
+  // Contrôles de zoom + bouton maison + bouton de recentrage, groupés en bas à droite de
+  // chaque carte (dans cet ordre) — le recentrage utilise la dernière position GPS reçue
+  // (indépendant d'un éventuel point cliqué).
   function addRecenterControl(targetMap) {
     if (targetMap.zoomControl) targetMap.zoomControl.setPosition('bottomright');
+    addHomeControl(targetMap);
     const RecenterControl = L.Control.extend({
       options: { position: 'bottomright' },
       onAdd: function () {
@@ -772,7 +805,7 @@
 
   function initSecondaryMap(id) {
     const m = L.map(id, { zoomControl: true, attributionControl: false });
-    m.fitBounds([[41.2, -5.3], [51.2, 9.7]]);
+    m.fitBounds(FRANCE_BOUNDS);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
     addRecenterControl(m);
     return m;
@@ -780,7 +813,8 @@
 
   // --- Carte principale OSM (Leaflet), cliquable ---
   const map = L.map('map', { zoomControl: true, attributionControl: false });
-  map.fitBounds([[41.2, -5.3], [51.2, 9.7]]); // France entière par défaut
+  map.fitBounds(FRANCE_BOUNDS); // France entière par défaut
+  map._homeView = { bounds: FRANCE_BOUNDS };
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   addRecenterControl(map);
 
@@ -800,6 +834,7 @@
   let lastQueriedPoint = null; // { lat, lon, source: 'gps' | 'carte' } — dernière action explicite de l'utilisateur
   let lastClickPoint = null;
   let hasCenteredOnGps = false;
+  let hasCenteredRadarOnGps = false;
 
   function updateSourceBadge() {
     if (!lastQueriedPoint) {
@@ -857,6 +892,13 @@
     if (!hasCenteredOnGps) {
       map.setView(latlng, 15);
       hasCenteredOnGps = true;
+    }
+    // Centre aussi la carte radar sur la position GPS, une seule fois (zoom large : on veut
+    // voir la situation météo régionale, pas juste le point précis).
+    if (!hasCenteredRadarOnGps) {
+      radarMap.setView(latlng, 6);
+      radarMap._homeView = { center: latlng, zoom: 6 };
+      hasCenteredRadarOnGps = true;
     }
   }
 
@@ -1753,6 +1795,7 @@
       }
     }
     antennasSearchStatusEl.textContent = `Autour de : ${sourceLabel} · ${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
+    antennaMap._homeView = { bounds: bounds };
     antennaMap.fitBounds(bounds, { padding: [24, 24] });
   }
 
@@ -1854,6 +1897,7 @@
           }
         }
         statusEl.textContent = `Autour de : ${sourceLabel} · ${items.length} résultat(s) · rayon ${radiusM / 1000} km`;
+        map._homeView = { bounds: bounds };
         map.fitBounds(bounds, { padding: [24, 24] });
       } catch (e) {
         statusEl.textContent = 'Service Overpass indisponible';
@@ -2282,8 +2326,10 @@
       if (communeLayer) {
         offlineMap.fitBounds(communeLayer.getBounds(), { padding: [16, 16] });
         offlineMap.setZoom(Math.max(offlineMap.getZoom() - 1, 0));
+        offlineMap._homeView = { center: offlineMap.getCenter(), zoom: offlineMap.getZoom() };
       } else if (deptLayer) {
         offlineMap.fitBounds(deptLayer.getBounds(), { padding: [16, 16] });
+        offlineMap._homeView = { bounds: deptLayer.getBounds() };
       }
     } catch (e) {
       offlineGeoStatus.textContent = 'Données indisponibles';

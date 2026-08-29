@@ -346,8 +346,8 @@ h1 {
   transform: rotate(45deg);
 }
 .leaflet-container { cursor: crosshair; }
-.recenter-control { margin-top: 8px !important; }
-.recenter-control-btn {
+.recenter-control, .home-control { margin-top: 8px !important; }
+.recenter-control-btn, .home-control-btn {
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -356,7 +356,7 @@ h1 {
   color: #1A1206 !important;
   text-decoration: none;
 }
-.recenter-control-btn:hover { background: #f4f4f4; }
+.recenter-control-btn:hover, .home-control-btn:hover { background: #f4f4f4; }
 .operator-filter {
   display: flex;
   flex-wrap: wrap;

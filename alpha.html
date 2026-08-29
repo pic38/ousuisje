@@ -50,11 +50,6 @@
   </header>
 
   <button id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
-  <label class="keep-alive-toggle">
-    <input type="checkbox" id="keepAliveCheckbox" />
-    <span>Garder le GPS actif (désactive l'arrêt automatique)</span>
-  </label>
-  <div id="autoStopCountdown" class="countdown"></div>
 
   <div class="status-line">
     <span id="statusDot" class="dot"></span>
@@ -113,6 +108,11 @@
   <details class="feature" data-section="diag">
     <summary class="feature-summary"><span>Détails techniques GPS</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
+      <label class="keep-alive-toggle">
+        <input type="checkbox" id="keepAliveCheckbox" />
+        <span>Garder le GPS actif (désactive l'arrêt automatique)</span>
+      </label>
+      <div id="autoStopCountdown" class="countdown"></div>
       <div class="addr-panel">
         <div class="addr-row"><span class="k">Position GPS</span><span id="diagPosition" class="v dim placeholder">—</span></div>
         <div class="addr-row"><span class="k">Vitesse</span><span id="spdVal" class="v dim">—</span></div>
@@ -261,7 +261,7 @@
       <div class="map-wrap">
         <div id="antennaMap"></div>
         <div class="map-footer">
-          <span class="map-hint"><span style="color:#FF7900;">●</span> Orange <span style="color:#E2001A;">●</span> SFR <span style="color:#0055A4;">●</span> Bouygues Telecom <span style="color:#2FB344;">●</span> Free Mobile</span>
+          <span class="map-hint"><span style="color:#FF7900;">●</span> Orange <span style="color:#E2001A;">●</span> SFR <span style="color:#0055A4;">●</span> Bouygues Telecom <span style="color:#2FB344;">●</span> Free Mobile — la carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -278,10 +278,10 @@
         </div>
         <table id="antennasTable" class="poi-table">
           <thead>
-            <tr><th>Opérateur</th><th>Générations</th><th>Distance</th></tr>
+            <tr><th>Opérateur</th><th>Générations</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="antennasTableBody">
-            <tr><td colspan="3" class="dim">Téléchargez les données, puis activez la localisation ou cliquez sur la carte</td></tr>
+            <tr><td colspan="4" class="dim">Téléchargez les données, puis activez la localisation ou cliquez sur la carte</td></tr>
           </tbody>
         </table>
       </div>
@@ -296,7 +296,7 @@
       <div class="map-wrap">
         <div id="escapeGamesMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 escape games les plus proches de la position actuelle.</span>
+          <span class="map-hint">Les 10 escape games les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -307,10 +307,10 @@
         </div>
         <table id="escapeGamesTable" class="poi-table">
           <thead>
-            <tr><th>Nom</th><th>Distance</th></tr>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="escapeGamesTableBody">
-            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
           </tbody>
         </table>
       </div>
@@ -326,7 +326,7 @@
       <div class="map-wrap">
         <div id="poolsMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 piscines publiques les plus proches de la position actuelle.</span>
+          <span class="map-hint">Les 10 piscines publiques les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -337,10 +337,10 @@
         </div>
         <table class="poi-table">
           <thead>
-            <tr><th>Nom</th><th>Distance</th></tr>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="poolsTableBody">
-            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
           </tbody>
         </table>
       </div>
@@ -356,7 +356,7 @@
       <div class="map-wrap">
         <div id="climbingSitesMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 sites d'escalade extérieurs (falaises, blocs) les plus proches, dans un rayon de 50 km.</span>
+          <span class="map-hint">Les 10 sites d'escalade extérieurs (falaises, blocs) les plus proches, dans un rayon de 50 km. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -367,10 +367,10 @@
         </div>
         <table class="poi-table">
           <thead>
-            <tr><th>Nom</th><th>Distance</th></tr>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="climbingSitesTableBody">
-            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
           </tbody>
         </table>
       </div>
@@ -386,7 +386,7 @@
       <div class="map-wrap">
         <div id="climbingGymsMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 salles d'escalade (bloc, voie) les plus proches de la position actuelle.</span>
+          <span class="map-hint">Les 10 salles d'escalade (bloc, voie) les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -397,10 +397,10 @@
         </div>
         <table class="poi-table">
           <thead>
-            <tr><th>Nom</th><th>Distance</th></tr>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="climbingGymsTableBody">
-            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
           </tbody>
         </table>
       </div>
@@ -416,7 +416,7 @@
       <div class="map-wrap">
         <div id="toiletsMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 toilettes publiques les plus proches de la position actuelle.</span>
+          <span class="map-hint">Les 10 toilettes publiques les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -427,10 +427,10 @@
         </div>
         <table class="poi-table">
           <thead>
-            <tr><th>Nom</th><th>Distance</th></tr>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="toiletsTableBody">
-            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
           </tbody>
         </table>
       </div>
@@ -446,7 +446,7 @@
       <div class="map-wrap">
         <div id="drinkingWaterMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 points d'eau potable les plus proches de la position actuelle.</span>
+          <span class="map-hint">Les 10 points d'eau potable les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -457,10 +457,10 @@
         </div>
         <table class="poi-table">
           <thead>
-            <tr><th>Nom</th><th>Distance</th></tr>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="drinkingWaterTableBody">
-            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
           </tbody>
         </table>
       </div>
@@ -476,7 +476,7 @@
       <div class="map-wrap">
         <div id="foodMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 restaurants, snacks et cafés les plus proches de la position actuelle.</span>
+          <span class="map-hint">Les 10 restaurants, snacks et cafés les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -487,10 +487,10 @@
         </div>
         <table class="poi-table">
           <thead>
-            <tr><th>Nom</th><th>Distance</th></tr>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="foodTableBody">
-            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
           </tbody>
         </table>
       </div>
@@ -661,7 +661,10 @@
       featureSections.forEach((other) => {
         if (other !== section) other.open = false;
       });
-      const top = section.getBoundingClientRect().top + window.scrollY - 8;
+      // Aligne le BAS de la section sur le bas de l'écran (pas le haut), pour garder
+      // la fin de son contenu visible plutôt que son en-tête.
+      const bottom = section.getBoundingClientRect().bottom + window.scrollY + 8;
+      const top = bottom - window.innerHeight;
       window.scrollTo({ top, behavior: 'smooth' });
     });
   }
@@ -1698,7 +1701,7 @@
       const dLat = s.lat - lat;
       const dLon = (s.lon - lon) * coslat;
       const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
-      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, op: s.op, gens: s.gens, distM: distM });
+      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, op: s.op, gens: s.gens, distM: distM, bearing: bearingTo(lat, lon, s.lat, s.lon) });
     }
     results.sort((a, b) => a.distM - b.distM);
     return results.slice(0, maxResults);
@@ -1714,7 +1717,8 @@
 
   const antennaMap = initSecondaryMap('antennaMap');
 
-  function updateAntennasNearby(lat, lon) {
+  function updateAntennasNearby(lat, lon, sourceLabel) {
+    if (sourceLabel === undefined) sourceLabel = getSourceLabel();
     if (antennaGpsMarker) { antennaMap.removeLayer(antennaGpsMarker); }
     antennaGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(antennaMap);
 
@@ -1729,27 +1733,33 @@
     const bounds = [[lat, lon]];
 
     if (results.length === 0) {
-      antennasTableBody.innerHTML = `<tr><td colspan="3" class="dim">Aucune antenne dans un rayon de ${ANTENNA_RADIUS_M / 1000} km</td></tr>`;
+      antennasTableBody.innerHTML = `<tr><td colspan="4" class="dim">Aucune antenne dans un rayon de ${ANTENNA_RADIUS_M / 1000} km</td></tr>`;
     } else {
       antennasTableBody.innerHTML = results.map((r) => `
         <tr>
           <td style="color:${operatorColor(r.op)};">${r.op}</td>
           <td>${r.gens.join(', ')}</td>
           <td>${fmtDistanceM(r.distM)}</td>
+          <td>${r.bearing}</td>
         </tr>
       `).join('');
       for (const r of results) {
         const color = operatorColor(r.op);
         const marker = L.circleMarker([r.lat, r.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-          .bindPopup(`<strong>${r.op}</strong><br>${r.gens.join(', ')}<br>${fmtDistanceM(r.distM)}<br>${gotoLinkHtml(r.lat, r.lon)}`)
+          .bindPopup(`<strong>${r.op}</strong><br>${r.gens.join(', ')}<br>${fmtDistanceM(r.distM)} · ${r.bearing}<br>${gotoLinkHtml(r.lat, r.lon)}`)
           .addTo(antennaMap);
         antennaMarkers.push(marker);
         bounds.push([r.lat, r.lon]);
       }
     }
-    antennasSearchStatusEl.textContent = `Autour de : ${getSourceLabel()} · ${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
+    antennasSearchStatusEl.textContent = `Autour de : ${sourceLabel} · ${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
     antennaMap.fitBounds(bounds, { padding: [24, 24] });
   }
+
+  // La carte des antennes est elle-même cliquable : relance la recherche à cet endroit.
+  antennaMap.on('click', (e) => {
+    updateAntennasNearby(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte');
+  });
 
   async function downloadAntennas() {
     if (antennasLoading) return;
@@ -1795,20 +1805,14 @@
   function setupNearbyOverpassFeature(config) {
     const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel } = config;
     let markers = [];
-    let gpsMarker = null;
+    let originMarker = null;
 
-    btn.addEventListener('click', async () => {
-      const point = getReferencePoint();
-      if (!point) {
-        statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
-        return;
-      }
-      const { lat, lon } = point;
+    async function runSearch(lat, lon, sourceLabel) {
       btn.disabled = true;
       statusEl.textContent = 'Recherche…';
 
-      if (gpsMarker) { map.removeLayer(gpsMarker); }
-      gpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(map);
+      if (originMarker) { map.removeLayer(originMarker); }
+      originMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(map);
 
       try {
         const query = buildQuery(lat, lon, radiusM);
@@ -1821,7 +1825,7 @@
             const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
             if (elat == null || elon == null) return null;
             const name = (el.tags && el.tags.name) || defaultName;
-            return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon) };
+            return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
           })
           .filter(Boolean)
           .sort((a, b) => a.distM - b.distM)
@@ -1832,30 +1836,46 @@
         const bounds = [[lat, lon]];
 
         if (items.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="2" class="dim">${emptyLabel} dans un rayon de ${radiusM / 1000} km</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="3" class="dim">${emptyLabel} dans un rayon de ${radiusM / 1000} km</td></tr>`;
         } else {
           tableBody.innerHTML = items.map((it) => `
             <tr>
               <td>${it.name}</td>
               <td>${fmtDistanceM(it.distM)}</td>
+              <td>${it.bearing}</td>
             </tr>
           `).join('');
           for (const it of items) {
             const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
               .addTo(map);
             markers.push(marker);
             bounds.push([it.lat, it.lon]);
           }
         }
-        statusEl.textContent = `Autour de : ${getSourceLabel()} · ${items.length} résultat(s) · rayon ${radiusM / 1000} km`;
+        statusEl.textContent = `Autour de : ${sourceLabel} · ${items.length} résultat(s) · rayon ${radiusM / 1000} km`;
         map.fitBounds(bounds, { padding: [24, 24] });
       } catch (e) {
         statusEl.textContent = 'Service Overpass indisponible';
-        tableBody.innerHTML = '<tr><td colspan="2" class="dim">Recherche impossible pour le moment</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
       } finally {
         btn.disabled = false;
       }
+    }
+
+    btn.addEventListener('click', () => {
+      const point = getReferencePoint();
+      if (!point) {
+        statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+        return;
+      }
+      runSearch(point.lat, point.lon, getSourceLabel());
+    });
+
+    // La carte de cette section est elle-même cliquable : ça relance la recherche
+    // centrée sur le point cliqué, indépendamment de la position de référence globale.
+    map.on('click', (e) => {
+      runSearch(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte');
     });
   }
 
@@ -2077,13 +2097,13 @@
         <button type="button" class="btn-secondary custom-search-btn">Chercher « ${label} » à proximité</button>
         <div class="map-wrap">
           <div id="${mapId}"></div>
-          <div class="map-footer"><span class="map-hint">Les 10 résultats les plus proches de la position actuelle.</span></div>
+          <div class="map-footer"><span class="map-hint">Les 10 résultats les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span></div>
         </div>
         <div class="addr-panel">
           <div class="addr-head"><span>${label} à proximité</span><span class="custom-status">—</span></div>
           <table class="poi-table">
-            <thead><tr><th>Nom</th><th>Distance</th></tr></thead>
-            <tbody class="custom-table-body"><tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>
+            <thead><tr><th>Nom</th><th>Distance</th><th>Direction</th></tr></thead>
+            <tbody class="custom-table-body"><tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>
           </table>
         </div>
         <p class="osm-credit">Résultat : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API) — section personnalisée ajoutée depuis les réglages.</p>

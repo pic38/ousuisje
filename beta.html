@@ -105,7 +105,7 @@
       <div class="map-wrap">
         <div id="map"></div>
         <div class="map-footer">
-          <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse — ça met aussi à jour les autres sections utilisant la position actuelle (département/commune hors ligne, antennes).</span>
+          <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse.</span>
           <a id="googleMapsLink" class="map-link" href="https://www.google.com/maps" target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
           <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir dans OpenStreetMap ↗</a>
         </div>
@@ -2520,9 +2520,15 @@
       const communeLayer = commune ? (communeExact ? drawCommuneExactOnMap(commune) : drawCommuneCircleOnMap(commune)) : null;
 
       if (communeLayer) {
-        offlineMap.fitBounds(communeLayer.getBounds(), { padding: [16, 16] });
-        offlineMap.setZoom(Math.max(offlineMap.getZoom() - 1, 0));
-        offlineMap._homeView = { center: offlineMap.getCenter(), zoom: offlineMap.getZoom() };
+        // Calcule le zoom "un cran plus large que l'ajustement parfait" directement à partir
+        // des limites de la commune (indépendant du zoom courant de la carte), pour éviter
+        // qu'un dézoom d'un cran ne s'accumule à chaque nouvelle recherche.
+        const communeBounds = communeLayer.getBounds();
+        const fitZoom = offlineMap.getBoundsZoom(communeBounds, false, L.point(16, 16));
+        const zoom = Math.max(fitZoom - 1, 0);
+        const center = communeBounds.getCenter();
+        offlineMap.setView(center, zoom);
+        offlineMap._homeView = { center: center, zoom: zoom };
       } else if (deptLayer) {
         offlineMap.fitBounds(deptLayer.getBounds(), { padding: [16, 16] });
         offlineMap._homeView = { bounds: deptLayer.getBounds() };

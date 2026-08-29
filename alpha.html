@@ -184,6 +184,7 @@
         </div>
         <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Code postal</span><span id="offlineCP" class="v dim">—</span></div>
       </div>
       <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). Mis à jour à chaque nouvelle position (GPS ou clic sur la carte principale). Par défaut, la commune est une estimation par proximité au centre-bourg : elle peut être erronée près d'une frontière communale — voir ci-dessous pour télécharger les vrais contours.</p>
 
@@ -201,26 +202,29 @@
         </div>
         <table class="contours-table">
           <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action">
+            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
           </colgroup>
           <thead>
-            <tr><th>Version</th><th>Statut</th><th></th></tr>
+            <tr><th>Version</th><th>Statut</th><th></th><th></th></tr>
           </thead>
           <tbody>
             <tr>
               <td>Cercles (1,4 Mo)</td>
               <td id="statusCentroides" class="dim">Téléchargées, actives</td>
               <td><button id="activateCentroides" class="btn-secondary" disabled>Actif ✓</button></td>
+              <td></td>
             </tr>
             <tr>
               <td>Polygones (6,7 Mo)</td>
               <td id="statusSimplifiee" class="dim">Non téléchargée</td>
               <td><button id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
+              <td><button id="deleteSimplifiee" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
             </tr>
             <tr>
               <td>Détaillée (16 Mo)</td>
               <td id="statusPrecise" class="dim">Non téléchargée</td>
               <td><button id="downloadPrecise" class="btn-secondary">Télécharger</button></td>
+              <td><button id="deletePrecise" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
             </tr>
           </tbody>
         </table>
@@ -241,16 +245,17 @@
         </div>
         <table class="contours-table">
           <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action">
+            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
           </colgroup>
           <thead>
-            <tr><th>Jeu de données</th><th>Statut</th><th></th></tr>
+            <tr><th>Jeu de données</th><th>Statut</th><th></th><th></th></tr>
           </thead>
           <tbody>
             <tr>
               <td>Sites ANFR, 4 opérateurs (1,3 Mo)</td>
               <td id="antennasRowStatus" class="dim">Non téléchargées</td>
               <td><button id="downloadAntennas" class="btn-secondary">Télécharger</button></td>
+              <td><button id="deleteAntennas" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
             </tr>
           </tbody>
         </table>
@@ -616,16 +621,21 @@
   const offlineGeoStatus = $('offlineGeoStatus');
   const offlineDeptEl = $('offlineDept');
   const offlineCommuneEl = $('offlineCommune');
+  const offlineCPEl = $('offlineCP');
   const contoursStatusEl = $('contoursStatus');
   const activateCentroidesBtn = $('activateCentroides');
   const downloadSimplifieeBtn = $('downloadSimplifiee');
   const downloadPreciseBtn = $('downloadPrecise');
+  const deleteSimplifieeBtn = $('deleteSimplifiee');
+  const deletePreciseBtn = $('deletePrecise');
   const tierButtons = { centroides: activateCentroidesBtn, simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
   const tierStatusEls = { centroides: $('statusCentroides'), simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
+  const tierDeleteButtons = { simplifiee: deleteSimplifieeBtn, precise: deletePreciseBtn };
 
   const antennasDlStatusEl = $('antennasDlStatus');
   const antennasRowStatusEl = $('antennasRowStatus');
   const downloadAntennasBtn = $('downloadAntennas');
+  const deleteAntennasBtn = $('deleteAntennas');
   const antennasSearchStatusEl = $('antennasSearchStatus');
   const antennasTableBody = $('antennasTableBody');
 
@@ -1461,7 +1471,20 @@
 
   let offlineDepts = null;
   let offlineCommunes = null;
+  let offlineCommunesByCode = null;
   let offlineDataPromise = null;
+
+  function formatPostalCodes(raw) {
+    if (!raw) return null;
+    const codes = raw.split('/');
+    if (codes.length <= 3) return codes.join(' / ');
+    return codes.slice(0, 3).join(' / ') + ` (+${codes.length - 3})`;
+  }
+
+  function communePostalCode(code) {
+    const entry = offlineCommunesByCode && offlineCommunesByCode.get(code);
+    return entry ? formatPostalCodes(entry[4]) : null;
+  }
 
   function pointInRing(x, y, ring) {
     let inside = false;
@@ -1611,9 +1634,22 @@
     contoursStatusEl.classList.remove('dim');
   }
 
+  // Supprime une URL du cache du service worker (toutes versions confondues), pour libérer
+  // l'espace occupé par des données téléchargées à la demande (contours, antennes).
+  async function deleteCachedUrl(url) {
+    if (typeof caches === 'undefined') return;
+    try {
+      const names = await caches.keys();
+      await Promise.all(names.map((n) => caches.open(n).then((c) => c.delete(url))));
+    } catch (e) {
+      // API Cache indisponible (ex. navigation privée) : rien de plus à faire.
+    }
+  }
+
   function updateTierUI(tier) {
     const btn = tierButtons[tier];
     const statusEl = tierStatusEls[tier];
+    const deleteBtn = tierDeleteButtons[tier];
     if (communeContoursTier === tier) {
       btn.textContent = 'Actif ✓';
       btn.disabled = true;
@@ -1630,6 +1666,9 @@
       statusEl.textContent = 'Non téléchargée';
       statusEl.classList.add('dim');
     }
+    if (deleteBtn) {
+      deleteBtn.style.display = communeContoursDownloaded.has(tier) ? '' : 'none';
+    }
   }
 
   function refreshContoursUI() {
@@ -1643,7 +1682,32 @@
     activateCentroidesBtn.disabled = disabled;
     downloadSimplifieeBtn.disabled = disabled;
     downloadPreciseBtn.disabled = disabled;
+    deleteSimplifieeBtn.disabled = disabled;
+    deletePreciseBtn.disabled = disabled;
   }
+
+  // Retire un jeu de contours téléchargé de l'appareil (cache du service worker) et,
+  // s'il était actif, retombe sur les cercles indicatifs.
+  async function deleteContourTier(tier) {
+    if (communeContoursLoading) return;
+    communeContoursLoading = true;
+    setContoursButtonsDisabled(true);
+    await deleteCachedUrl(CONTOUR_TIERS[tier].url);
+    communeContoursDownloaded.delete(tier);
+    localStorage.setItem(CONTOURS_DOWNLOADED_STORAGE_KEY, JSON.stringify([...communeContoursDownloaded]));
+    if (communeContoursTier === tier) {
+      communeContoursTier = 'centroides';
+      communeContoursByDept = null;
+      localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, 'centroides');
+      const point = getReferencePoint();
+      if (point) updateOfflineGeo(point.lat, point.lon);
+    }
+    communeContoursLoading = false;
+    setContoursButtonsDisabled(false);
+    refreshContoursUI();
+  }
+  deleteSimplifieeBtn.addEventListener('click', () => deleteContourTier('simplifiee'));
+  deletePreciseBtn.addEventListener('click', () => deleteContourTier('precise'));
 
   // Le niveau "cercles" (centroïdes) est toujours prêt (chargé avec les données de base) :
   // l'activer ne fait que basculer la recherche de commune sur l'approximation par proximité.
@@ -1848,6 +1912,7 @@
       antennasRowStatusEl.textContent = 'Téléchargées';
       antennasDlStatusEl.textContent = 'Téléchargées';
       antennasDlStatusEl.classList.remove('dim');
+      deleteAntennasBtn.style.display = '';
       const point = getReferencePoint();
       if (point) updateAntennasNearby(point.lat, point.lon);
     } catch (e) {
@@ -1858,7 +1923,30 @@
     }
   }
 
+  async function deleteAntennas() {
+    if (antennasLoading) return;
+    antennasLoading = true;
+    downloadAntennasBtn.disabled = true;
+    deleteAntennasBtn.disabled = true;
+    await deleteCachedUrl(ANTENNAS_URL);
+    antennaSites = null;
+    clearAntennaMarkers();
+    localStorage.removeItem(ANTENNAS_DOWNLOADED_STORAGE_KEY);
+    downloadAntennasBtn.textContent = 'Télécharger';
+    antennasRowStatusEl.textContent = 'Non téléchargées';
+    antennasRowStatusEl.classList.add('dim');
+    antennasDlStatusEl.textContent = 'Non téléchargées';
+    antennasDlStatusEl.classList.add('dim');
+    deleteAntennasBtn.style.display = 'none';
+    antennasLoading = false;
+    downloadAntennasBtn.disabled = false;
+    deleteAntennasBtn.disabled = false;
+    const point = getReferencePoint();
+    if (point) updateAntennasNearby(point.lat, point.lon);
+  }
+
   downloadAntennasBtn.addEventListener('click', downloadAntennas);
+  deleteAntennasBtn.addEventListener('click', deleteAntennas);
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
   // --- Points d'intérêt à proximité, en direct via Overpass (escape games, piscines, escalade) ---
@@ -2265,9 +2353,12 @@
       if (!deptRes.ok || !communesRes.ok) throw new Error('offline geo data unavailable');
       offlineDepts = await deptRes.json();
       const text = await communesRes.text();
+      offlineCommunesByCode = new Map();
       offlineCommunes = text.split('\n').filter(Boolean).map((line) => {
         const parts = line.split(';');
-        return [parts[0], parts[1], parseFloat(parts[2]), parseFloat(parts[3])];
+        const entry = [parts[0], parts[1], parseFloat(parts[2]), parseFloat(parts[3]), parts[4] || ''];
+        offlineCommunesByCode.set(parts[0], entry);
+        return entry;
       });
     })();
     return offlineDataPromise;
@@ -2333,9 +2424,14 @@
       if (commune) {
         offlineCommuneEl.textContent = commune.nom;
         offlineCommuneEl.classList.remove('dim');
+        const cp = communePostalCode(commune.code);
+        offlineCPEl.textContent = cp || 'Non disponible';
+        offlineCPEl.classList.toggle('dim', !cp);
       } else {
         offlineCommuneEl.textContent = 'Introuvable';
         offlineCommuneEl.classList.add('dim');
+        offlineCPEl.textContent = '—';
+        offlineCPEl.classList.add('dim');
       }
       offlineGeoStatus.textContent = 'Hors ligne ✓';
       offlineGeoStatus.classList.remove('dim');

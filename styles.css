@@ -540,9 +540,10 @@ h1 {
   border-collapse: collapse;
   font-size: 13px;
 }
-.contours-table col.col-version { width: 42%; }
-.contours-table col.col-status { width: 34%; }
-.contours-table col.col-action { width: 24%; }
+.contours-table col.col-version { width: 39%; }
+.contours-table col.col-status { width: 31%; }
+.contours-table col.col-action { width: 21%; }
+.contours-table col.col-delete { width: 9%; }
 .contours-table thead th {
   text-align: left;
   padding: 10px 16px;
@@ -570,6 +571,15 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.btn-delete {
+  width: 100%;
+  padding: 8px 6px;
+  font-size: 14px;
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+}
+.btn-delete:hover:not(:disabled) { background: rgba(224, 84, 106, 0.14); color: #e0546a; border-color: #e0546a; }
 
 /* --- Buttons --- */
 .actions { display: flex; flex-direction: column; gap: 10px; }

@@ -822,7 +822,7 @@
   // Contrôles de zoom + bouton maison + bouton de recentrage, groupés en bas à droite de
   // chaque carte (dans cet ordre) — le recentrage utilise la dernière position GPS reçue
   // (indépendant d'un éventuel point cliqué).
-  function addRecenterControl(targetMap) {
+  function addRecenterControl(targetMap, zoomFn) {
     if (targetMap.zoomControl) targetMap.zoomControl.setPosition('bottomright');
     addHomeControl(targetMap);
     const RecenterControl = L.Control.extend({
@@ -837,7 +837,8 @@
           .on(link, 'click', L.DomEvent.preventDefault)
           .on(link, 'click', () => {
             if (lastPos) {
-              targetMap.setView([lastPos.coords.latitude, lastPos.coords.longitude], Math.max(targetMap.getZoom(), 15));
+              const zoom = zoomFn ? zoomFn(targetMap) : Math.max(targetMap.getZoom(), 15);
+              targetMap.setView([lastPos.coords.latitude, lastPos.coords.longitude], zoom);
             }
           });
         return container;
@@ -846,11 +847,12 @@
     targetMap.addControl(new RecenterControl());
   }
 
-  function initSecondaryMap(id) {
+  function initSecondaryMap(id, opts) {
+    opts = opts || {};
     const m = L.map(id, { zoomControl: true, attributionControl: false });
     m.fitBounds(FRANCE_BOUNDS);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
-    addRecenterControl(m);
+    addRecenterControl(m, opts.recenterZoomFn);
     allMaps.push(m);
     return m;
   }
@@ -875,6 +877,7 @@
   });
   let gpsMarker = null;
   let gpsAccuracyCircle = null;
+  let radarGpsMarker = null;
   let clickMarker = null;
   let lastQueriedPoint = null; // { lat, lon, source: 'gps' | 'carte' } — dernière action explicite de l'utilisateur
   let lastClickPoint = null;
@@ -933,6 +936,11 @@
     } else if (gpsAccuracyCircle) {
       map.removeLayer(gpsAccuracyCircle);
       gpsAccuracyCircle = null;
+    }
+    if (!radarGpsMarker) {
+      radarGpsMarker = L.marker(latlng, { icon: gpsMarkerIcon }).addTo(radarMap);
+    } else {
+      radarGpsMarker.setLatLng(latlng);
     }
     if (!hasCenteredOnGps) {
       map.setView(latlng, 15);
@@ -1375,7 +1383,15 @@
   if (autoLocateCheckbox.checked) startWatch();
 
   // --- Radar de pluie (RainViewer) ---
-  const radarMap = initSecondaryMap('radarMap');
+  // Ici, le recentrage zoome 2 crans de plus que le zoom "maison" (au lieu du comportement
+  // générique des autres cartes) : sur le radar on veut resserrer la vue une fois centré,
+  // pas juste rester au niveau régional utilisé par défaut.
+  const radarMap = initSecondaryMap('radarMap', {
+    recenterZoomFn: (m) => {
+      const homeZoom = (m._homeView && m._homeView.zoom != null) ? m._homeView.zoom : 6;
+      return homeZoom + 2;
+    }
+  });
   const RADAR_COLOR = 2;
   const RADAR_OPTIONS_SUFFIX = '1_1';
   const PAST_FRAME_COUNT = 6;
@@ -1436,6 +1452,7 @@
         L.tileLayer(frameTileUrl(frame), { opacity: 0, zIndex: 400, maxZoom: 19, maxNativeZoom: 7 }).addTo(radarMap)
       );
       showFrame(radarLayers.length - 1);
+      startPlayback();
     } catch (e) {
       radarTimestamp.textContent = 'Radar indisponible';
     }

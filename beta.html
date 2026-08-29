@@ -27,7 +27,7 @@
   <label class="settings-check"><input type="checkbox" data-section="localisation" checked><span>Localisation administrative</span></label>
   <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Réglages et détails GPS</span></label>
   <label class="settings-check"><input type="checkbox" data-section="poi" checked><span>Points d'intérêt à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte IGN</span></label>
   <label class="settings-check"><input type="checkbox" data-section="offline-geo" checked><span>Département et commune hors ligne</span></label>
   <label class="settings-check"><input type="checkbox" data-section="antennas"><span>Antennes relais (2G, 3G, 4G, 5G)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games à proximité</span></label>
@@ -161,7 +161,7 @@
   </details>
 
   <details class="feature" data-section="altitude">
-    <summary class="feature-summary"><span>Altitude depuis carte</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Altitude depuis carte IGN</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <button id="altCompareBtn" class="btn-secondary">Altitude IGN (plus précis, France uniquement)</button>
       <div class="addr-panel">
@@ -192,6 +192,7 @@
   <details class="feature" data-section="offline-geo">
     <summary class="feature-summary"><span>Département et commune hors ligne</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
+      <button id="offlineGeoBtn" class="btn-secondary">Rechercher le département et la commune</button>
       <div class="addr-panel">
         <div class="addr-head">
           <span>Département et commune hors ligne</span>
@@ -632,6 +633,7 @@
   const radarNext = $('radarNext');
   const radarOpacity = $('radarOpacity');
 
+  const offlineGeoBtn = $('offlineGeoBtn');
   const offlineGeoStatus = $('offlineGeoStatus');
   const offlineDeptEl = $('offlineDept');
   const offlineCommuneEl = $('offlineCommune');
@@ -2445,6 +2447,16 @@
       offlineGeoStatus.textContent = 'Données indisponibles';
     }
   }
+
+  offlineGeoBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      offlineGeoStatus.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      offlineGeoStatus.classList.remove('dim');
+      return;
+    }
+    updateOfflineGeo(point.lat, point.lon);
+  });
 
   loadOfflineGeoData()
     .then(() => { offlineGeoStatus.textContent = 'Prêt'; })

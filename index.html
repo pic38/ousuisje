@@ -90,7 +90,6 @@
       <button id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Localisation administrative</span>
           <span id="addrStatus">—</span>
         </div>
         <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
@@ -101,7 +100,7 @@
         <div class="addr-row"><span class="k">Région</span><span id="addrRegion" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
       </div>
-      <button id="copyAddressBtn" class="btn-secondary" disabled>Copier l'adresse</button>
+      <button id="shareAddressBtn" class="btn-secondary" disabled>Partager l'adresse</button>
 
       <div class="map-wrap">
         <div id="map"></div>
@@ -606,7 +605,7 @@
   const osmLink = $('osmLink');
   const googleMapsLink = $('googleMapsLink');
   const geocodeBtn = $('geocodeBtn');
-  const copyAddressBtn = $('copyAddressBtn');
+  const shareAddressBtn = $('shareAddressBtn');
   const diagFixState = $('diagFixState');
   const diagFixAge = $('diagFixAge');
   const diagFixCount = $('diagFixCount');
@@ -1085,13 +1084,13 @@
       setAddrField(addrPays, pays, colorClass);
 
       addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
-      copyAddressBtn.disabled = !(adresse || commune);
+      shareAddressBtn.disabled = !(adresse || commune);
     } catch (e) {
       if (requestId === geocodeRequestId) addrStatus.textContent = 'Indisponible';
     }
   }
 
-  copyAddressBtn.addEventListener('click', async () => {
+  shareAddressBtn.addEventListener('click', async () => {
     const lines = [];
     const rue = addrAdresse.textContent !== '—' ? addrAdresse.textContent : (addrLieuDit.textContent !== '—' ? addrLieuDit.textContent : null);
     if (rue) lines.push(rue);
@@ -1101,14 +1100,22 @@
 
     const text = lines.join('\n');
     if (!text) return;
+    const original = shareAddressBtn.textContent;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Adresse — OuSuisJe', text });
+      } catch (e) {
+        // Partage annulé ou échoué : rien à faire.
+      }
+      return;
+    }
     try {
       await navigator.clipboard.writeText(text);
-      const original = copyAddressBtn.textContent;
-      copyAddressBtn.textContent = 'Adresse copiée ✓';
-      setTimeout(() => { copyAddressBtn.textContent = original; }, 2000);
+      shareAddressBtn.textContent = 'Adresse copiée ✓';
+      setTimeout(() => { shareAddressBtn.textContent = original; }, 2000);
     } catch (e) {
-      copyAddressBtn.textContent = 'Copie impossible';
-      setTimeout(() => { copyAddressBtn.textContent = "Copier l'adresse"; }, 2000);
+      shareAddressBtn.textContent = 'Partage impossible';
+      setTimeout(() => { shareAddressBtn.textContent = original; }, 2000);
     }
   });
 

@@ -18,6 +18,9 @@
 <div id="settingsPanel" class="settings-panel is-hidden">
   <div class="settings-panel-title">Sections affichées</div>
   <div class="settings-bulk">
+    <button id="settingsResetDefault" type="button" class="settings-bulk-btn">Affichage par défaut</button>
+  </div>
+  <div class="settings-bulk">
     <button id="settingsCheckAll" type="button" class="settings-bulk-btn">Tout cocher</button>
     <button id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
   </div>
@@ -748,6 +751,13 @@
   }
   $('settingsCheckAll').addEventListener('click', () => setAllSectionsVisibility(true));
   $('settingsUncheckAll').addEventListener('click', () => setAllSectionsVisibility(false));
+
+  // Réinitialise uniquement les préférences d'affichage (visible/masqué) aux valeurs par
+  // défaut ; ne touche pas à la liste des sections personnalisées ajoutées par l'utilisateur.
+  $('settingsResetDefault').addEventListener('click', () => {
+    localStorage.removeItem(SECTION_VISIBILITY_KEY);
+    applySectionVisibility();
+  });
 
   settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();

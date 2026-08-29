@@ -208,17 +208,17 @@
           </thead>
           <tbody>
             <tr>
-              <td>Départements + centroïdes de communes (1,4 Mo)</td>
-              <td class="dim">Téléchargées, actives (automatique)</td>
-              <td></td>
+              <td>Cercles (1,4 Mo)</td>
+              <td id="statusCentroides" class="dim">Téléchargées, actives</td>
+              <td><button id="activateCentroides" class="btn-secondary" disabled>Actif ✓</button></td>
             </tr>
             <tr>
-              <td>Simplifiée (6,7 Mo)</td>
+              <td>Polygones (6,7 Mo)</td>
               <td id="statusSimplifiee" class="dim">Non téléchargée</td>
               <td><button id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
             </tr>
             <tr>
-              <td>Pleine précision (16 Mo)</td>
+              <td>Détaillée (16 Mo)</td>
               <td id="statusPrecise" class="dim">Non téléchargée</td>
               <td><button id="downloadPrecise" class="btn-secondary">Télécharger</button></td>
             </tr>
@@ -617,10 +617,11 @@
   const offlineDeptEl = $('offlineDept');
   const offlineCommuneEl = $('offlineCommune');
   const contoursStatusEl = $('contoursStatus');
+  const activateCentroidesBtn = $('activateCentroides');
   const downloadSimplifieeBtn = $('downloadSimplifiee');
   const downloadPreciseBtn = $('downloadPrecise');
-  const tierButtons = { simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
-  const tierStatusEls = { simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
+  const tierButtons = { centroides: activateCentroidesBtn, simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
+  const tierStatusEls = { centroides: $('statusCentroides'), simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
 
   const antennasDlStatusEl = $('antennasDlStatus');
   const antennasRowStatusEl = $('antennasRowStatus');
@@ -653,12 +654,21 @@
   // --- Sections dépliables : une seule ouverte à la fois, alignée en haut de l'écran ---
   // (tableau mutable : les sections ajoutées dynamiquement par mot-clé s'y ajoutent aussi)
   const featureSections = [];
+  const allMaps = []; // toutes les cartes Leaflet de la page, pour invalidateSize() à l'ouverture de leur section
   function wireAccordionSection(section) {
     featureSections.push(section);
     section.addEventListener('toggle', () => {
       if (!section.open) return;
       featureSections.forEach((other) => {
         if (other !== section) other.open = false;
+      });
+      // Une carte Leaflet créée pendant que son conteneur est masqué (section repliée)
+      // mémorise une taille invalide (0×0) et cadre alors n'importe comment tant qu'on
+      // ne lui redit pas de re-mesurer son conteneur, une fois celui-ci enfin visible.
+      allMaps.forEach((m) => {
+        if (section.contains(m.getContainer())) {
+          setTimeout(() => m.invalidateSize(), 0);
+        }
       });
       // Aligne le BAS de la section sur le bas de l'écran (pas le haut), pour garder
       // la fin de son contenu visible plutôt que son en-tête.
@@ -808,6 +818,7 @@
     m.fitBounds(FRANCE_BOUNDS);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
     addRecenterControl(m);
+    allMaps.push(m);
     return m;
   }
 
@@ -817,6 +828,7 @@
   map._homeView = { bounds: FRANCE_BOUNDS };
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   addRecenterControl(map);
+  allMaps.push(map);
 
   const gpsMarkerIcon = L.divIcon({
     className: 'gps-marker',
@@ -1514,14 +1526,17 @@
 
   // --- Contours précis des communes (téléchargement optionnel, à la demande) ---
   const CONTOUR_TIERS = {
+    centroides: {
+      label: 'cercles (centroïdes)'
+    },
     simplifiee: {
       url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes-version-simplifiee.geojson',
-      label: 'version simplifiée',
+      label: 'polygones (version simplifiée)',
       rawSizeBytes: 19342488
     },
     precise: {
       url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson',
-      label: 'pleine précision',
+      label: 'détaillée (pleine précision)',
       rawSizeBytes: 45291317
     }
   };
@@ -1529,7 +1544,7 @@
   const CONTOURS_DOWNLOADED_STORAGE_KEY = 'ousuisje_commune_contours_downloaded';
 
   let communeContoursByDept = null;
-  let communeContoursTier = null;
+  let communeContoursTier = 'centroides'; // niveau actif : centroides (cercle indicatif) par défaut
   let communeContoursLoading = false;
 
   function loadDownloadedTiers() {
@@ -1592,13 +1607,8 @@
   }
 
   function updateOverallContoursStatus() {
-    if (communeContoursTier) {
-      contoursStatusEl.textContent = `Actif : ${CONTOUR_TIERS[communeContoursTier].label} ✓`;
-      contoursStatusEl.classList.remove('dim');
-    } else {
-      contoursStatusEl.textContent = 'Non téléchargés';
-      contoursStatusEl.classList.add('dim');
-    }
+    contoursStatusEl.textContent = `Actif : ${CONTOUR_TIERS[communeContoursTier].label} ✓`;
+    contoursStatusEl.classList.remove('dim');
   }
 
   function updateTierUI(tier) {
@@ -1607,12 +1617,12 @@
     if (communeContoursTier === tier) {
       btn.textContent = 'Actif ✓';
       btn.disabled = true;
-      statusEl.textContent = 'Téléchargée, active';
+      statusEl.textContent = 'Téléchargées, actives';
       statusEl.classList.remove('dim');
-    } else if (communeContoursDownloaded.has(tier)) {
+    } else if (tier === 'centroides' || communeContoursDownloaded.has(tier)) {
       btn.textContent = 'Activer';
       btn.disabled = false;
-      statusEl.textContent = 'Téléchargée, inactive';
+      statusEl.textContent = tier === 'centroides' ? 'Téléchargées, inactives' : 'Téléchargée, inactive';
       statusEl.classList.remove('dim');
     } else {
       btn.textContent = 'Télécharger';
@@ -1624,14 +1634,28 @@
 
   function refreshContoursUI() {
     updateOverallContoursStatus();
+    updateTierUI('centroides');
     updateTierUI('simplifiee');
     updateTierUI('precise');
   }
 
   function setContoursButtonsDisabled(disabled) {
+    activateCentroidesBtn.disabled = disabled;
     downloadSimplifieeBtn.disabled = disabled;
     downloadPreciseBtn.disabled = disabled;
   }
+
+  // Le niveau "cercles" (centroïdes) est toujours prêt (chargé avec les données de base) :
+  // l'activer ne fait que basculer la recherche de commune sur l'approximation par proximité.
+  function activateCentroides() {
+    if (communeContoursLoading) return;
+    communeContoursTier = 'centroides';
+    localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, 'centroides');
+    refreshContoursUI();
+    const point = getReferencePoint();
+    if (point) updateOfflineGeo(point.lat, point.lon);
+  }
+  activateCentroidesBtn.addEventListener('click', activateCentroides);
 
   async function downloadCommuneContours(tier) {
     if (communeContoursLoading) return;
@@ -1672,7 +1696,7 @@
   refreshContoursUI();
 
   const savedActiveTier = localStorage.getItem(CONTOURS_ACTIVE_STORAGE_KEY);
-  if (savedActiveTier && CONTOUR_TIERS[savedActiveTier]) downloadCommuneContours(savedActiveTier);
+  if (savedActiveTier === 'simplifiee' || savedActiveTier === 'precise') downloadCommuneContours(savedActiveTier);
 
   // --- Antennes relais ANFR (téléchargement optionnel, à la demande) ---
   const ANTENNAS_URL = 'data/anfr-antennas.min.csv';
@@ -2186,6 +2210,8 @@
       if (idx !== -1) featureSections.splice(idx, 1);
       const cbIdx = sectionCheckboxes.indexOf(cb);
       if (cbIdx !== -1) sectionCheckboxes.splice(cbIdx, 1);
+      const mapIdx = allMaps.indexOf(secMap);
+      if (mapIdx !== -1) allMaps.splice(mapIdx, 1);
       if (secMap.remove) secMap.remove();
       details.remove();
       checkLabel.remove();
@@ -2300,15 +2326,12 @@
       offlineDeptEl.textContent = dept ? `${dept.nom} (${dept.code})` : 'Introuvable';
       offlineDeptEl.classList.toggle('dim', !dept);
 
-      let commune = dept ? findCommuneExact(lon, lat, dept.code) : null;
+      let commune = (dept && communeContoursTier !== 'centroides') ? findCommuneExact(lon, lat, dept.code) : null;
       const communeExact = !!commune;
       if (!commune) commune = findCommuneApprox(lat, lon);
 
       if (commune) {
-        const suffix = communeExact
-          ? ' (contour exact)'
-          : commune.distanceKm < 1 ? ' (estimation, < 1 km du centre)' : ` (estimation, ~${commune.distanceKm.toFixed(1)} km du centre)`;
-        offlineCommuneEl.textContent = commune.nom + suffix;
+        offlineCommuneEl.textContent = commune.nom;
         offlineCommuneEl.classList.remove('dim');
       } else {
         offlineCommuneEl.textContent = 'Introuvable';

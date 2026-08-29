@@ -32,7 +32,7 @@
   <label class="settings-check"><input type="checkbox" data-section="antennas"><span>Antennes relais (2G, 3G, 4G, 5G)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="pools" checked><span>Piscines à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="climbing-sites" checked><span>Sites d'escalade à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="climbing-sites"><span>Sites d'escalade à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable à proximité</span></label>
@@ -137,15 +137,23 @@
   <details class="feature" data-section="poi">
     <summary class="feature-summary"><span>Points d'intérêt à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="poiBtn" class="btn-secondary">Points d'intérêt à proximité</button>
+      <button id="poiBtn" class="btn-secondary">Chercher les points d'intérêt à proximité</button>
+
+      <div class="map-wrap">
+        <div id="poiMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Les 10 points d'intérêt les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
       <div class="addr-panel">
         <div class="addr-head">
           <span>Points d'intérêt à proximité</span>
           <span id="poiStatus">—</span>
         </div>
         <table id="poiTable" class="poi-table">
-          <thead><tr><th>Point</th><th>Distance</th><th>Direction</th></tr></thead>
-          <tbody id="poiTableBody"><tr><td colspan="3" class="dim">Aucune recherche effectuée</td></tr></tbody>
+          <thead><tr><th>Nom</th><th>Distance</th><th>Direction</th></tr></thead>
+          <tbody id="poiTableBody"><tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>
         </table>
       </div>
       <p class="osm-credit">Points d'intérêt : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
@@ -167,7 +175,7 @@
       </div>
       <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
 
-      <button id="oeCompareBtn" class="btn-secondary">Altitude Open-Elevation</button>
+      <button id="oeCompareBtn" class="btn-secondary">Altitude Open-Elevation (moins précis, Monde entier)</button>
       <div class="addr-panel">
         <div class="addr-head">
           <span>Comparaison d'altitude — Open-Elevation</span>
@@ -544,7 +552,6 @@
   <footer>
     <div class="footer-nav">
       <a href="index.html">Accueil</a>
-      <a href="alpha.html">Alpha</a>
       <a href="about.html">À propos</a>
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
@@ -617,7 +624,6 @@
 
   const poiBtn = $('poiBtn');
   const poiStatus = $('poiStatus');
-  const poiTable = $('poiTable');
   const poiTableBody = $('poiTableBody');
 
   const radarTimestamp = $('radarTimestamp');
@@ -699,7 +705,7 @@
 
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
-  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas']); // masquées par défaut tant que l'utilisateur ne les active pas
+  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas', 'climbing-sites']); // masquées par défaut tant que l'utilisateur ne les active pas
   const settingsBtn = $('settingsBtn');
   const settingsPanel = $('settingsPanel');
   const sectionCheckboxes = [];
@@ -1189,58 +1195,6 @@
     const points = ['Nord', 'Nord-Est', 'Est', 'Sud-Est', 'Sud', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'];
     return points[Math.round(deg / 45) % 8];
   }
-
-  function fmtDistance(m) {
-    return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
-  }
-
-  poiBtn.addEventListener('click', async () => {
-    const point = getReferencePoint();
-    if (!point) {
-      poiStatus.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
-      return;
-    }
-    const { lat, lon } = point;
-    poiTable.classList.remove('source-gps', 'source-carte');
-    poiTable.classList.add(point.source === 'carte' ? 'source-carte' : 'source-gps');
-    poiStatus.textContent = 'Recherche…';
-    poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche en cours…</td></tr>';
-    try {
-      const radius = 1500;
-      const query = `[out:json][timeout:20];node(around:${radius},${lat},${lon})["name"]["amenity"~"."];out body 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: 'data=' + encodeURIComponent(query)
-      });
-      const data = await res.json();
-      const elements = (data.elements || []).filter((el) => el.tags && el.tags.name);
-
-      const withDistance = elements.map((el) => ({
-        name: el.tags.name,
-        distance: haversine(lat, lon, el.lat, el.lon),
-        bearing: bearingTo(lat, lon, el.lat, el.lon)
-      }));
-
-      withDistance.sort((a, b) => a.distance - b.distance);
-      const nearest = withDistance.slice(0, 10);
-
-      if (nearest.length === 0) {
-        poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Aucun point trouvé à proximité</td></tr>';
-      } else {
-        poiTableBody.innerHTML = nearest.map((p) => `
-          <tr>
-            <td>${p.name}</td>
-            <td>${fmtDistance(p.distance)}</td>
-            <td>${p.bearing}</td>
-          </tr>
-        `).join('');
-      }
-      poiStatus.textContent = 'Autour de : ' + getSourceLabel() + ' · ' + nearest.length + ' point(s) · rayon ' + radius + ' m';
-    } catch (e) {
-      poiStatus.textContent = 'Service Overpass indisponible';
-      poiTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
-    }
-  });
 
   function updateUI(pos) {
     lastPos = pos;
@@ -2057,6 +2011,7 @@
     });
   }
 
+  const poiMap = initSecondaryMap('poiMap');
   const escapeGamesMap = initSecondaryMap('escapeGamesMap');
   const poolsMap = initSecondaryMap('poolsMap');
   const climbingSitesMap = initSecondaryMap('climbingSitesMap');
@@ -2064,6 +2019,20 @@
   const toiletsMap = initSecondaryMap('toiletsMap');
   const drinkingWaterMap = initSecondaryMap('drinkingWaterMap');
   const foodMap = initSecondaryMap('foodMap');
+
+  setupNearbyOverpassFeature({
+    btn: poiBtn,
+    statusEl: poiStatus,
+    tableBody: poiTableBody,
+    map: poiMap,
+    color: '#4FD1C5',
+    radiusM: 1500,
+    maxResults: 10,
+    defaultName: "Point d'intérêt",
+    emptyLabel: "Aucun point d'intérêt trouvé",
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];node(around:${r},${lat},${lon})["name"]["amenity"];out body 200;`
+  });
 
   setupNearbyOverpassFeature({
     btn: escapeGamesBtn,

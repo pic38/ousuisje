@@ -170,6 +170,13 @@
   <details class="feature" data-section="altitude">
     <summary class="feature-summary"><span>Altitude depuis carte IGN</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
+      <div class="map-wrap">
+        <div id="altitudeMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable : sélectionnez un point pour comparer son altitude IGN et Open-Elevation.</span>
+        </div>
+      </div>
+
       <button id="altCompareBtn" class="btn-secondary">Altitude IGN (plus précis, France uniquement)</button>
       <div class="addr-panel">
         <div class="addr-head">
@@ -214,7 +221,7 @@
       <div class="map-wrap">
         <div id="offlineMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Contour du département (exact, en teal). Commune en ambre : cercle indicatif par défaut, ou contour exact une fois les données précises téléchargées ci-dessous.</span>
+          <span class="map-hint">Contour du département (exact, en teal). Commune en ambre : cercle indicatif par défaut, ou contour exact une fois les données précises téléchargées ci-dessous. La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -284,6 +291,8 @@
         </table>
       </div>
       <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). L'API officielle n'étant pas interrogeable directement depuis un navigateur, ce fichier est un instantané figé (127 000 sites — ANFR met à jour sa base chaque semaine) préparé à l'avance plutôt qu'une requête en direct.</p>
+
+      <button id="antennasSearchBtn" class="btn-secondary">Chercher les antennes à proximité</button>
 
       <div class="map-wrap">
         <div id="antennaMap"></div>
@@ -662,6 +671,7 @@
   const antennasRowStatusEl = $('antennasRowStatus');
   const downloadAntennasBtn = $('downloadAntennas');
   const deleteAntennasBtn = $('deleteAntennas');
+  const antennasSearchBtn = $('antennasSearchBtn');
   const antennasSearchStatusEl = $('antennasSearchStatus');
   const antennasTableBody = $('antennasTableBody');
 
@@ -1162,8 +1172,8 @@
     return val != null ? val : null;
   }
 
-  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, sourceLabel, fetchFn) {
-    const point = getReferencePoint();
+  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, sourceLabel, fetchFn, pointOverride, sourceLabelOverride) {
+    const point = pointOverride || getReferencePoint();
     if (!point) {
       statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
       return;
@@ -1204,14 +1214,40 @@
         diffEl.classList.add('dim');
       }
 
-      statusEl.textContent = 'Point comparé : ' + getSourceLabel();
+      statusEl.textContent = 'Point comparé : ' + (sourceLabelOverride || getSourceLabel());
     } catch (e) {
       statusEl.textContent = 'Service ' + sourceLabel + ' indisponible';
     }
   }
 
-  altCompareBtn.addEventListener('click', () => runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude));
-  oeCompareBtn.addEventListener('click', () => runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude));
+  const altitudeMap = initSecondaryMap('altitudeMap');
+  let altitudeMapMarker = null;
+  function placeAltitudeMapMarker(lat, lon) {
+    if (altitudeMapMarker) { altitudeMap.removeLayer(altitudeMapMarker); }
+    altitudeMapMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(altitudeMap);
+    altitudeMap.setView([lat, lon], 13);
+    altitudeMap._homeView = { center: [lat, lon], zoom: 13 };
+  }
+
+  altCompareBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (point) placeAltitudeMapMarker(point.lat, point.lon);
+    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude);
+  });
+  oeCompareBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (point) placeAltitudeMapMarker(point.lat, point.lon);
+    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude);
+  });
+
+  // La carte de cette section est elle-même cliquable : compare l'altitude au point choisi,
+  // indépendamment de la position de référence globale.
+  altitudeMap.on('click', (e) => {
+    const point = { lat: e.latlng.lat, lon: e.latlng.lng, source: 'carte' };
+    placeAltitudeMapMarker(point.lat, point.lon);
+    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude, point, 'point sélectionné sur cette carte');
+    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point, 'point sélectionné sur cette carte');
+  });
 
   // --- Points d'intérêt à proximité (Overpass API) ---
   function bearingTo(lat1, lon1, lat2, lon2) {
@@ -1909,6 +1945,15 @@
     updateAntennasNearby(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte');
   });
 
+  antennasSearchBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      antennasSearchStatusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    updateAntennasNearby(point.lat, point.lon);
+  });
+
   async function downloadAntennas() {
     if (antennasLoading) return;
     const alreadyDownloaded = localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1';
@@ -2495,6 +2540,11 @@
       return;
     }
     updateOfflineGeo(point.lat, point.lon);
+  });
+
+  // La carte de cette section est elle-même cliquable : relance la recherche à cet endroit.
+  offlineMap.on('click', (e) => {
+    updateOfflineGeo(e.latlng.lat, e.latlng.lng);
   });
 
   loadOfflineGeoData()

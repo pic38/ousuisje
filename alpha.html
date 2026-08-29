@@ -22,7 +22,7 @@
     <button id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
   </div>
   <label class="settings-check"><input type="checkbox" data-section="localisation" checked><span>Localisation administrative</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Détails techniques GPS</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Réglages et détails GPS</span></label>
   <label class="settings-check"><input type="checkbox" data-section="poi" checked><span>Points d'intérêt à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte</span></label>
   <label class="settings-check"><input type="checkbox" data-section="offline-geo" checked><span>Département et commune hors ligne</span></label>
@@ -105,11 +105,15 @@
   </details>
 
   <details class="feature" data-section="diag">
-    <summary class="feature-summary"><span>Détails techniques GPS</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Réglages et détails GPS</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <label class="keep-alive-toggle">
-        <input type="checkbox" id="keepAliveCheckbox" />
-        <span>Garder le GPS actif (désactive l'arrêt automatique)</span>
+        <input type="checkbox" id="autoLocateCheckbox" />
+        <span>Activer la localisation à l'ouverture de l'app</span>
+      </label>
+      <label class="keep-alive-toggle">
+        <input type="checkbox" id="autoStopCheckbox" />
+        <span>Désactiver le GPS au bout d'une minute</span>
       </label>
       <div id="autoStopCountdown" class="countdown"></div>
       <div class="addr-panel">
@@ -574,7 +578,8 @@
   const sourceBadge = $('sourceBadge');
   const sourceBadgeText = $('sourceBadgeText');
   const badgeHint = $('badgeHint');
-  const keepAliveCheckbox = $('keepAliveCheckbox');
+  const autoStopCheckbox = $('autoStopCheckbox');
+  const autoLocateCheckbox = $('autoLocateCheckbox');
   const autoStopCountdown = $('autoStopCountdown');
   const osmLink = $('osmLink');
   const googleMapsLink = $('googleMapsLink');
@@ -1343,7 +1348,7 @@
       if (lastRawPos) updateUI(lastRawPos);
     }, 1000);
 
-    if (!keepAliveCheckbox.checked) {
+    if (autoStopCheckbox.checked) {
       autoStopRemaining = AUTO_STOP_SECONDS;
       updateCountdownDisplay();
       countdownInterval = setInterval(() => {
@@ -1375,9 +1380,9 @@
     updateSourceBadge();
   }
 
-  keepAliveCheckbox.addEventListener('change', () => {
+  autoStopCheckbox.addEventListener('change', () => {
     if (!isTrackingActive()) return;
-    if (keepAliveCheckbox.checked) {
+    if (!autoStopCheckbox.checked) {
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
       autoStopCountdown.textContent = '';
     } else {
@@ -1395,6 +1400,13 @@
   });
 
   locateBtn.addEventListener('click', () => { if (isTrackingActive()) stopWatch(); else startWatch(); });
+
+  const AUTO_LOCATE_STORAGE_KEY = 'ousuisje_alpha_auto_locate';
+  autoLocateCheckbox.checked = localStorage.getItem(AUTO_LOCATE_STORAGE_KEY) === '1';
+  autoLocateCheckbox.addEventListener('change', () => {
+    localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, autoLocateCheckbox.checked ? '1' : '0');
+  });
+  if (autoLocateCheckbox.checked) startWatch();
 
   // --- Radar de pluie (RainViewer) ---
   const radarMap = initSecondaryMap('radarMap');

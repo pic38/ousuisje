@@ -26,12 +26,20 @@
   <label class="settings-check"><input type="checkbox" data-section="poi" checked><span>Points d'intérêt à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte</span></label>
   <label class="settings-check"><input type="checkbox" data-section="offline-geo" checked><span>Département et commune hors ligne</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="antennas" checked><span>Antennes relais (2G, 3G, 4G, 5G)</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="antennas"><span>Antennes relais (2G, 3G, 4G, 5G)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="pools" checked><span>Piscines à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-sites" checked><span>Sites d'escalade à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de précipitations</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="food" checked><span>De quoi manger à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de pluie</span></label>
+  <div id="settingsCustomList"></div>
+  <div class="settings-custom-add">
+    <input type="text" id="customSectionInput" class="settings-custom-input" placeholder="Ajouter un lieu : pharmacie, boulangerie…" />
+    <button type="button" id="customSectionAddBtn" class="settings-bulk-btn">Ajouter</button>
+  </div>
 </div>
 
 <div class="wrap">
@@ -400,19 +408,109 @@
     </div>
   </details>
 
-  <details class="feature" data-section="radar">
-    <summary class="feature-summary"><span>Radar de précipitations</span><span class="feature-chevron">▾</span></summary>
+  <details class="feature" data-section="toilets">
+    <summary class="feature-summary"><span>Toilettes à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
+      <button id="toiletsBtn" class="btn-secondary">Chercher les toilettes à proximité</button>
+
       <div class="map-wrap">
-        <div id="radarMap"></div>
+        <div id="toiletsMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Radar de précipitations en filigrane sur la carte OpenStreetMap.</span>
+          <span class="map-hint">Les 10 toilettes publiques les plus proches de la position actuelle.</span>
         </div>
       </div>
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Radar de précipitations</span>
+          <span>Toilettes à proximité</span>
+          <span id="toiletsStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="toiletsTableBody">
+            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Toilettes : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="drinking-water">
+    <summary class="feature-summary"><span>Eau potable à proximité</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button id="drinkingWaterBtn" class="btn-secondary">Chercher des points d'eau potable à proximité</button>
+
+      <div class="map-wrap">
+        <div id="drinkingWaterMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Les 10 points d'eau potable les plus proches de la position actuelle.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Eau potable à proximité</span>
+          <span id="drinkingWaterStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="drinkingWaterTableBody">
+            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Eau potable : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="food">
+    <summary class="feature-summary"><span>De quoi manger à proximité</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button id="foodBtn" class="btn-secondary">Chercher de quoi manger à proximité</button>
+
+      <div class="map-wrap">
+        <div id="foodMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Les 10 restaurants, snacks et cafés les plus proches de la position actuelle.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>De quoi manger à proximité</span>
+          <span id="foodStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th></tr>
+          </thead>
+          <tbody id="foodTableBody">
+            <tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Restauration : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="radar">
+    <summary class="feature-summary"><span>Radar de pluie</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="map-wrap">
+        <div id="radarMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Radar de pluie en filigrane sur la carte OpenStreetMap.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Radar de pluie</span>
           <span id="radarTimestamp">Chargement…</span>
         </div>
         <div style="padding: 12px 16px; display:flex; align-items:center; justify-content:center; gap:10px;">
@@ -429,6 +527,8 @@
       <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
     </div>
   </details>
+
+  <div id="customSectionsAnchor"></div>
 
   <footer>
     <div class="footer-nav">
@@ -541,10 +641,21 @@
   const climbingGymsBtn = $('climbingGymsBtn');
   const climbingGymsStatusEl = $('climbingGymsStatus');
   const climbingGymsTableBody = $('climbingGymsTableBody');
+  const toiletsBtn = $('toiletsBtn');
+  const toiletsStatusEl = $('toiletsStatus');
+  const toiletsTableBody = $('toiletsTableBody');
+  const drinkingWaterBtn = $('drinkingWaterBtn');
+  const drinkingWaterStatusEl = $('drinkingWaterStatus');
+  const drinkingWaterTableBody = $('drinkingWaterTableBody');
+  const foodBtn = $('foodBtn');
+  const foodStatusEl = $('foodStatus');
+  const foodTableBody = $('foodTableBody');
 
   // --- Sections dépliables : une seule ouverte à la fois, alignée en haut de l'écran ---
-  const featureSections = Array.from(document.querySelectorAll('details.feature'));
-  featureSections.forEach((section) => {
+  // (tableau mutable : les sections ajoutées dynamiquement par mot-clé s'y ajoutent aussi)
+  const featureSections = [];
+  function wireAccordionSection(section) {
+    featureSections.push(section);
     section.addEventListener('toggle', () => {
       if (!section.open) return;
       featureSections.forEach((other) => {
@@ -553,13 +664,28 @@
       const top = section.getBoundingClientRect().top + window.scrollY - 8;
       window.scrollTo({ top, behavior: 'smooth' });
     });
-  });
+  }
+  Array.from(document.querySelectorAll('details.feature')).forEach(wireAccordionSection);
 
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
+  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas']); // masquées par défaut tant que l'utilisateur ne les active pas
   const settingsBtn = $('settingsBtn');
   const settingsPanel = $('settingsPanel');
-  const sectionCheckboxes = Array.from(settingsPanel.querySelectorAll('input[type="checkbox"]'));
+  const sectionCheckboxes = [];
+  function wireVisibilityCheckbox(cb) {
+    sectionCheckboxes.push(cb);
+    cb.addEventListener('change', () => {
+      const prefs = loadVisibilityPrefs();
+      prefs[cb.dataset.section] = cb.checked;
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+      applySectionVisibility();
+    });
+  }
+
+  function defaultSectionVisible(id) {
+    return !DEFAULT_HIDDEN_SECTIONS.has(id);
+  }
 
   function loadVisibilityPrefs() {
     try {
@@ -570,25 +696,22 @@
     }
   }
 
+  function isSectionVisible(id, prefs) {
+    const stored = prefs[id];
+    return stored !== undefined ? stored : defaultSectionVisible(id);
+  }
+
   function applySectionVisibility() {
     const prefs = loadVisibilityPrefs();
     featureSections.forEach((section) => {
-      const visible = prefs[section.dataset.section] !== false; // visible par défaut
-      section.style.display = visible ? '' : 'none';
+      section.style.display = isSectionVisible(section.dataset.section, prefs) ? '' : 'none';
     });
     sectionCheckboxes.forEach((cb) => {
-      cb.checked = prefs[cb.dataset.section] !== false;
+      cb.checked = isSectionVisible(cb.dataset.section, prefs);
     });
   }
 
-  sectionCheckboxes.forEach((cb) => {
-    cb.addEventListener('change', () => {
-      const prefs = loadVisibilityPrefs();
-      prefs[cb.dataset.section] = cb.checked;
-      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
-      applySectionVisibility();
-    });
-  });
+  Array.from(settingsPanel.querySelectorAll('input[type="checkbox"]')).forEach(wireVisibilityCheckbox);
 
   function setAllSectionsVisibility(visible) {
     const prefs = loadVisibilityPrefs();
@@ -1206,7 +1329,7 @@
 
   locateBtn.addEventListener('click', () => { if (isTrackingActive()) stopWatch(); else startWatch(); });
 
-  // --- Radar de précipitations (RainViewer) ---
+  // --- Radar de pluie (RainViewer) ---
   const radarMap = initSecondaryMap('radarMap');
   const RADAR_COLOR = 2;
   const RADAR_OPTIONS_SUFFIX = '1_1';
@@ -1740,6 +1863,9 @@
   const poolsMap = initSecondaryMap('poolsMap');
   const climbingSitesMap = initSecondaryMap('climbingSitesMap');
   const climbingGymsMap = initSecondaryMap('climbingGymsMap');
+  const toiletsMap = initSecondaryMap('toiletsMap');
+  const drinkingWaterMap = initSecondaryMap('drinkingWaterMap');
+  const foodMap = initSecondaryMap('foodMap');
 
   setupNearbyOverpassFeature({
     btn: escapeGamesBtn,
@@ -1795,6 +1921,248 @@
     emptyLabel: "Aucune salle d'escalade trouvée",
     buildQuery: (lat, lon, r) =>
       `[out:json][timeout:20];(node["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon});way["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon}););out center 200;`
+  });
+
+  setupNearbyOverpassFeature({
+    btn: toiletsBtn,
+    statusEl: toiletsStatusEl,
+    tableBody: toiletsTableBody,
+    map: toiletsMap,
+    color: '#6C7A89',
+    radiusM: 2000,
+    maxResults: 10,
+    defaultName: 'Toilettes',
+    emptyLabel: 'Aucune toilette trouvée',
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["amenity"="toilets"](around:${r},${lat},${lon});way["amenity"="toilets"](around:${r},${lat},${lon}););out center 200;`
+  });
+
+  setupNearbyOverpassFeature({
+    btn: drinkingWaterBtn,
+    statusEl: drinkingWaterStatusEl,
+    tableBody: drinkingWaterTableBody,
+    map: drinkingWaterMap,
+    color: '#2AABE2',
+    radiusM: 2000,
+    maxResults: 10,
+    defaultName: 'Eau potable',
+    emptyLabel: "Aucun point d'eau potable trouvé",
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];node["amenity"="drinking_water"](around:${r},${lat},${lon});out body 200;`
+  });
+
+  setupNearbyOverpassFeature({
+    btn: foodBtn,
+    statusEl: foodStatusEl,
+    tableBody: foodTableBody,
+    map: foodMap,
+    color: '#E24A4A',
+    radiusM: 2000,
+    maxResults: 10,
+    defaultName: 'Restauration',
+    emptyLabel: 'Aucun endroit pour manger trouvé',
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["amenity"~"restaurant|fast_food|cafe"](around:${r},${lat},${lon});way["amenity"~"restaurant|fast_food|cafe"](around:${r},${lat},${lon}););out center 200;`
+  });
+
+  // --- Sections personnalisées par mot-clé (réglages) ---
+  // Traduit quelques mots-clés français courants vers les tags OSM correspondants ;
+  // pour un mot-clé inconnu, on cherche en repli dans amenity/shop/name (comme du texte libre).
+  const KEYWORD_TAG_MAP = {
+    'pharmacie': 'amenity=pharmacy',
+    'boulangerie': 'shop=bakery',
+    'boucherie': 'shop=butcher',
+    'banque': 'amenity=bank',
+    'distributeur': 'amenity=atm',
+    'distributeur de billets': 'amenity=atm',
+    'atm': 'amenity=atm',
+    'supermarché': 'shop=supermarket',
+    'supermarche': 'shop=supermarket',
+    'epicerie': 'shop=convenience',
+    'épicerie': 'shop=convenience',
+    'hopital': 'amenity=hospital',
+    'hôpital': 'amenity=hospital',
+    'medecin': 'amenity=doctors',
+    'médecin': 'amenity=doctors',
+    'dentiste': 'amenity=dentist',
+    'veterinaire': 'amenity=veterinary',
+    'vétérinaire': 'amenity=veterinary',
+    'hotel': 'tourism=hotel',
+    'hôtel': 'tourism=hotel',
+    'camping': 'tourism=camp_site',
+    'coiffeur': 'shop=hairdresser',
+    'essence': 'amenity=fuel',
+    'station-service': 'amenity=fuel',
+    'station essence': 'amenity=fuel',
+    'parking': 'amenity=parking',
+    'bar': 'amenity=bar',
+    'cinema': 'amenity=cinema',
+    'cinéma': 'amenity=cinema',
+    'bibliotheque': 'amenity=library',
+    'bibliothèque': 'amenity=library',
+    'poste': 'amenity=post_office',
+    'laverie': 'shop=laundry',
+    'pressing': 'shop=dry_cleaning',
+    'fleuriste': 'shop=florist',
+    'librairie': 'shop=books',
+    'vetements': 'shop=clothes',
+    'vêtements': 'shop=clothes',
+    'opticien': 'shop=optician',
+    'musee': 'tourism=museum',
+    'musée': 'tourism=museum',
+    'ecole': 'amenity=school',
+    'école': 'amenity=school',
+    'gare': 'railway=station',
+    'aire de jeux': 'leisure=playground',
+    'garage': 'shop=car_repair',
+    'boucher': 'shop=butcher',
+    'patisserie': 'shop=pastry',
+    'pâtisserie': 'shop=pastry',
+    'bijouterie': 'shop=jewelry',
+    'animalerie': 'shop=pet',
+    'quincaillerie': 'shop=hardware',
+    'jardinerie': 'shop=garden_centre'
+  };
+  const CUSTOM_SECTION_COLORS = ['#4FD1C5', '#E8A33D', '#8B5CF6', '#22A6D9', '#F2994A', '#2FB344', '#6C7A89', '#2AABE2'];
+  const CUSTOM_SECTIONS_KEY = 'ousuisje_alpha_custom_sections';
+  let customSectionSeq = 0;
+
+  function loadCustomSections() {
+    try {
+      const raw = localStorage.getItem(CUSTOM_SECTIONS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveCustomSections(list) {
+    localStorage.setItem(CUSTOM_SECTIONS_KEY, JSON.stringify(list));
+  }
+
+  function buildQueryForKeyword(keyword) {
+    const kw = keyword.trim().toLowerCase();
+    const mapped = KEYWORD_TAG_MAP[kw];
+    if (mapped) {
+      const eq = mapped.indexOf('=');
+      const tagKey = mapped.slice(0, eq);
+      const tagVal = mapped.slice(eq + 1);
+      return (lat, lon, r) =>
+        `[out:json][timeout:20];(node["${tagKey}"="${tagVal}"](around:${r},${lat},${lon});way["${tagKey}"="${tagVal}"](around:${r},${lat},${lon}););out center 200;`;
+    }
+    const esc = kw.replace(/["\\]/g, '');
+    return (lat, lon, r) =>
+      `[out:json][timeout:20];(nwr["amenity"~"${esc}",i](around:${r},${lat},${lon});nwr["shop"~"${esc}",i](around:${r},${lat},${lon});nwr["name"~"${esc}",i](around:${r},${lat},${lon}););out center 200;`;
+  }
+
+  const customSectionsAnchor = $('customSectionsAnchor');
+  const settingsCustomList = $('settingsCustomList');
+
+  function addCustomSection(keyword, opts) {
+    opts = opts || {};
+    const label = opts.label || (keyword.charAt(0).toUpperCase() + keyword.slice(1));
+    const id = 'custom-' + (customSectionSeq++);
+    const mapId = 'customMap' + id;
+    const color = CUSTOM_SECTION_COLORS[customSectionSeq % CUSTOM_SECTION_COLORS.length];
+
+    const details = document.createElement('details');
+    details.className = 'feature';
+    details.dataset.section = id;
+    details.innerHTML = `
+      <summary class="feature-summary">
+        <span style="flex:1;">${label} à proximité</span>
+        <button type="button" class="feature-summary-remove" title="Retirer cette section">✕</button>
+        <span class="feature-chevron">▾</span>
+      </summary>
+      <div class="feature-body">
+        <button type="button" class="btn-secondary custom-search-btn">Chercher « ${label} » à proximité</button>
+        <div class="map-wrap">
+          <div id="${mapId}"></div>
+          <div class="map-footer"><span class="map-hint">Les 10 résultats les plus proches de la position actuelle.</span></div>
+        </div>
+        <div class="addr-panel">
+          <div class="addr-head"><span>${label} à proximité</span><span class="custom-status">—</span></div>
+          <table class="poi-table">
+            <thead><tr><th>Nom</th><th>Distance</th></tr></thead>
+            <tbody class="custom-table-body"><tr><td colspan="2" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>
+          </table>
+        </div>
+        <p class="osm-credit">Résultat : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API) — section personnalisée ajoutée depuis les réglages.</p>
+      </div>
+    `;
+    customSectionsAnchor.parentNode.insertBefore(details, customSectionsAnchor);
+    wireAccordionSection(details);
+
+    const checkLabel = document.createElement('label');
+    checkLabel.className = 'settings-check';
+    checkLabel.innerHTML = `<input type="checkbox" data-section="${id}" checked><span>${label} (perso.)</span><button type="button" class="settings-check-remove" title="Retirer">✕</button>`;
+    settingsCustomList.appendChild(checkLabel);
+    const cb = checkLabel.querySelector('input');
+    wireVisibilityCheckbox(cb);
+
+    const btn = details.querySelector('.custom-search-btn');
+    const statusEl = details.querySelector('.custom-status');
+    const tableBody = details.querySelector('.custom-table-body');
+    const secMap = initSecondaryMap(mapId);
+
+    setupNearbyOverpassFeature({
+      btn: btn,
+      statusEl: statusEl,
+      tableBody: tableBody,
+      map: secMap,
+      color: color,
+      radiusM: 5000,
+      maxResults: 10,
+      defaultName: label,
+      emptyLabel: `Aucun résultat pour « ${label} »`,
+      buildQuery: buildQueryForKeyword(keyword)
+    });
+
+    function removeThisSection() {
+      const idx = featureSections.indexOf(details);
+      if (idx !== -1) featureSections.splice(idx, 1);
+      const cbIdx = sectionCheckboxes.indexOf(cb);
+      if (cbIdx !== -1) sectionCheckboxes.splice(cbIdx, 1);
+      if (secMap.remove) secMap.remove();
+      details.remove();
+      checkLabel.remove();
+      saveCustomSections(loadCustomSections().filter((s) => s.id !== id));
+      const prefs = loadVisibilityPrefs();
+      delete prefs[id];
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+    }
+    details.querySelector('.feature-summary-remove').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      removeThisSection();
+    });
+    checkLabel.querySelector('.settings-check-remove').addEventListener('click', removeThisSection);
+
+    if (!opts.silent) {
+      saveCustomSections(loadCustomSections().concat([{ id: id, keyword: keyword, label: label }]));
+      applySectionVisibility();
+      details.open = true; // ouvre la nouvelle section (referme les autres via l'accordéon)
+    }
+
+    return details;
+  }
+
+  // Recrée les sections personnalisées ajoutées lors d'une visite précédente.
+  loadCustomSections().forEach((s) => {
+    customSectionSeq = Math.max(customSectionSeq, parseInt((s.id || '').replace('custom-', ''), 10) + 1 || 0);
+  });
+  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { label: s.label, silent: true }));
+  applySectionVisibility();
+
+  const customSectionInput = $('customSectionInput');
+  const customSectionAddBtn = $('customSectionAddBtn');
+  customSectionAddBtn.addEventListener('click', () => {
+    const kw = customSectionInput.value.trim();
+    if (!kw) return;
+    addCustomSection(kw);
+    customSectionInput.value = '';
+  });
+  customSectionInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); customSectionAddBtn.click(); }
   });
 
   async function loadOfflineGeoData() {

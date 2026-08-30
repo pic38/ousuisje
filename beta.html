@@ -187,9 +187,9 @@
         </div>
         <div class="addr-row"><span class="k">Altitude GPS</span><span id="altGpsVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Altitude IGN au point GPS</span><span id="altIgnVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart GPS - IGN(GPS)</span><span id="altDiffVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Altitude IGN au point cliqué sur la carte</span><span id="altIgnClickVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Écart GPS-IGN(gps)</span><span id="altDiffVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Écart IGN(gps)-IGN(Point sélectionné sur la carte)</span><span id="altDiffGpsClickVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart IGN(Point cliqué) - IGN(GPS)</span><span id="altDiffGpsClickVal" class="v dim">—</span></div>
       </div>
       <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
 
@@ -1325,7 +1325,7 @@
 
     altDiffGpsClickVal.classList.remove('v-amber', 'v-teal');
     if (ignAltAtGps != null && ignAltAtClick != null) {
-      const diff = ignAltAtGps - ignAltAtClick;
+      const diff = ignAltAtClick - ignAltAtGps;
       altDiffGpsClickVal.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
       altDiffGpsClickVal.classList.remove('dim');
       altDiffGpsClickVal.classList.add('copyable', 'v-teal');

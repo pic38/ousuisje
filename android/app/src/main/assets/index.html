@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>OuSuisJe — Retrouvez l'adresse, et plus encore !</title>
+<meta name="description" content="OuSuisJe retrouve votre adresse, l'altitude et les points d'intérêt autour de vous, via le GPS ou un simple clic sur la carte. Installable comme application." />
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0B1220" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="OuSuisJe" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+<body>
+
+<button type="button" id="settingsBtn" class="settings-btn" aria-label="Réglages" aria-expanded="false" aria-haspopup="true">⚙</button>
+<div id="settingsPanel" class="settings-panel is-hidden">
+  <div class="settings-panel-title">Sections affichées</div>
+  <div class="settings-bulk">
+    <button type="button" id="settingsResetDefault" type="button" class="settings-bulk-btn">Affichage par défaut</button>
+  </div>
+  <div class="settings-bulk">
+    <button type="button" id="settingsCheckAll" type="button" class="settings-bulk-btn">Tout cocher</button>
+    <button type="button" id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
+  </div>
+  <label class="settings-check"><input type="checkbox" data-section="localisation" checked><span>Localisation administrative</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Réglages et détails GPS</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="poi" checked><span>Points d'intérêt</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte IGN</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="offline-geo"><span>Département et commune</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="antennas"><span>Antennes relais 2G 3G 4G 5G</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="food" checked><span>De quoi manger</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de précipitations</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
+  <div id="settingsCustomList"></div>
+  <div class="settings-custom-add">
+    <input type="text" id="customSectionInput" class="settings-custom-input" placeholder="Ajouter un lieu : pharmacie, boulangerie…" />
+    <button type="button" id="customSectionAddBtn" class="settings-bulk-btn">Ajouter</button>
+  </div>
+  <div class="settings-bulk">
+    <button type="button" id="settingsCloseBtn" class="settings-bulk-btn">Fermer</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">OuSuisJe · outils de localisation</div>
+    <h1>Trouvez l'adresse et plus encore !</h1>
+  </header>
+
+  <button type="button" id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
+
+  <div class="status-line">
+    <span id="statusDot" class="dot"></span>
+    <span id="statusText">En attente</span>
+  </div>
+
+  <div class="grid">
+    <div class="cell">
+      <div class="label">Précision horizontale</div>
+      <div id="accVal" class="value dim">—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Altitude GPS</div>
+      <div id="altVal" class="value dim">—</div>
+    </div>
+  </div>
+  <p id="accuracyWarning" class="accuracy-warning" style="display:none;"></p>
+
+  <details class="feature" data-section="localisation" open>
+    <summary class="feature-summary"><span>Localisation administrative</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span id="addrStatus">—</span>
+        </div>
+        <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Lieu-dit</span><span id="addrLieuDit" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Code postal</span><span id="addrCP" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Commune</span><span id="addrCommune" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Département</span><span id="addrDept" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Région</span><span id="addrRegion" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
+      </div>
+      <button type="button" id="shareAddressBtn" class="btn-secondary" disabled>Partager l'adresse</button>
+
+      <div class="source-mini-badge is-hidden" id="mapSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="map"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <a id="googleMapsLink" class="map-link" href="https://www.google.com/maps" target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
+          <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir dans OpenStreetMap ↗</a>
+        </div>
+      </div>
+      <p class="osm-credit">Carte et adresse : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="diag">
+    <summary class="feature-summary"><span>Réglages et détails GPS</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <label class="keep-alive-toggle">
+        <input type="checkbox" id="autoLocateCheckbox" />
+        <span>Activer la localisation à l'ouverture de l'app</span>
+      </label>
+      <label class="keep-alive-toggle">
+        <input type="checkbox" id="autoStopCheckbox" />
+        <span>Désactiver le GPS au bout d'une minute</span>
+      </label>
+      <div id="autoStopCountdown" class="countdown"></div>
+      <div class="addr-panel">
+        <div class="addr-row"><span class="k">Coordonnées</span><span id="diagPosition" class="v dim placeholder">—</span></div>
+        <div class="addr-row"><span class="k">Vitesse</span><span id="spdVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Cap</span><span id="hdgVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Heure</span><span id="tsVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Précision altitude</span><span id="altAccVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Décalage altitude</span>
+          <span class="v" style="display:flex; align-items:center; gap:6px;">
+            <input type="number" id="altOffsetInput" step="1" placeholder="0" class="altitude-offset-input" /> m
+          </span>
+        </div>
+        <div class="addr-row"><span class="k">État du fix</span><span id="diagFixState" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Âge du relevé</span><span id="diagFixAge" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Relevés reçus</span><span id="diagFixCount" class="v dim">0</span></div>
+        <div class="addr-row"><span class="k">Précision brute</span><span id="diagRawAcc" class="v dim">—</span></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="feature" data-section="poi">
+    <summary class="feature-summary"><span>Points d'intérêt</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="poiBtn" class="btn-secondary">Trouver les points d'intérêt</button>
+
+      <div class="source-mini-badge is-hidden" id="poiSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="poiMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Points d'intérêt</span>
+          <span id="poiStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead><tr><th>Nom</th><th>Distance</th><th>Direction</th></tr></thead>
+          <tbody id="poiTableBody"><tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Points d'intérêt : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="altitude">
+    <summary class="feature-summary"><span>Altitude depuis carte IGN</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="source-mini-badge is-hidden" id="altitudeSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="altitudeMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <button type="button" id="altCompareBtn" class="btn-secondary">Altitude IGN (plus précis, France uniquement)</button>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Comparaison d'altitude — IGN</span>
+          <span id="altCompareStatus">—</span>
+        </div>
+        <div class="addr-row"><span class="k">Altitude GPS</span><span id="altGpsVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude IGN (RGE ALTI)</span><span id="altIgnVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart</span><span id="altDiffVal" class="v dim">—</span></div>
+      </div>
+      <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
+
+      <button type="button" id="oeCompareBtn" class="btn-secondary">Altitude Open-Elevation (moins précis, Monde entier)</button>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Comparaison d'altitude — Open-Elevation</span>
+          <span id="oeCompareStatus">—</span>
+        </div>
+        <div class="addr-row"><span class="k">Altitude GPS</span><span id="oeGpsVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude Open-Elevation</span><span id="oeVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart</span><span id="oeDiffVal" class="v dim">—</span></div>
+      </div>
+      <p class="osm-credit">Altitude : service public <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (données SRTM)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="offline-geo">
+    <summary class="feature-summary"><span>Département et commune</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="offlineGeoBtn" class="btn-secondary">Trouver le département et la commune</button>
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Département et commune (Mode hors ligne)</span>
+        </div>
+        <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Région</span><span id="offlineRegion" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Code postal</span><span id="offlineCP" class="v dim">—</span></div>
+      </div>
+      <div class="source-mini-badge is-hidden" id="offlineSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="offlineMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Contours précis des communes (optionnel)</span>
+        </div>
+        <table class="contours-table">
+          <colgroup>
+            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+          </colgroup>
+          <thead>
+            <tr><th>Version</th><th>Statut</th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cercles (1,4 Mo)</td>
+              <td id="statusCentroides" class="dim">Téléchargées, actives</td>
+              <td><button type="button" id="activateCentroides" class="btn-secondary" disabled>Actif ✓</button></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Polygones (6,7 Mo)</td>
+              <td id="statusSimplifiee" class="dim">Non téléchargée</td>
+              <td><button type="button" id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deleteSimplifiee" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+            </tr>
+            <tr>
+              <td>Détaillée (16 Mo)</td>
+              <td id="statusPrecise" class="dim">Non téléchargée</td>
+              <td><button type="button" id="downloadPrecise" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deletePrecise" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Contours : © IGN Admin Express, via le projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a></p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="antennas">
+    <summary class="feature-summary"><span>Antennes relais 2G 3G 4G 5G</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Antennes relais ANFR (hors ligne, sur demande)</span>
+        </div>
+        <table class="contours-table">
+          <colgroup>
+            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+          </colgroup>
+          <thead>
+            <tr><th>Jeu de données</th><th>Statut</th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sites ANFR, 4 opérateurs (1,3 Mo)</td>
+              <td id="antennasRowStatus" class="dim">Non téléchargées</td>
+              <td><button type="button" id="downloadAntennas" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deleteAntennas" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). Ce fichier est un instantané figé (127 000 sites — ANFR met à jour sa base chaque semaine).</p>
+
+      <button type="button" id="antennasSearchBtn" class="btn-secondary">Trouver les antennes</button>
+
+      <div class="source-mini-badge is-hidden" id="antennaSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="antennaMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Antennes</span>
+          <span id="antennasSearchStatus">—</span>
+        </div>
+        <div id="antennaOperatorFilter" class="operator-filter">
+          <label class="operator-filter-check"><input type="checkbox" data-op="ORANGE" checked><span class="operator-dot" style="background:#FF7900;"></span>Orange</label>
+          <label class="operator-filter-check"><input type="checkbox" data-op="SFR" checked><span class="operator-dot" style="background:#E2001A;"></span>SFR</label>
+          <label class="operator-filter-check"><input type="checkbox" data-op="BOUYGUES TELECOM" checked><span class="operator-dot" style="background:#0055A4;"></span>Bouygues</label>
+          <label class="operator-filter-check"><input type="checkbox" data-op="FREE MOBILE" checked><span class="operator-dot" style="background:#2FB344;"></span>Free</label>
+        </div>
+        <table id="antennasTable" class="poi-table">
+          <thead>
+            <tr><th>Opérateur</th><th>Générations</th><th>Distance</th><th>Direction</th></tr>
+          </thead>
+          <tbody id="antennasTableBody">
+            <tr><td colspan="4" class="dim">Téléchargez les données, puis lancez une recherche.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="feature" data-section="escape-games">
+    <summary class="feature-summary"><span>Escape games</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="escapeGamesBtn" class="btn-secondary">Trouver les escape games</button>
+
+      <div class="source-mini-badge is-hidden" id="escapeGamesSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="escapeGamesMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Escape games</span>
+          <span id="escapeGamesStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
+          </thead>
+          <tbody id="escapeGamesTableBody">
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Escape games : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="climbing-gyms">
+    <summary class="feature-summary"><span>Salles d'escalade</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="climbingGymsBtn" class="btn-secondary">Trouver les salles d'escalade</button>
+
+      <div class="source-mini-badge is-hidden" id="climbingGymsSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="climbingGymsMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Salles d'escalade</span>
+          <span id="climbingGymsStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
+          </thead>
+          <tbody id="climbingGymsTableBody">
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Salles d'escalade : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="toilets">
+    <summary class="feature-summary"><span>Toilettes</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="toiletsBtn" class="btn-secondary">Trouver les toilettes</button>
+
+      <div class="source-mini-badge is-hidden" id="toiletsSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="toiletsMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Toilettes</span>
+          <span id="toiletsStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
+          </thead>
+          <tbody id="toiletsTableBody">
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Toilettes : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="drinking-water">
+    <summary class="feature-summary"><span>Eau potable</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="drinkingWaterBtn" class="btn-secondary">Trouver des points d'eau potable</button>
+
+      <div class="source-mini-badge is-hidden" id="drinkingWaterSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="drinkingWaterMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Eau potable</span>
+          <span id="drinkingWaterStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
+          </thead>
+          <tbody id="drinkingWaterTableBody">
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">Eau potable : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="food">
+    <summary class="feature-summary"><span>De quoi manger</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <button type="button" id="foodBtn" class="btn-secondary">Trouver de quoi manger</button>
+
+      <div class="source-mini-badge is-hidden" id="foodSourceBadge">Source : —</div>
+      <div class="map-wrap">
+        <div id="foodMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>De quoi manger</span>
+          <span id="foodStatus">—</span>
+        </div>
+        <table class="poi-table">
+          <thead>
+            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
+          </thead>
+          <tbody id="foodTableBody">
+            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="osm-credit">De quoi manger : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+    </div>
+  </details>
+
+  <details class="feature" data-section="radar">
+    <summary class="feature-summary"><span>Radar de précipitations</span><span class="feature-chevron">▾</span></summary>
+    <div class="feature-body">
+      <div class="map-wrap">
+        <div id="radarMap"></div>
+        <div class="map-footer">
+          <span class="map-hint">Radar de précipitations en filigrane sur la carte OpenStreetMap.</span>
+        </div>
+      </div>
+
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Radar de précipitations</span>
+          <span id="radarTimestamp">Chargement…</span>
+        </div>
+        <div style="padding: 12px 16px; display:flex; align-items:center; justify-content:center; gap:10px;">
+          <button type="button" id="radarPrev" class="btn-secondary" style="padding:10px 14px;">◂</button>
+          <button type="button" id="radarPlay" class="btn-primary" style="padding:10px 20px;">▶ Lecture</button>
+          <button type="button" id="radarNext" class="btn-secondary" style="padding:10px 14px;">▸</button>
+        </div>
+        <div class="addr-row"><span class="k">Opacité du radar</span>
+          <span class="v" style="display:flex; align-items:center; gap:8px;">
+            <input type="range" id="radarOpacity" min="20" max="100" value="75" style="accent-color: var(--teal);" />
+          </span>
+        </div>
+      </div>
+      <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+    </div>
+  </details>
+
+  <div id="customSectionsAnchor"></div>
+
+  <footer>
+    <div class="footer-nav">
+      <a href="beta.html">Bêta</a>
+      <a href="about.html">À propos</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+    </div>
+    <div class="visit-counter">Visites : <span id="visitCount">…</span></div>
+    Ajoutez le site à l'écran d'accueil de votre smartphone, il se comportera alors comme une application classique et fonctionnera hors ligne pour les fonctions qui le permettent.
+  </footer>
+
+  <div class="actions">
+    <button type="button" id="installBtn" class="btn-secondary">Ajouter à l'écran d'accueil</button>
+    <p id="installNote" class="install-note"></p>
+    <button type="button" id="shareBtn" class="btn-secondary">Partager OuSuisJe</button>
+    <p id="shareNote" class="install-note"></p>
+  </div>
+
+  <p class="feedback-note">Une suggestion, un bug à signaler ? N'hésitez pas à écrire à l'adresse indiquée dans les <a href="mentions-legales.html" class="inline">mentions légales</a>.</p>
+  <p class="version-note">Version 0.9</p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  // --- Références DOM ---
+  const statusDot = $('statusDot');
+  const statusText = $('statusText');
+  const diagPosition = $('diagPosition');
+  const accVal = $('accVal');
+  const altVal = $('altVal');
+  const spdVal = $('spdVal');
+  const hdgVal = $('hdgVal');
+  const tsVal = $('tsVal');
+  const altAccVal = $('altAccVal');
+  const altOffsetInput = $('altOffsetInput');
+  const accuracyWarning = $('accuracyWarning');
+  const locateBtn = $('locateBtn');
+  const autoStopCheckbox = $('autoStopCheckbox');
+  const autoLocateCheckbox = $('autoLocateCheckbox');
+  const autoStopCountdown = $('autoStopCountdown');
+  const osmLink = $('osmLink');
+  const googleMapsLink = $('googleMapsLink');
+  const geocodeBtn = $('geocodeBtn');
+  const shareAddressBtn = $('shareAddressBtn');
+  const diagFixState = $('diagFixState');
+  const diagFixAge = $('diagFixAge');
+  const diagFixCount = $('diagFixCount');
+  const diagRawAcc = $('diagRawAcc');
+
+  const addrStatus = $('addrStatus');
+  const mapSourceBadge = $('mapSourceBadge');
+  const addrAdresse = $('addrAdresse');
+  const addrLieuDit = $('addrLieuDit');
+  const addrCP = $('addrCP');
+  const addrCommune = $('addrCommune');
+  const addrDept = $('addrDept');
+  const addrRegion = $('addrRegion');
+  const addrPays = $('addrPays');
+
+  const altitudeSourceBadge = $('altitudeSourceBadge');
+  const altCompareBtn = $('altCompareBtn');
+  const altCompareStatus = $('altCompareStatus');
+  const altGpsVal = $('altGpsVal');
+  const altIgnVal = $('altIgnVal');
+  const altDiffVal = $('altDiffVal');
+
+  const oeCompareBtn = $('oeCompareBtn');
+  const oeCompareStatus = $('oeCompareStatus');
+  const oeGpsVal = $('oeGpsVal');
+  const oeVal = $('oeVal');
+  const oeDiffVal = $('oeDiffVal');
+
+  const poiBtn = $('poiBtn');
+  const poiStatus = $('poiStatus');
+  const poiTableBody = $('poiTableBody');
+  const poiSourceBadge = $('poiSourceBadge');
+
+  const radarTimestamp = $('radarTimestamp');
+  const radarPrev = $('radarPrev');
+  const radarPlay = $('radarPlay');
+  const radarNext = $('radarNext');
+  const radarOpacity = $('radarOpacity');
+
+  const offlineGeoBtn = $('offlineGeoBtn');
+  const offlineSourceBadge = $('offlineSourceBadge');
+  const offlineDeptEl = $('offlineDept');
+  const offlineRegionEl = $('offlineRegion');
+  const offlineCommuneEl = $('offlineCommune');
+  const offlineCPEl = $('offlineCP');
+  const activateCentroidesBtn = $('activateCentroides');
+  const downloadSimplifieeBtn = $('downloadSimplifiee');
+  const downloadPreciseBtn = $('downloadPrecise');
+  const deleteSimplifieeBtn = $('deleteSimplifiee');
+  const deletePreciseBtn = $('deletePrecise');
+  const tierButtons = { centroides: activateCentroidesBtn, simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
+  const tierStatusEls = { centroides: $('statusCentroides'), simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
+  const tierDeleteButtons = { simplifiee: deleteSimplifieeBtn, precise: deletePreciseBtn };
+
+  const antennasRowStatusEl = $('antennasRowStatus');
+  const downloadAntennasBtn = $('downloadAntennas');
+  const deleteAntennasBtn = $('deleteAntennas');
+  const antennasSearchBtn = $('antennasSearchBtn');
+  const antennaSourceBadge = $('antennaSourceBadge');
+  const antennasSearchStatusEl = $('antennasSearchStatus');
+  const antennasTableBody = $('antennasTableBody');
+
+  const escapeGamesBtn = $('escapeGamesBtn');
+  const escapeGamesStatusEl = $('escapeGamesStatus');
+  const escapeGamesTableBody = $('escapeGamesTableBody');
+  const escapeGamesSourceBadge = $('escapeGamesSourceBadge');
+  const climbingGymsBtn = $('climbingGymsBtn');
+  const climbingGymsStatusEl = $('climbingGymsStatus');
+  const climbingGymsTableBody = $('climbingGymsTableBody');
+  const climbingGymsSourceBadge = $('climbingGymsSourceBadge');
+  const toiletsBtn = $('toiletsBtn');
+  const toiletsStatusEl = $('toiletsStatus');
+  const toiletsTableBody = $('toiletsTableBody');
+  const toiletsSourceBadge = $('toiletsSourceBadge');
+  const drinkingWaterBtn = $('drinkingWaterBtn');
+  const drinkingWaterStatusEl = $('drinkingWaterStatus');
+  const drinkingWaterTableBody = $('drinkingWaterTableBody');
+  const drinkingWaterSourceBadge = $('drinkingWaterSourceBadge');
+  const foodBtn = $('foodBtn');
+  const foodStatusEl = $('foodStatus');
+  const foodTableBody = $('foodTableBody');
+  const foodSourceBadge = $('foodSourceBadge');
+
+  // --- Sections dépliables : une seule ouverte à la fois, alignée en haut de l'écran ---
+  // (tableau mutable : les sections ajoutées dynamiquement par mot-clé s'y ajoutent aussi)
+  const featureSections = [];
+  const allMaps = []; // toutes les cartes Leaflet de la page, pour invalidateSize() à l'ouverture de leur section
+  function wireAccordionSection(section) {
+    featureSections.push(section);
+    section.addEventListener('toggle', () => {
+      if (!section.open) return;
+      featureSections.forEach((other) => {
+        if (other !== section) other.open = false;
+      });
+      // Une carte Leaflet créée pendant que son conteneur est masqué (section repliée)
+      // mémorise une taille invalide (0×0) et cadre alors n'importe comment tant qu'on
+      // ne lui redit pas de re-mesurer son conteneur, une fois celui-ci enfin visible.
+      allMaps.forEach((m) => {
+        if (section.contains(m.getContainer())) {
+          setTimeout(() => m.invalidateSize(), 0);
+        }
+      });
+      // Aligne le BAS de la section sur le bas de l'écran (pas le haut), pour garder
+      // la fin de son contenu visible plutôt que son en-tête.
+      const bottom = section.getBoundingClientRect().bottom + window.scrollY + 8;
+      const top = bottom - window.innerHeight;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  }
+  Array.from(document.querySelectorAll('details.feature')).forEach(wireAccordionSection);
+
+  // --- Réglages : sections affichées, personnalisable et mémorisé ---
+  const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
+  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas', 'offline-geo']); // masquées par défaut tant que l'utilisateur ne les active pas
+  const settingsBtn = $('settingsBtn');
+  const settingsPanel = $('settingsPanel');
+  const sectionCheckboxes = [];
+  function wireVisibilityCheckbox(cb) {
+    sectionCheckboxes.push(cb);
+    cb.addEventListener('change', () => {
+      const prefs = loadVisibilityPrefs();
+      prefs[cb.dataset.section] = cb.checked;
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+      applySectionVisibility();
+    });
+  }
+
+  function defaultSectionVisible(id) {
+    return !DEFAULT_HIDDEN_SECTIONS.has(id);
+  }
+
+  function loadVisibilityPrefs() {
+    try {
+      const raw = localStorage.getItem(SECTION_VISIBILITY_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function isSectionVisible(id, prefs) {
+    const stored = prefs[id];
+    return stored !== undefined ? stored : defaultSectionVisible(id);
+  }
+
+  function applySectionVisibility() {
+    const prefs = loadVisibilityPrefs();
+    featureSections.forEach((section) => {
+      section.style.display = isSectionVisible(section.dataset.section, prefs) ? '' : 'none';
+    });
+    sectionCheckboxes.forEach((cb) => {
+      cb.checked = isSectionVisible(cb.dataset.section, prefs);
+    });
+  }
+
+  Array.from(settingsPanel.querySelectorAll('input[type="checkbox"]')).forEach(wireVisibilityCheckbox);
+
+  // --- Réglages : réorganisation des sections par glisser-déposer ---
+  // S'applique à toutes les sections enfants directes du panneau réglages : natives ET
+  // personnalisées par mot-clé (celles-ci sont insérées comme enfants directs de
+  // settingsPanel, juste avant le marqueur settingsCustomList, plutôt que dans un
+  // conteneur imbriqué séparé — voir addCustomSection()). Le câblage effectif (capture de
+  // l'ordre par défaut, poignées sur les sections déjà présentes, application d'un ordre
+  // sauvegardé) se fait plus bas dans le script, une fois les sections personnalisées
+  // recréées depuis le stockage local. Utilise $() directement plutôt que les const
+  // customSectionsAnchor / settingsCustomList (déclarées plus bas dans le script).
+  const SECTION_ORDER_KEY = 'ousuisje_beta_section_order';
+
+  function reorderableCheckLabels() {
+    return Array.from(settingsPanel.children).filter((el) => el.tagName === 'LABEL' && el.classList.contains('settings-check'));
+  }
+  function sectionIdOfLabel(label) {
+    return label.querySelector('input[type="checkbox"]').dataset.section;
+  }
+  function currentSectionOrder() {
+    return reorderableCheckLabels().map(sectionIdOfLabel);
+  }
+  function loadSectionOrder() {
+    try {
+      const raw = localStorage.getItem(SECTION_ORDER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function saveSectionOrder(order) {
+    localStorage.setItem(SECTION_ORDER_KEY, JSON.stringify(order));
+  }
+  function applySectionOrder(order) {
+    const labels = reorderableCheckLabels();
+    const byId = new Map(labels.map((l) => [sectionIdOfLabel(l), l]));
+    const orderedIds = order.filter((id) => byId.has(id));
+    const remainingIds = labels.map(sectionIdOfLabel).filter((id) => orderedIds.indexOf(id) === -1);
+    const finalOrder = orderedIds.concat(remainingIds);
+    const customAnchor = $('customSectionsAnchor');
+    const customListEl = $('settingsCustomList');
+    finalOrder.forEach((id) => {
+      const label = byId.get(id);
+      settingsPanel.insertBefore(label, customListEl);
+      const section = featureSections.find((s) => s.dataset.section === id);
+      if (section) customAnchor.parentNode.insertBefore(section, customAnchor);
+    });
+  }
+
+  // Glisser-déposer (souris et tactile, via Pointer Events), à la poignée dédiée
+  // uniquement (pas toute la ligne, pour ne pas gêner le clic normal sur la case à cocher).
+  let dragState = null;
+
+  function labelAtPointerY(clientY, exceptLabel) {
+    for (const label of reorderableCheckLabels()) {
+      if (label === exceptLabel) continue;
+      const rect = label.getBoundingClientRect();
+      if (clientY >= rect.top && clientY <= rect.bottom) return label;
+    }
+    return null;
+  }
+
+  function onDragPointerMove(e) {
+    if (!dragState || e.pointerId !== dragState.pointerId) return;
+    const draggedLabel = reorderableCheckLabels().find((l) => sectionIdOfLabel(l) === dragState.id);
+    if (!draggedLabel) return;
+    const target = labelAtPointerY(e.clientY, draggedLabel);
+    if (!target) return;
+    const order = currentSectionOrder();
+    const fromIdx = order.indexOf(dragState.id);
+    const toIdx = order.indexOf(sectionIdOfLabel(target));
+    if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+    order.splice(fromIdx, 1);
+    order.splice(toIdx, 0, dragState.id);
+    applySectionOrder(order);
+  }
+
+  function onDragPointerEnd(e) {
+    if (!dragState || (e.pointerId !== undefined && e.pointerId !== dragState.pointerId)) return;
+    const draggedLabel = reorderableCheckLabels().find((l) => sectionIdOfLabel(l) === dragState.id);
+    if (draggedLabel) draggedLabel.classList.remove('is-dragging');
+    saveSectionOrder(currentSectionOrder());
+    dragState = null;
+  }
+
+  document.addEventListener('pointermove', onDragPointerMove);
+  document.addEventListener('pointerup', onDragPointerEnd);
+  document.addEventListener('pointercancel', onDragPointerEnd);
+
+  // Câble la poignée de glissement d'une section (native ou personnalisée) : appelé une
+  // fois pour chaque section déjà présente plus bas dans le script, et directement depuis
+  // addCustomSection() pour toute nouvelle section ajoutée en cours de session.
+  function wireReorderHandle(label) {
+    const id = sectionIdOfLabel(label);
+    const handle = label.querySelector('.settings-drag-handle');
+    if (!handle) return;
+    handle.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragState = { id: id, pointerId: e.pointerId };
+      label.classList.add('is-dragging');
+      try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+  }
+
+  function setAllSectionsVisibility(visible) {
+    const prefs = loadVisibilityPrefs();
+    sectionCheckboxes.forEach((cb) => { prefs[cb.dataset.section] = visible; });
+    localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+    applySectionVisibility();
+  }
+  $('settingsCheckAll').addEventListener('click', () => setAllSectionsVisibility(true));
+  $('settingsUncheckAll').addEventListener('click', () => setAllSectionsVisibility(false));
+
+  // Réinitialise les préférences d'affichage (visible/masqué) ET l'ordre des sections aux
+  // valeurs par défaut ; ne touche pas à la liste des sections personnalisées elle-même
+  // (elles restent définies, seulement replacées à la position de leur création).
+  $('settingsResetDefault').addEventListener('click', () => {
+    localStorage.removeItem(SECTION_VISIBILITY_KEY);
+    localStorage.removeItem(SECTION_ORDER_KEY);
+    applySectionOrder(DEFAULT_SECTION_ORDER.slice());
+    applySectionVisibility();
+  });
+
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = settingsPanel.classList.contains('is-hidden');
+    settingsPanel.classList.toggle('is-hidden', !willOpen);
+    settingsBtn.setAttribute('aria-expanded', String(willOpen));
+  });
+  document.addEventListener('click', (e) => {
+    if (settingsPanel.classList.contains('is-hidden')) return;
+    if (settingsPanel.contains(e.target) || e.target === settingsBtn) return;
+    settingsPanel.classList.add('is-hidden');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  });
+  $('settingsCloseBtn').addEventListener('click', () => {
+    settingsPanel.classList.add('is-hidden');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  applySectionVisibility();
+
+  function setStatus(state, label) {
+    statusDot.className = 'dot' + (state === 'live' ? ' live' : state === 'err' ? ' err' : '');
+    statusText.textContent = label;
+  }
+
+  const FRANCE_BOUNDS = [[41.2, -5.3], [51.2, 9.7]];
+
+  // Bouton "maison" : revient à la vue par défaut de cette carte — les derniers résultats
+  // si elle en a (bounds mémorisées dans targetMap._homeView), sinon la France
+  // entière. Chaque fonctionnalité met à jour targetMap._homeView à chaque nouvelle recherche.
+  function addHomeControl(targetMap) {
+    const HomeControl = L.Control.extend({
+      options: { position: 'bottomright' },
+      onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control home-control');
+        const link = L.DomUtil.create('a', 'home-control-btn', container);
+        link.href = '#';
+        link.title = 'Revenir à la vue par défaut';
+        link.innerHTML = '⌂';
+        L.DomEvent.on(link, 'click', L.DomEvent.stopPropagation)
+          .on(link, 'click', L.DomEvent.preventDefault)
+          .on(link, 'click', () => {
+            const view = targetMap._homeView;
+            if (view && view.bounds) {
+              targetMap.fitBounds(view.bounds, { padding: [24, 24] });
+            } else if (view && view.center) {
+              targetMap.setView(view.center, view.zoom || 6);
+            } else {
+              targetMap.fitBounds(FRANCE_BOUNDS);
+            }
+          });
+        return container;
+      }
+    });
+    targetMap.addControl(new HomeControl());
+  }
+
+  // Contrôles de zoom + bouton maison + bouton de recentrage, groupés en bas à droite de
+  // chaque carte (dans cet ordre) — le recentrage utilise la dernière position GPS reçue
+  // (indépendant d'un éventuel point cliqué).
+  function addRecenterControl(targetMap, zoomFn) {
+    if (targetMap.zoomControl) targetMap.zoomControl.setPosition('bottomright');
+    addHomeControl(targetMap);
+    const RecenterControl = L.Control.extend({
+      options: { position: 'bottomright' },
+      onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control recenter-control');
+        const link = L.DomUtil.create('a', 'recenter-control-btn', container);
+        link.href = '#';
+        link.title = 'Recentrer sur ma position GPS';
+        link.innerHTML = '⌖';
+        L.DomEvent.on(link, 'click', L.DomEvent.stopPropagation)
+          .on(link, 'click', L.DomEvent.preventDefault)
+          .on(link, 'click', () => {
+            if (lastPos) {
+              const zoom = zoomFn ? zoomFn(targetMap) : Math.max(targetMap.getZoom(), 15);
+              targetMap.setView([lastPos.coords.latitude, lastPos.coords.longitude], zoom);
+            }
+          });
+        return container;
+      }
+    });
+    targetMap.addControl(new RecenterControl());
+  }
+
+  function initSecondaryMap(id, opts) {
+    opts = opts || {};
+    const m = L.map(id, { zoomControl: true, attributionControl: false });
+    m.fitBounds(FRANCE_BOUNDS);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
+    addRecenterControl(m, opts.recenterZoomFn);
+    allMaps.push(m);
+    return m;
+  }
+
+  // --- Carte principale OSM (Leaflet), cliquable ---
+  const map = L.map('map', { zoomControl: true, attributionControl: false });
+  map.fitBounds(FRANCE_BOUNDS); // France entière par défaut
+  map._homeView = { bounds: FRANCE_BOUNDS };
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  addRecenterControl(map);
+  allMaps.push(map);
+
+  const gpsMarkerIcon = L.divIcon({
+    className: 'gps-marker',
+    html: '<span class="gps-marker-dot"></span>',
+    iconSize: [16, 16]
+  });
+  const clickMarkerIcon = L.divIcon({
+    className: 'click-marker',
+    html: '<span class="click-marker-dot"></span>',
+    iconSize: [16, 16]
+  });
+  let gpsMarker = null;
+  let gpsAccuracyCircle = null;
+  let radarGpsMarker = null;
+  let clickMarker = null;
+  let hasCenteredOnGps = false;
+  let hasCenteredRadarOnGps = false;
+
+  // Chaque section est indépendante : le point de référence par défaut d'une section (utilisé
+  // par son propre bouton de recherche) est toujours la position GPS actuelle, jamais un point
+  // choisi dans une AUTRE section — cliquer sur la carte de "Localisation administrative" ne met
+  // donc plus à jour les autres sections. Chaque section garde sa propre carte cliquable pour
+  // interroger un point précis, indépendamment des autres.
+  function getReferencePoint() {
+    if (lastPos) return { lat: lastPos.coords.latitude, lon: lastPos.coords.longitude, source: 'gps' };
+    return null;
+  }
+
+  // Badge discret affiché au-dessus de chaque carte, indiquant l'origine du dernier point
+  // utilisé par CETTE section (position GPS ou point cliqué sur SA propre carte).
+  function updateMiniSourceBadge(badgeEl, source) {
+    if (!badgeEl) return;
+    badgeEl.classList.remove('is-hidden', 'source-mini-gps', 'source-mini-carte');
+    badgeEl.classList.add(source === 'carte' ? 'source-mini-carte' : 'source-mini-gps');
+    badgeEl.textContent = 'Source : ' + (source === 'carte' ? 'Point cliqué sur la carte' : 'Position GPS');
+  }
+
+  // Chaque texte de résultat de recherche (valeurs d'adresse, cellules de tableau) est
+  // cliquable pour en copier le contenu — délégation unique, fonctionne aussi pour les
+  // lignes régénérées dynamiquement à chaque recherche et les sections personnalisées.
+  document.addEventListener('click', async (e) => {
+    const target = e.target.closest('.v.copyable, td.copyable');
+    if (!target) return;
+    const text = target.textContent.trim();
+    if (!text || text === '—' || text === 'Copié ✓') return;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = target.textContent;
+      target.textContent = 'Copié ✓';
+      setTimeout(() => { if (target.textContent === 'Copié ✓') target.textContent = original; }, 1200);
+    } catch (err) {
+      // Copie impossible (permissions du navigateur) : rien de plus à faire.
+    }
+  });
+
+  function updateExternalLinks(latitude, longitude) {
+    osmLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
+    googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  }
+
+  function placeGpsMarker(latitude, longitude, accuracy) {
+    const latlng = [latitude, longitude];
+    if (!gpsMarker) {
+      gpsMarker = L.marker(latlng, { icon: gpsMarkerIcon }).addTo(map);
+    } else {
+      gpsMarker.setLatLng(latlng);
+    }
+    if (accuracy != null) {
+      if (!gpsAccuracyCircle) {
+        gpsAccuracyCircle = L.circle(latlng, { radius: accuracy, color: '#E8A33D', weight: 1.5, fillColor: '#E8A33D', fillOpacity: 0.12 }).addTo(map);
+      } else {
+        gpsAccuracyCircle.setLatLng(latlng);
+        gpsAccuracyCircle.setRadius(accuracy);
+      }
+    } else if (gpsAccuracyCircle) {
+      map.removeLayer(gpsAccuracyCircle);
+      gpsAccuracyCircle = null;
+    }
+    if (!radarGpsMarker) {
+      radarGpsMarker = L.marker(latlng, { icon: gpsMarkerIcon }).addTo(radarMap);
+    } else {
+      radarGpsMarker.setLatLng(latlng);
+    }
+    if (!hasCenteredOnGps) {
+      map.setView(latlng, 15);
+      hasCenteredOnGps = true;
+    }
+    // Centre aussi la carte radar sur la position GPS, une seule fois (zoom large : on veut
+    // voir la situation météo régionale, pas juste le point précis).
+    if (!hasCenteredRadarOnGps) {
+      radarMap.setView(latlng, 6);
+      radarMap._homeView = { center: latlng, zoom: 6 };
+      hasCenteredRadarOnGps = true;
+    }
+  }
+
+  function placeClickMarker(latitude, longitude) {
+    const latlng = [latitude, longitude];
+    if (!clickMarker) {
+      clickMarker = L.marker(latlng, { icon: clickMarkerIcon }).addTo(map);
+    } else {
+      clickMarker.setLatLng(latlng);
+    }
+    updateExternalLinks(latitude, longitude);
+  }
+
+  let watchId = null;
+  let restartTimerId = null;
+  let renderInterval = null;
+  let countdownInterval = null;
+  let lastPos = null;
+  let lastRawPos = null;
+  let recentFixes = [];
+  let lastKnownSpeedKmh = null;
+  let fixCount = 0;
+  let lastFixReceivedAt = null;
+  let autoStopRemaining = 0;
+  const AUTO_STOP_SECONDS = 60;
+
+  // --- Décalage manuel d'altitude (correction ajoutée à l'altitude brute du GPS) ---
+  const ALT_OFFSET_STORAGE_KEY = 'ousuisje_altitude_offset_m';
+  let altitudeOffsetM = parseFloat(localStorage.getItem(ALT_OFFSET_STORAGE_KEY));
+  if (!Number.isFinite(altitudeOffsetM)) altitudeOffsetM = 0;
+  if (altitudeOffsetM) altOffsetInput.value = String(altitudeOffsetM);
+  altOffsetInput.addEventListener('input', () => {
+    const v = parseFloat(altOffsetInput.value);
+    altitudeOffsetM = Number.isFinite(v) ? v : 0;
+    localStorage.setItem(ALT_OFFSET_STORAGE_KEY, String(altitudeOffsetM));
+    if (lastPos) updateUI(lastPos);
+  });
+  const isFirefox = /firefox/i.test(navigator.userAgent);
+  const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function computeSpeedKmh(pos) {
+    if (pos.coords.speed != null && !Number.isNaN(pos.coords.speed)) {
+      return pos.coords.speed * 3.6;
+    }
+    recentFixes.push({ lat: pos.coords.latitude, lon: pos.coords.longitude, t: pos.timestamp });
+    recentFixes = recentFixes.filter((f) => pos.timestamp - f.t <= 1200);
+    if (recentFixes.length >= 2) {
+      const first = recentFixes[0];
+      const dt = (pos.timestamp - first.t) / 1000;
+      if (dt >= 0.3) {
+        const dist = haversine(first.lat, first.lon, pos.coords.latitude, pos.coords.longitude);
+        return (dist / dt) * 3.6;
+      }
+    }
+    return lastKnownSpeedKmh;
+  }
+
+  function fmtCoord(v) { return v.toFixed(6) + '°'; }
+
+  function setAddrField(el, value, colorClass) {
+    el.textContent = value || '—';
+    el.classList.toggle('dim', !value);
+    el.classList.toggle('copyable', !!value);
+    el.classList.remove('v-amber', 'v-teal');
+    if (colorClass && value) el.classList.add(colorClass);
+  }
+
+  // --- Limitation de débit Nominatim (politique d'usage : 1 requête/seconde max) ---
+  let lastNominatimCallAt = 0;
+  let geocodeRequestId = 0;
+
+  async function fetchNominatim(url, options, onWait) {
+    const wait = Math.max(0, 3000 - (Date.now() - lastNominatimCallAt));
+    if (wait > 0) {
+      if (onWait) onWait();
+      await new Promise((resolve) => setTimeout(resolve, wait));
+    }
+    lastNominatimCallAt = Date.now();
+    return fetch(url, options);
+  }
+
+  async function doGeocode(latitude, longitude, source) {
+    const requestId = ++geocodeRequestId;
+    const colorClass = source === 'gps' ? 'v-amber' : 'v-teal';
+    updateMiniSourceBadge(mapSourceBadge, source);
+    addrStatus.textContent = 'Recherche…';
+    try {
+      const res = await fetchNominatim(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+        { headers: { 'Accept-Language': 'fr' } },
+        () => { addrStatus.textContent = 'Patientez…'; }
+      );
+      if (requestId !== geocodeRequestId) return;
+      const data = await res.json();
+      if (requestId !== geocodeRequestId) return;
+      const addr = data.address || {};
+
+      const adresse = [addr.house_number, addr.road].filter(Boolean).join(' ')
+        || addr.pedestrian || addr.neighbourhood || null;
+      const lieuDit = addr.hamlet || addr.locality || addr.isolated_dwelling || addr.suburb || addr.quarter || null;
+      const commune = addr.village || addr.town || addr.city || addr.municipality || null;
+      let departement = addr.county || addr.state_district || null;
+      const region = addr.state || null;
+      const pays = addr.country || null;
+      const codePostal = addr.postcode || null;
+
+      if (departement && addr.country_code === 'fr' && codePostal) {
+        const deptNum = (codePostal.startsWith('97') || codePostal.startsWith('98'))
+          ? codePostal.slice(0, 3)
+          : codePostal.slice(0, 2);
+        departement = `${departement} (${deptNum})`;
+      }
+
+      setAddrField(addrAdresse, adresse, colorClass);
+      setAddrField(addrLieuDit, lieuDit, colorClass);
+      setAddrField(addrCP, codePostal, colorClass);
+      setAddrField(addrCommune, commune, colorClass);
+      setAddrField(addrDept, departement, colorClass);
+      setAddrField(addrRegion, region, colorClass);
+      setAddrField(addrPays, pays, colorClass);
+
+      addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
+      shareAddressBtn.disabled = !(adresse || commune);
+    } catch (e) {
+      if (requestId === geocodeRequestId) addrStatus.textContent = 'Indisponible';
+    }
+  }
+
+  shareAddressBtn.addEventListener('click', async () => {
+    const lines = [];
+    const rue = addrAdresse.textContent !== '—' ? addrAdresse.textContent : (addrLieuDit.textContent !== '—' ? addrLieuDit.textContent : null);
+    if (rue) lines.push(rue);
+    const cpCommune = [addrCP.textContent !== '—' ? addrCP.textContent : '', addrCommune.textContent !== '—' ? addrCommune.textContent : ''].filter(Boolean).join(' ');
+    if (cpCommune) lines.push(cpCommune);
+    if (addrPays.textContent !== '—') lines.push(addrPays.textContent);
+
+    const text = lines.join('\n');
+    if (!text) return;
+    const original = shareAddressBtn.textContent;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Adresse — OuSuisJe', text });
+      } catch (e) {
+        // Partage annulé ou échoué : rien à faire.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      shareAddressBtn.textContent = 'Adresse copiée ✓';
+      setTimeout(() => { shareAddressBtn.textContent = original; }, 2000);
+    } catch (e) {
+      shareAddressBtn.textContent = 'Partage impossible';
+      setTimeout(() => { shareAddressBtn.textContent = original; }, 2000);
+    }
+  });
+
+  geocodeBtn.addEventListener('click', () => {
+    if (!lastPos) {
+      addrStatus.textContent = "Activez d'abord la localisation GPS.";
+      addrStatus.classList.remove('dim');
+      return;
+    }
+    const { latitude, longitude } = lastPos.coords;
+    doGeocode(latitude, longitude, 'gps');
+  });
+
+  map.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    placeClickMarker(lat, lng);
+    doGeocode(lat, lng, 'carte');
+  });
+
+  // --- Sources d'altitude ---
+  async function fetchIGNAltitude(lat, lon) {
+    const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
+    const data = await res.json();
+    const raw = data && data.elevations ? data.elevations[0] : null;
+    const val = (raw != null && typeof raw === 'object') ? raw.z : raw;
+    return (val != null && val > -9999) ? val : null;
+  }
+
+  async function fetchOpenElevationAltitude(lat, lon) {
+    const res = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`);
+    const data = await res.json();
+    const val = data && data.results && data.results[0] ? data.results[0].elevation : null;
+    return val != null ? val : null;
+  }
+
+  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, serviceName, fetchFn, pointOverride) {
+    const point = pointOverride || getReferencePoint();
+    if (!point) {
+      statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    const { lat, lon } = point;
+    const pointColorClass = point.source === 'carte' ? 'v-teal' : 'v-amber';
+    statusEl.textContent = 'Recherche…';
+    try {
+      const elevation = await fetchFn(lat, lon);
+      const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude + altitudeOffsetM : null;
+
+      gpsEl.classList.remove('v-amber', 'v-teal');
+      if (gpsAlt != null) {
+        gpsEl.textContent = Math.round(gpsAlt) + ' m';
+        gpsEl.classList.remove('dim');
+        gpsEl.classList.add('copyable', 'v-amber');
+      } else {
+        gpsEl.textContent = 'Non fournie par le GPS';
+        gpsEl.classList.add('dim');
+        gpsEl.classList.remove('copyable');
+      }
+
+      sourceEl.classList.remove('v-amber', 'v-teal');
+      if (elevation != null) {
+        sourceEl.textContent = Math.round(elevation) + ' m';
+        sourceEl.classList.remove('dim');
+        sourceEl.classList.add('copyable', pointColorClass);
+      } else {
+        sourceEl.textContent = 'Indisponible pour ce point';
+        sourceEl.classList.add('dim');
+        sourceEl.classList.remove('copyable');
+      }
+
+      diffEl.classList.remove('v-amber', 'v-teal');
+      if (gpsAlt != null && elevation != null) {
+        const diff = gpsAlt - elevation;
+        diffEl.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+        diffEl.classList.remove('dim');
+        diffEl.classList.add('copyable', pointColorClass);
+      } else {
+        diffEl.textContent = '—';
+        diffEl.classList.add('dim');
+        diffEl.classList.remove('copyable');
+      }
+
+      statusEl.textContent = 'Comparaison effectuée';
+    } catch (e) {
+      statusEl.textContent = 'Service ' + serviceName + ' indisponible';
+    }
+  }
+
+  const altitudeMap = initSecondaryMap('altitudeMap');
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let altitudeGpsMarker = null;
+  let altitudeClickMarker = null;
+  function placeAltitudeMapMarker(lat, lon, source) {
+    if (source === 'carte') {
+      if (altitudeClickMarker) { altitudeMap.removeLayer(altitudeClickMarker); }
+      altitudeClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(altitudeMap);
+    } else {
+      if (altitudeGpsMarker) { altitudeMap.removeLayer(altitudeGpsMarker); }
+      altitudeGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(altitudeMap);
+    }
+    altitudeMap.setView([lat, lon], 13);
+    altitudeMap._homeView = { center: [lat, lon], zoom: 13 };
+    updateMiniSourceBadge(altitudeSourceBadge, source);
+  }
+
+  altCompareBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (point) placeAltitudeMapMarker(point.lat, point.lon, point.source);
+    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude);
+  });
+  oeCompareBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (point) placeAltitudeMapMarker(point.lat, point.lon, point.source);
+    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude);
+  });
+
+  // La carte de cette section est elle-même cliquable : compare l'altitude au point choisi,
+  // indépendamment de la position de référence globale.
+  altitudeMap.on('click', (e) => {
+    const point = { lat: e.latlng.lat, lon: e.latlng.lng, source: 'carte' };
+    placeAltitudeMapMarker(point.lat, point.lon, point.source);
+    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude, point);
+    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point);
+  });
+
+  // --- Points d'intérêt (Overpass API) ---
+  function bearingTo(lat1, lon1, lat2, lon2) {
+    const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+    const deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    const points = ['Nord', 'Nord-Est', 'Est', 'Sud-Est', 'Sud', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'];
+    return points[Math.round(deg / 45) % 8];
+  }
+
+  function updateUI(pos) {
+    lastPos = pos;
+    const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading } = pos.coords;
+
+    diagPosition.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtCoord(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtCoord(Math.abs(longitude));
+    diagPosition.classList.remove('dim', 'placeholder');
+
+    accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
+    accVal.classList.remove('dim');
+
+    if (accuracy != null && accuracy >= 50) {
+      accuracyWarning.textContent = `Précision faible (${Math.round(accuracy)} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil).`;
+      accuracyWarning.style.display = 'block';
+    } else {
+      accuracyWarning.style.display = 'none';
+    }
+    altVal.textContent = altitude != null ? Math.round(altitude + altitudeOffsetM) + ' m' : 'Non fournie';
+    altVal.classList.toggle('dim', altitude == null);
+    const isMoving = lastKnownSpeedKmh != null && lastKnownSpeedKmh >= 2;
+    spdVal.textContent = isMoving ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : '—';
+    spdVal.classList.toggle('dim', !isMoving);
+    hdgVal.textContent = (isMoving && heading != null && !Number.isNaN(heading)) ? Math.round(heading) + '°' : '—';
+    hdgVal.classList.toggle('dim', !(isMoving && heading != null && !Number.isNaN(heading)));
+    tsVal.textContent = new Date(pos.timestamp).toLocaleTimeString('fr-FR');
+    tsVal.classList.remove('dim');
+    altAccVal.textContent = altitudeAccuracy != null ? '± ' + Math.round(altitudeAccuracy) + ' m' : '—';
+    altAccVal.classList.toggle('dim', altitudeAccuracy == null);
+
+    diagFixState.textContent = 'Fix valide';
+    diagFixState.classList.remove('dim');
+    const ageSec = lastFixReceivedAt != null ? Math.max(0, Math.round((Date.now() - lastFixReceivedAt) / 1000)) : null;
+    diagFixAge.textContent = ageSec != null ? ageSec + ' s' : '—';
+    diagFixAge.classList.toggle('dim', ageSec == null);
+    diagFixCount.textContent = String(fixCount);
+    diagFixCount.classList.remove('dim');
+    diagRawAcc.textContent = accuracy != null ? accuracy.toFixed(1) + ' m' : '—';
+    diagRawAcc.classList.toggle('dim', accuracy == null);
+
+    placeGpsMarker(latitude, longitude, accuracy);
+    setStatus('live', 'Localisation GPS active');
+  }
+
+  function handleError(err) {
+    let msg = 'Erreur de localisation';
+    if (err.code === err.PERMISSION_DENIED) msg = 'Localisation refusée';
+    else if (err.code === err.POSITION_UNAVAILABLE) msg = 'Position indisponible';
+    else if (err.code === err.TIMEOUT) msg = 'Délai dépassé';
+    setStatus('err', msg);
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
+    if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    autoStopCountdown.textContent = '';
+    locateBtn.textContent = 'Activer la localisation GPS';
+    locateBtn.disabled = false;
+    diagFixState.textContent = 'Erreur';
+    diagFixState.classList.add('dim');
+  }
+
+  function updateCountdownDisplay() {
+    autoStopCountdown.textContent = autoStopRemaining > 0 ? `Arrêt automatique dans ${autoStopRemaining} s` : '';
+  }
+
+  function isTrackingActive() { return watchId != null; }
+
+  function handleFix(pos) {
+    fixCount++;
+    lastKnownSpeedKmh = computeSpeedKmh(pos);
+    lastFixReceivedAt = Date.now();
+    lastRawPos = pos;
+    locateBtn.textContent = 'Désactiver la localisation GPS';
+    locateBtn.disabled = false;
+    updateUI(pos);
+  }
+
+  function handleFixError(err) {
+    if (err.code === err.PERMISSION_DENIED) { handleError(err); return; }
+    setStatus('err', err.code === err.TIMEOUT ? 'Délai dépassé, nouvelle tentative…' : 'Signal GPS perdu, nouvelle tentative…');
+    diagFixState.textContent = 'Signal perdu';
+    diagFixState.classList.add('dim');
+  }
+
+  function beginWatch() {
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(handleFix, handleFixError, WATCH_OPTIONS);
+  }
+
+  function startWatch() {
+    if (!('geolocation' in navigator)) {
+      setStatus('err', 'Non pris en charge');
+      locateBtn.disabled = true;
+      locateBtn.textContent = 'Indisponible sur cet appareil';
+      return;
+    }
+    setStatus('idle', 'Recherche du signal…');
+    locateBtn.textContent = 'Recherche en cours…';
+    locateBtn.disabled = true;
+    fixCount = 0;
+    recentFixes = [];
+    lastKnownSpeedKmh = null;
+    diagFixCount.textContent = '0';
+
+    beginWatch();
+
+    if (isFirefox) {
+      restartTimerId = setInterval(beginWatch, 20000);
+    }
+
+    renderInterval = setInterval(() => {
+      if (lastRawPos) updateUI(lastRawPos);
+    }, 1000);
+
+    if (autoStopCheckbox.checked) {
+      autoStopRemaining = AUTO_STOP_SECONDS;
+      updateCountdownDisplay();
+      countdownInterval = setInterval(() => {
+        autoStopRemaining--;
+        updateCountdownDisplay();
+        if (autoStopRemaining <= 0) {
+          stopWatch();
+          setStatus('idle', 'Désactivée automatiquement (économie de batterie)');
+        }
+      }, 1000);
+    } else {
+      autoStopCountdown.textContent = '';
+    }
+  }
+
+  function stopWatch() {
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
+    if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    autoStopCountdown.textContent = '';
+    setStatus('idle', 'Localisation désactivée');
+    locateBtn.textContent = 'Activer la localisation GPS';
+    locateBtn.disabled = false;
+    diagFixState.textContent = lastPos ? 'Inactif — dernière position conservée' : 'Inactif';
+    diagFixState.classList.add('dim');
+    recentFixes = [];
+    lastKnownSpeedKmh = null;
+  }
+
+  const AUTO_STOP_STORAGE_KEY = 'ousuisje_gps_auto_stop';
+  autoStopCheckbox.checked = localStorage.getItem(AUTO_STOP_STORAGE_KEY) === '1';
+
+  autoStopCheckbox.addEventListener('change', () => {
+    localStorage.setItem(AUTO_STOP_STORAGE_KEY, autoStopCheckbox.checked ? '1' : '0');
+    if (!isTrackingActive()) return;
+    if (!autoStopCheckbox.checked) {
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      autoStopCountdown.textContent = '';
+    } else {
+      autoStopRemaining = AUTO_STOP_SECONDS;
+      updateCountdownDisplay();
+      countdownInterval = setInterval(() => {
+        autoStopRemaining--;
+        updateCountdownDisplay();
+        if (autoStopRemaining <= 0) {
+          stopWatch();
+          setStatus('idle', 'Désactivée automatiquement (économie de batterie)');
+        }
+      }, 1000);
+    }
+  });
+
+  locateBtn.addEventListener('click', () => { if (isTrackingActive()) stopWatch(); else startWatch(); });
+
+  const AUTO_LOCATE_STORAGE_KEY = 'ousuisje_alpha_auto_locate';
+  autoLocateCheckbox.checked = localStorage.getItem(AUTO_LOCATE_STORAGE_KEY) === '1';
+  autoLocateCheckbox.addEventListener('change', () => {
+    localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, autoLocateCheckbox.checked ? '1' : '0');
+  });
+  if (autoLocateCheckbox.checked) startWatch();
+
+  // --- Radar de précipitations (RainViewer) ---
+  // Ici, le recentrage zoome 2 crans de plus que le zoom "maison" (au lieu du comportement
+  // générique des autres cartes) : sur le radar on veut resserrer la vue une fois centré,
+  // pas juste rester au niveau régional utilisé par défaut.
+  const radarMap = initSecondaryMap('radarMap', {
+    recenterZoomFn: (m) => {
+      const homeZoom = (m._homeView && m._homeView.zoom != null) ? m._homeView.zoom : 6;
+      return homeZoom + 2;
+    }
+  });
+  const RADAR_COLOR = 2;
+  const RADAR_OPTIONS_SUFFIX = '1_1';
+  const PAST_FRAME_COUNT = 6;
+
+  let radarFrames = [];
+  let radarLayers = [];
+  let currentFrame = 0;
+  let playTimer = null;
+  let currentOpacity = 0.75;
+
+  function frameTileUrl(frame) {
+    return `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/${RADAR_COLOR}/${RADAR_OPTIONS_SUFFIX}.png`;
+  }
+
+  function showFrame(index) {
+    if (radarLayers.length === 0) return;
+    currentFrame = ((index % radarLayers.length) + radarLayers.length) % radarLayers.length;
+    radarLayers.forEach((layer, i) => {
+      layer.setOpacity(i === currentFrame ? currentOpacity : 0);
+    });
+    const time = radarFrames[currentFrame].time * 1000;
+    radarTimestamp.textContent = new Date(time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function stopPlayback() {
+    if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    radarPlay.textContent = '▶ Lecture';
+  }
+
+  function startPlayback() {
+    stopPlayback();
+    radarPlay.textContent = '⏸ Pause';
+    playTimer = setInterval(() => showFrame(currentFrame + 1), 600);
+  }
+
+  radarPlay.addEventListener('click', () => {
+    if (playTimer) stopPlayback();
+    else startPlayback();
+  });
+  radarPrev.addEventListener('click', () => { stopPlayback(); showFrame(currentFrame - 1); });
+  radarNext.addEventListener('click', () => { stopPlayback(); showFrame(currentFrame + 1); });
+  radarOpacity.addEventListener('input', () => {
+    currentOpacity = Number(radarOpacity.value) / 100;
+    showFrame(currentFrame);
+  });
+
+  async function loadRadar() {
+    try {
+      const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+      const data = await res.json();
+      const allPast = data.radar && data.radar.past ? data.radar.past : [];
+      radarFrames = allPast.slice(-PAST_FRAME_COUNT);
+      if (radarFrames.length === 0) {
+        radarTimestamp.textContent = 'Indisponible';
+        return;
+      }
+      radarLayers = radarFrames.map((frame) =>
+        L.tileLayer(frameTileUrl(frame), { opacity: 0, zIndex: 400, maxZoom: 19, maxNativeZoom: 7 }).addTo(radarMap)
+      );
+      showFrame(radarLayers.length - 1);
+      startPlayback();
+    } catch (e) {
+      radarTimestamp.textContent = 'Radar indisponible';
+    }
+  }
+
+  loadRadar();
+
+  // --- Département et commune (Mode hors ligne) (données pré-téléchargées) ---
+  const OFFLINE_DEPT_URL = 'data/departements.min.json';
+  const OFFLINE_COMMUNES_URL = 'data/communes.min.csv';
+
+  let offlineDepts = null;
+  let offlineCommunes = null;
+  let offlineCommunesByCode = null;
+  let offlineDataPromise = null;
+
+  function formatPostalCodes(raw) {
+    if (!raw) return null;
+    const codes = raw.split('/');
+    if (codes.length <= 3) return codes.join(' / ');
+    return codes.slice(0, 3).join(' / ') + ` (+${codes.length - 3})`;
+  }
+
+  function communePostalCode(code) {
+    const entry = offlineCommunesByCode && offlineCommunesByCode.get(code);
+    return entry ? formatPostalCodes(entry[4]) : null;
+  }
+
+  function pointInRing(x, y, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1];
+      const xj = ring[j][0], yj = ring[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  function pointInPolygons(lon, lat, polys) {
+    for (const poly of polys) {
+      if (!pointInRing(lon, lat, poly[0])) continue;
+      let inHole = false;
+      for (let h = 1; h < poly.length; h++) {
+        if (pointInRing(lon, lat, poly[h])) { inHole = true; break; }
+      }
+      if (!inHole) return true;
+    }
+    return false;
+  }
+
+  function findDepartement(lon, lat) {
+    if (!offlineDepts) return null;
+    for (const code in offlineDepts) {
+      const entry = offlineDepts[code];
+      if (pointInPolygons(lon, lat, entry.p)) return { code, nom: entry.n };
+    }
+    return null;
+  }
+
+  // Table de correspondance département → région (13 régions métropolitaines, découpage 2016).
+  // Statique : ne dépend d'aucun fichier téléchargé, coût négligeable.
+  const DEPT_TO_REGION = {
+    '01': 'Auvergne-Rhône-Alpes', '03': 'Auvergne-Rhône-Alpes', '07': 'Auvergne-Rhône-Alpes',
+    '15': 'Auvergne-Rhône-Alpes', '26': 'Auvergne-Rhône-Alpes', '38': 'Auvergne-Rhône-Alpes',
+    '42': 'Auvergne-Rhône-Alpes', '43': 'Auvergne-Rhône-Alpes', '63': 'Auvergne-Rhône-Alpes',
+    '69': 'Auvergne-Rhône-Alpes', '73': 'Auvergne-Rhône-Alpes', '74': 'Auvergne-Rhône-Alpes',
+    '21': 'Bourgogne-Franche-Comté', '25': 'Bourgogne-Franche-Comté', '39': 'Bourgogne-Franche-Comté',
+    '58': 'Bourgogne-Franche-Comté', '70': 'Bourgogne-Franche-Comté', '71': 'Bourgogne-Franche-Comté',
+    '89': 'Bourgogne-Franche-Comté', '90': 'Bourgogne-Franche-Comté',
+    '22': 'Bretagne', '29': 'Bretagne', '35': 'Bretagne', '56': 'Bretagne',
+    '18': 'Centre-Val de Loire', '28': 'Centre-Val de Loire', '36': 'Centre-Val de Loire',
+    '37': 'Centre-Val de Loire', '41': 'Centre-Val de Loire', '45': 'Centre-Val de Loire',
+    '2A': 'Corse', '2B': 'Corse',
+    '08': 'Grand Est', '10': 'Grand Est', '51': 'Grand Est', '52': 'Grand Est',
+    '54': 'Grand Est', '55': 'Grand Est', '57': 'Grand Est', '67': 'Grand Est',
+    '68': 'Grand Est', '88': 'Grand Est',
+    '02': 'Hauts-de-France', '59': 'Hauts-de-France', '60': 'Hauts-de-France',
+    '62': 'Hauts-de-France', '80': 'Hauts-de-France',
+    '75': 'Île-de-France', '77': 'Île-de-France', '78': 'Île-de-France', '91': 'Île-de-France',
+    '92': 'Île-de-France', '93': 'Île-de-France', '94': 'Île-de-France', '95': 'Île-de-France',
+    '14': 'Normandie', '27': 'Normandie', '50': 'Normandie', '61': 'Normandie', '76': 'Normandie',
+    '16': 'Nouvelle-Aquitaine', '17': 'Nouvelle-Aquitaine', '19': 'Nouvelle-Aquitaine',
+    '23': 'Nouvelle-Aquitaine', '24': 'Nouvelle-Aquitaine', '33': 'Nouvelle-Aquitaine',
+    '40': 'Nouvelle-Aquitaine', '47': 'Nouvelle-Aquitaine', '64': 'Nouvelle-Aquitaine',
+    '79': 'Nouvelle-Aquitaine', '86': 'Nouvelle-Aquitaine', '87': 'Nouvelle-Aquitaine',
+    '09': 'Occitanie', '11': 'Occitanie', '12': 'Occitanie', '30': 'Occitanie', '31': 'Occitanie',
+    '32': 'Occitanie', '34': 'Occitanie', '46': 'Occitanie', '48': 'Occitanie', '65': 'Occitanie',
+    '66': 'Occitanie', '81': 'Occitanie', '82': 'Occitanie',
+    '44': 'Pays de la Loire', '49': 'Pays de la Loire', '53': 'Pays de la Loire',
+    '72': 'Pays de la Loire', '85': 'Pays de la Loire',
+    '04': "Provence-Alpes-Côte d'Azur", '05': "Provence-Alpes-Côte d'Azur", '06': "Provence-Alpes-Côte d'Azur",
+    '13': "Provence-Alpes-Côte d'Azur", '83': "Provence-Alpes-Côte d'Azur", '84': "Provence-Alpes-Côte d'Azur"
+  };
+
+  function nearestCommuneEntry(lat, lon, excludeCode) {
+    if (!offlineCommunes || offlineCommunes.length === 0) return null;
+    const coslat = Math.cos(lat * Math.PI / 180);
+    let best = null;
+    let bestD = Infinity;
+    for (const c of offlineCommunes) {
+      if (excludeCode && c[0] === excludeCode) continue;
+      const dLat = c[2] - lat;
+      const dLon = (c[3] - lon) * coslat;
+      const d = dLat * dLat + dLon * dLon;
+      if (d < bestD) { bestD = d; best = c; }
+    }
+    if (!best) return null;
+    const distanceKm = Math.sqrt(bestD) * 111.32;
+    return { code: best[0], nom: best[1], lat: best[2], lon: best[3], distanceKm };
+  }
+
+  function findCommuneApprox(lat, lon) {
+    return nearestCommuneEntry(lat, lon, null);
+  }
+
+  function communeIndicativeRadiusMeters(commune) {
+    const neighbor = nearestCommuneEntry(commune.lat, commune.lon, commune.code);
+    if (!neighbor) return 1500;
+    const radiusM = (neighbor.distanceKm * 1000) / 2;
+    return Math.min(Math.max(radiusM, 300), 15000);
+  }
+
+  // --- Contours précis des communes (téléchargement optionnel, à la demande) ---
+  const CONTOUR_TIERS = {
+    centroides: {
+      label: 'cercles (centroïdes)'
+    },
+    simplifiee: {
+      url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes-version-simplifiee.geojson',
+      label: 'polygones (version simplifiée)',
+      rawSizeBytes: 19342488
+    },
+    precise: {
+      url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson',
+      label: 'détaillée (pleine précision)',
+      rawSizeBytes: 45291317
+    }
+  };
+  const CONTOURS_ACTIVE_STORAGE_KEY = 'ousuisje_commune_contours_tier';
+  const CONTOURS_DOWNLOADED_STORAGE_KEY = 'ousuisje_commune_contours_downloaded';
+
+  let communeContoursByDept = null;
+  let communeContoursTier = 'centroides'; // niveau actif : centroides (cercle indicatif) par défaut
+  let communeContoursLoading = false;
+
+  function loadDownloadedTiers() {
+    try {
+      const raw = localStorage.getItem(CONTOURS_DOWNLOADED_STORAGE_KEY);
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch (e) {
+      return new Set();
+    }
+  }
+  let communeContoursDownloaded = loadDownloadedTiers();
+
+  async function fetchTextWithProgress(url, expectedTotal, onProgress) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.body) return res.text();
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let received = 0;
+    let text = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.length;
+      text += decoder.decode(value, { stream: true });
+      onProgress(Math.min(received / expectedTotal, 1));
+    }
+    text += decoder.decode();
+    return text;
+  }
+
+  function geojsonToPolys(geometry) {
+    if (!geometry) return [];
+    if (geometry.type === 'Polygon') return [geometry.coordinates];
+    if (geometry.type === 'MultiPolygon') return geometry.coordinates;
+    return [];
+  }
+
+  function indexCommuneContours(geojson) {
+    const byDept = new Map();
+    for (const feature of geojson.features) {
+      const code = feature.properties && feature.properties.code;
+      const nom = feature.properties && feature.properties.nom;
+      if (!code || !feature.geometry) continue;
+      const deptCode = code.slice(0, 2);
+      if (!byDept.has(deptCode)) byDept.set(deptCode, []);
+      byDept.get(deptCode).push({ code, nom, geometry: feature.geometry });
+    }
+    return byDept;
+  }
+
+  function findCommuneExact(lon, lat, deptCode) {
+    if (!communeContoursByDept) return null;
+    const candidates = communeContoursByDept.get(deptCode);
+    if (!candidates) return null;
+    for (const c of candidates) {
+      if (pointInPolygons(lon, lat, geojsonToPolys(c.geometry))) return c;
+    }
+    return null;
+  }
+
+  // Supprime une URL du cache du service worker (toutes versions confondues), pour libérer
+  // l'espace occupé par des données téléchargées à la demande (contours, antennes).
+  async function deleteCachedUrl(url) {
+    if (typeof caches === 'undefined') return;
+    try {
+      const names = await caches.keys();
+      await Promise.all(names.map((n) => caches.open(n).then((c) => c.delete(url))));
+    } catch (e) {
+      // API Cache indisponible (ex. navigation privée) : rien de plus à faire.
+    }
+  }
+
+  function updateTierUI(tier) {
+    const btn = tierButtons[tier];
+    const statusEl = tierStatusEls[tier];
+    const deleteBtn = tierDeleteButtons[tier];
+    if (communeContoursTier === tier) {
+      btn.textContent = 'Actif ✓';
+      btn.disabled = true;
+      statusEl.textContent = 'Téléchargées, actives';
+      statusEl.classList.remove('dim');
+    } else if (tier === 'centroides' || communeContoursDownloaded.has(tier)) {
+      btn.textContent = 'Activer';
+      btn.disabled = false;
+      statusEl.textContent = tier === 'centroides' ? 'Téléchargées, inactives' : 'Téléchargée, inactive';
+      statusEl.classList.remove('dim');
+    } else {
+      btn.textContent = 'Télécharger';
+      btn.disabled = false;
+      statusEl.textContent = 'Non téléchargée';
+      statusEl.classList.add('dim');
+    }
+    if (deleteBtn) {
+      deleteBtn.style.display = communeContoursDownloaded.has(tier) ? '' : 'none';
+    }
+  }
+
+  function refreshContoursUI() {
+    updateTierUI('centroides');
+    updateTierUI('simplifiee');
+    updateTierUI('precise');
+  }
+
+  function setContoursButtonsDisabled(disabled) {
+    activateCentroidesBtn.disabled = disabled;
+    downloadSimplifieeBtn.disabled = disabled;
+    downloadPreciseBtn.disabled = disabled;
+    deleteSimplifieeBtn.disabled = disabled;
+    deletePreciseBtn.disabled = disabled;
+  }
+
+  // Retire un jeu de contours téléchargé de l'appareil (cache du service worker) et,
+  // s'il était actif, retombe sur les cercles indicatifs.
+  async function deleteContourTier(tier) {
+    if (communeContoursLoading) return;
+    communeContoursLoading = true;
+    setContoursButtonsDisabled(true);
+    await deleteCachedUrl(CONTOUR_TIERS[tier].url);
+    communeContoursDownloaded.delete(tier);
+    localStorage.setItem(CONTOURS_DOWNLOADED_STORAGE_KEY, JSON.stringify([...communeContoursDownloaded]));
+    if (communeContoursTier === tier) {
+      communeContoursTier = 'centroides';
+      communeContoursByDept = null;
+      localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, 'centroides');
+      const point = getReferencePoint();
+      if (point) updateOfflineGeo(point.lat, point.lon);
+    }
+    communeContoursLoading = false;
+    setContoursButtonsDisabled(false);
+    refreshContoursUI();
+  }
+  deleteSimplifieeBtn.addEventListener('click', () => deleteContourTier('simplifiee'));
+  deletePreciseBtn.addEventListener('click', () => deleteContourTier('precise'));
+
+  // Le niveau "cercles" (centroïdes) est toujours prêt (chargé avec les données de base) :
+  // l'activer ne fait que basculer la recherche de commune sur l'approximation par proximité.
+  function activateCentroides() {
+    if (communeContoursLoading) return;
+    communeContoursTier = 'centroides';
+    localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, 'centroides');
+    refreshContoursUI();
+    const point = getReferencePoint();
+    if (point) updateOfflineGeo(point.lat, point.lon);
+  }
+  activateCentroidesBtn.addEventListener('click', activateCentroides);
+
+  async function downloadCommuneContours(tier) {
+    if (communeContoursLoading) return;
+    const conf = CONTOUR_TIERS[tier];
+    const alreadyDownloaded = communeContoursDownloaded.has(tier);
+    communeContoursLoading = true;
+    setContoursButtonsDisabled(true);
+    const statusEl = tierStatusEls[tier];
+    statusEl.classList.remove('dim');
+    statusEl.textContent = alreadyDownloaded ? 'Activation…' : 'Téléchargement… 0%';
+    try {
+      const text = await fetchTextWithProgress(conf.url, conf.rawSizeBytes, (frac) => {
+        if (alreadyDownloaded) return;
+        const pct = Math.round(frac * 100);
+        statusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
+      });
+      statusEl.textContent = 'Analyse du fichier…';
+      const geojson = JSON.parse(text);
+      communeContoursByDept = indexCommuneContours(geojson);
+      communeContoursTier = tier;
+      communeContoursDownloaded.add(tier);
+      localStorage.setItem(CONTOURS_DOWNLOADED_STORAGE_KEY, JSON.stringify([...communeContoursDownloaded]));
+      localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, tier);
+      const point = getReferencePoint();
+      if (point) updateOfflineGeo(point.lat, point.lon);
+    } catch (e) {
+      statusEl.textContent = alreadyDownloaded ? 'Échec de l\'activation' : 'Échec du téléchargement';
+    } finally {
+      communeContoursLoading = false;
+      setContoursButtonsDisabled(false);
+      refreshContoursUI();
+    }
+  }
+
+  downloadSimplifieeBtn.addEventListener('click', () => downloadCommuneContours('simplifiee'));
+  downloadPreciseBtn.addEventListener('click', () => downloadCommuneContours('precise'));
+
+  refreshContoursUI();
+
+  const savedActiveTier = localStorage.getItem(CONTOURS_ACTIVE_STORAGE_KEY);
+  if (savedActiveTier === 'simplifiee' || savedActiveTier === 'precise') downloadCommuneContours(savedActiveTier);
+
+  // --- Antennes relais ANFR (téléchargement optionnel, à la demande) ---
+  const ANTENNAS_URL = 'data/anfr-antennas.min.csv';
+  const ANTENNAS_RAW_BYTES = 6071089;
+  const ANTENNAS_DOWNLOADED_STORAGE_KEY = 'ousuisje_anfr_antennas_downloaded';
+  const ANTENNA_RADIUS_M = 5000;
+  const ANTENNA_MAX_RESULTS = 20;
+  const OPERATOR_COLORS = {
+    'ORANGE': '#FF7900',
+    'SFR': '#E2001A',
+    'BOUYGUES TELECOM': '#0055A4',
+    'FREE MOBILE': '#2FB344'
+  };
+  const ANTENNA_DEFAULT_COLOR = '#8892A6';
+
+  let antennaSites = null;
+  let antennasLoading = false;
+  let antennaOperatorFilter = new Set(Object.keys(OPERATOR_COLORS));
+
+  const antennaOperatorFilterEl = $('antennaOperatorFilter');
+  Array.from(antennaOperatorFilterEl.querySelectorAll('input[type="checkbox"]')).forEach((cb) => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) antennaOperatorFilter.add(cb.dataset.op);
+      else antennaOperatorFilter.delete(cb.dataset.op);
+      const point = getReferencePoint();
+      if (point) updateAntennasNearby(point.lat, point.lon);
+    });
+  });
+
+  function parseAntennasCsv(text) {
+    const out = [];
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      const parts = line.split(';');
+      const lat = parseFloat(parts[1]);
+      const lon = parseFloat(parts[2]);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
+      out.push({
+        id: parts[0],
+        lat: lat,
+        lon: lon,
+        op: parts[3] || '',
+        gens: parts[4] ? parts[4].split(',') : []
+      });
+    }
+    return out;
+  }
+
+  function operatorColor(op) {
+    return OPERATOR_COLORS[op] || ANTENNA_DEFAULT_COLOR;
+  }
+
+  // Regroupe les sites (quasi) à la même position — mutualisation d'un même mât par
+  // plusieurs opérateurs — pour n'afficher qu'un seul marqueur "camembert" par lieu.
+  // Arrondi à 5 décimales (~1 m) : suffisant pour fusionner un même site, pas pour
+  // confondre deux sites réellement distincts.
+  function groupAntennasByLocation(results) {
+    // Distance réelle plutôt qu'un simple arrondi de coordonnées : deux opérateurs sur un
+    // même mât mutualisé peuvent avoir géocodé leur site avec un léger écart l'un de l'autre.
+    const MERGE_DISTANCE_M = 30;
+    const groups = [];
+    for (const r of results) {
+      const group = groups.find((g) => distanceMetersApprox(g[0].lat, g[0].lon, r.lat, r.lon) <= MERGE_DISTANCE_M);
+      if (group) group.push(r); else groups.push([r]);
+    }
+    return groups;
+  }
+
+  function polarPoint(cx, cy, radius, angleDeg) {
+    const rad = (angleDeg - 90) * Math.PI / 180;
+    return [cx + radius * Math.cos(rad), cy + radius * Math.sin(rad)];
+  }
+
+  // Icône "camembert" : une part colorée par opérateur partageant le site (2 à 4 couleurs).
+  function buildAntennaPieIcon(ops) {
+    const colors = ops.map(operatorColor);
+    const size = 18;
+    const r = size / 2;
+    const anglePer = 360 / colors.length;
+    let paths = '';
+    for (let i = 0; i < colors.length; i++) {
+      const [x1, y1] = polarPoint(r, r, r, i * anglePer);
+      const [x2, y2] = polarPoint(r, r, r, (i + 1) * anglePer);
+      const largeArc = anglePer > 180 ? 1 : 0;
+      paths += `<path d="M ${r} ${r} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z" fill="${colors[i]}" stroke="#0B1220" stroke-width="1"/>`;
+    }
+    const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+    return L.divIcon({ className: 'antenna-pie-marker', html: svg, iconSize: [size, size], iconAnchor: [r, r] });
+  }
+
+  function fmtDistanceM(d) {
+    return d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km';
+  }
+
+  function gotoLinkHtml(lat, lon) {
+    return `<a class="popup-goto" href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank" rel="noopener">Y aller →</a>`;
+  }
+
+  function findNearbyAntennas(lat, lon, radiusM, maxResults) {
+    if (!antennaSites) return [];
+    const coslat = Math.cos(lat * Math.PI / 180);
+    const results = [];
+    for (const s of antennaSites) {
+      if (!antennaOperatorFilter.has(s.op)) continue;
+      const dLat = s.lat - lat;
+      const dLon = (s.lon - lon) * coslat;
+      const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
+      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, op: s.op, gens: s.gens, distM: distM, bearing: bearingTo(lat, lon, s.lat, s.lon) });
+    }
+    results.sort((a, b) => a.distM - b.distM);
+    return results.slice(0, maxResults);
+  }
+
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let antennaGpsMarker = null;
+  let antennaClickMarker = null;
+  let antennaMarkers = [];
+
+  function clearAntennaMarkers() {
+    antennaMarkers.forEach((m) => antennaMap.removeLayer(m));
+    antennaMarkers = [];
+  }
+
+  const antennaMap = initSecondaryMap('antennaMap');
+
+  function updateAntennasNearby(lat, lon, source) {
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
+    updateMiniSourceBadge(antennaSourceBadge, source);
+    if (source === 'carte') {
+      if (antennaClickMarker) { antennaMap.removeLayer(antennaClickMarker); }
+      antennaClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(antennaMap);
+    } else {
+      if (antennaGpsMarker) { antennaMap.removeLayer(antennaGpsMarker); }
+      antennaGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(antennaMap);
+    }
+
+    if (!antennaSites) {
+      antennasSearchStatusEl.textContent = 'Téléchargez les données ci-dessus';
+      antennaMap.setView([lat, lon], 12);
+      return;
+    }
+
+    const results = findNearbyAntennas(lat, lon, ANTENNA_RADIUS_M, ANTENNA_MAX_RESULTS);
+    clearAntennaMarkers();
+    const bounds = [[lat, lon]];
+
+    if (results.length === 0) {
+      antennasTableBody.className = '';
+      antennasTableBody.innerHTML = `<tr><td colspan="4" class="dim">Aucune antenne dans un rayon de ${ANTENNA_RADIUS_M / 1000} km</td></tr>`;
+    } else {
+      antennasTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
+      antennasTableBody.innerHTML = results.map((r) => `
+        <tr>
+          <td class="copyable" style="color:${operatorColor(r.op)};">${r.op}</td>
+          <td class="copyable">${r.gens.join(', ')}</td>
+          <td class="copyable">${fmtDistanceM(r.distM)}</td>
+          <td class="copyable">${r.bearing}</td>
+        </tr>
+      `).join('');
+      for (const group of groupAntennasByLocation(results)) {
+        const first = group[0];
+        bounds.push([first.lat, first.lon]);
+        if (group.length === 1) {
+          const color = operatorColor(first.op);
+          const marker = L.circleMarker([first.lat, first.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
+            .bindPopup(`<strong>${first.op}</strong><br>${first.gens.join(', ')}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
+            .addTo(antennaMap);
+          antennaMarkers.push(marker);
+        } else {
+          // Site mutualisé par plusieurs opérateurs : un marqueur camembert avec une part
+          // par opérateur, plutôt que plusieurs points superposés.
+          const icon = buildAntennaPieIcon(group.map((g) => g.op));
+          const popupLines = group.map((g) => `<strong style="color:${operatorColor(g.op)};">${g.op}</strong> — ${g.gens.join(', ')}`).join('<br>');
+          const marker = L.marker([first.lat, first.lon], { icon: icon })
+            .bindPopup(`${popupLines}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
+            .addTo(antennaMap);
+          antennaMarkers.push(marker);
+        }
+      }
+    }
+    antennasSearchStatusEl.textContent = `${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
+    antennaMap._homeView = { bounds: bounds };
+    antennaMap.fitBounds(bounds, { padding: [24, 24] });
+  }
+
+  // La carte des antennes est elle-même cliquable : relance la recherche à cet endroit.
+  antennaMap.on('click', (e) => {
+    updateAntennasNearby(e.latlng.lat, e.latlng.lng, 'carte');
+  });
+
+  antennasSearchBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      antennasSearchStatusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    updateAntennasNearby(point.lat, point.lon);
+  });
+
+  async function downloadAntennas() {
+    if (antennasLoading) return;
+    const alreadyDownloaded = localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1';
+    antennasLoading = true;
+    downloadAntennasBtn.disabled = true;
+    antennasRowStatusEl.classList.remove('dim');
+    antennasRowStatusEl.textContent = alreadyDownloaded ? 'Chargement…' : 'Téléchargement… 0%';
+    try {
+      const text = await fetchTextWithProgress(ANTENNAS_URL, ANTENNAS_RAW_BYTES, (frac) => {
+        if (alreadyDownloaded) return;
+        const pct = Math.round(frac * 100);
+        antennasRowStatusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
+      });
+      antennasRowStatusEl.textContent = 'Analyse du fichier…';
+      antennaSites = parseAntennasCsv(text);
+      localStorage.setItem(ANTENNAS_DOWNLOADED_STORAGE_KEY, '1');
+      downloadAntennasBtn.textContent = 'Téléchargées';
+      antennasRowStatusEl.textContent = 'Téléchargées';
+      deleteAntennasBtn.style.display = '';
+      const point = getReferencePoint();
+      if (point) updateAntennasNearby(point.lat, point.lon);
+    } catch (e) {
+      antennasRowStatusEl.textContent = 'Échec du téléchargement';
+    } finally {
+      antennasLoading = false;
+      downloadAntennasBtn.disabled = !!antennaSites;
+    }
+  }
+
+  async function deleteAntennas() {
+    if (antennasLoading) return;
+    antennasLoading = true;
+    downloadAntennasBtn.disabled = true;
+    deleteAntennasBtn.disabled = true;
+    await deleteCachedUrl(ANTENNAS_URL);
+    antennaSites = null;
+    clearAntennaMarkers();
+    localStorage.removeItem(ANTENNAS_DOWNLOADED_STORAGE_KEY);
+    downloadAntennasBtn.textContent = 'Télécharger';
+    antennasRowStatusEl.textContent = 'Non téléchargées';
+    antennasRowStatusEl.classList.add('dim');
+    deleteAntennasBtn.style.display = 'none';
+    antennasLoading = false;
+    downloadAntennasBtn.disabled = false;
+    deleteAntennasBtn.disabled = false;
+    const point = getReferencePoint();
+    if (point) updateAntennasNearby(point.lat, point.lon);
+  }
+
+  downloadAntennasBtn.addEventListener('click', downloadAntennas);
+  deleteAntennasBtn.addEventListener('click', deleteAntennas);
+  if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
+
+  // --- Points d'intérêt, en direct via Overpass (escape games, piscines, escalade) ---
+  function distanceMetersApprox(lat1, lon1, lat2, lon2) {
+    const coslat = Math.cos(lat1 * Math.PI / 180);
+    const dLat = lat2 - lat1;
+    const dLon = (lon2 - lon1) * coslat;
+    return Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
+  }
+
+  function setupNearbyOverpassFeature(config) {
+    const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
+    let markers = [];
+    // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+    // doit pas faire disparaître le point de la position GPS, et inversement.
+    let originGpsMarker = null;
+    let originClickMarker = null;
+
+    async function runSearch(lat, lon, source) {
+      if (source === undefined) {
+        const refPoint = getReferencePoint();
+        source = (refPoint && refPoint.source) || 'gps';
+      }
+      btn.disabled = true;
+      statusEl.textContent = 'Recherche…';
+      updateMiniSourceBadge(badgeEl, source);
+
+      if (source === 'carte') {
+        if (originClickMarker) { map.removeLayer(originClickMarker); }
+        originClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(map);
+      } else {
+        if (originGpsMarker) { map.removeLayer(originGpsMarker); }
+        originGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(map);
+      }
+
+      try {
+        const query = buildQuery(lat, lon, radiusM);
+        const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+        const data = await res.json();
+
+        const items = (data.elements || [])
+          .map((el) => {
+            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+            if (elat == null || elon == null) return null;
+            const name = (el.tags && el.tags.name) || defaultName;
+            return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
+          })
+          .filter(Boolean)
+          .sort((a, b) => a.distM - b.distM)
+          .slice(0, maxResults);
+
+        markers.forEach((m) => map.removeLayer(m));
+        markers = [];
+        const bounds = [[lat, lon]];
+
+        if (items.length === 0) {
+          tableBody.className = '';
+          tableBody.innerHTML = `<tr><td colspan="3" class="dim">${emptyLabel} dans un rayon de ${radiusM / 1000} km</td></tr>`;
+        } else {
+          tableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
+          tableBody.innerHTML = items.map((it) => `
+            <tr>
+              <td class="copyable">${it.name}</td>
+              <td class="copyable">${fmtDistanceM(it.distM)}</td>
+              <td class="copyable">${it.bearing}</td>
+            </tr>
+          `).join('');
+          for (const it of items) {
+            const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
+              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+              .addTo(map);
+            markers.push(marker);
+            bounds.push([it.lat, it.lon]);
+          }
+        }
+        statusEl.textContent = `${items.length} résultat(s) · rayon ${radiusM / 1000} km`;
+        map._homeView = { bounds: bounds };
+        map.fitBounds(bounds, { padding: [24, 24] });
+      } catch (e) {
+        statusEl.textContent = 'Service Overpass indisponible';
+        tableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    btn.addEventListener('click', () => {
+      const point = getReferencePoint();
+      if (!point) {
+        statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+        return;
+      }
+      runSearch(point.lat, point.lon);
+    });
+
+    // La carte de cette section est elle-même cliquable : ça relance la recherche
+    // centrée sur le point cliqué, indépendamment de la position de référence globale.
+    map.on('click', (e) => {
+      runSearch(e.latlng.lat, e.latlng.lng, 'carte');
+    });
+  }
+
+  const poiMap = initSecondaryMap('poiMap');
+  const escapeGamesMap = initSecondaryMap('escapeGamesMap');
+  const climbingGymsMap = initSecondaryMap('climbingGymsMap');
+  const toiletsMap = initSecondaryMap('toiletsMap');
+  const drinkingWaterMap = initSecondaryMap('drinkingWaterMap');
+  const foodMap = initSecondaryMap('foodMap');
+
+  setupNearbyOverpassFeature({
+    btn: poiBtn,
+    statusEl: poiStatus,
+    tableBody: poiTableBody,
+    map: poiMap,
+    badgeEl: poiSourceBadge,
+    color: '#4FD1C5',
+    radiusM: 1500,
+    maxResults: 20,
+    defaultName: "Point d'intérêt",
+    emptyLabel: "Aucun point d'intérêt trouvé",
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];node(around:${r},${lat},${lon})["name"]["amenity"];out body 200;`
+  });
+
+  setupNearbyOverpassFeature({
+    btn: escapeGamesBtn,
+    statusEl: escapeGamesStatusEl,
+    tableBody: escapeGamesTableBody,
+    map: escapeGamesMap,
+    badgeEl: escapeGamesSourceBadge,
+    color: '#8B5CF6',
+    radiusM: 20000,
+    maxResults: 20,
+    defaultName: 'Escape game',
+    emptyLabel: 'Aucun escape game trouvé',
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["leisure"="escape_game"](around:${r},${lat},${lon});way["leisure"="escape_game"](around:${r},${lat},${lon}););out center 200;`
+  });
+
+  setupNearbyOverpassFeature({
+    btn: climbingGymsBtn,
+    statusEl: climbingGymsStatusEl,
+    tableBody: climbingGymsTableBody,
+    map: climbingGymsMap,
+    badgeEl: climbingGymsSourceBadge,
+    color: '#F2994A',
+    radiusM: 20000,
+    maxResults: 20,
+    defaultName: "Salle d'escalade",
+    emptyLabel: "Aucune salle d'escalade trouvée",
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon});way["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon}););out center 200;`
+  });
+
+  // --- Toilettes (jeu de données téléchargeable, hors ligne, sur demande) ---
+  // Même schéma que l'eau potable / les antennes ANFR : hors ligne si téléchargé,
+  // repli sur Overpass en direct sinon. Téléchargé par défaut (comme l'eau potable).
+  const TOILETS_URL = 'data/toilets.min.csv';
+  const TOILETS_RAW_BYTES = 788726;
+  const TOILETS_DOWNLOADED_STORAGE_KEY = 'ousuisje_toilets_downloaded';
+  const TOILETS_RADIUS_M = 2000;
+  const TOILETS_MAX_RESULTS = 20;
+  const TOILETS_COLOR = '#6C7A89';
+
+  let toiletsSites = null;
+  let toiletsLoading = false;
+
+  function parseToiletsCsv(text) {
+    const out = [];
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      const parts = line.split(';');
+      const lat = parseFloat(parts[1]);
+      const lon = parseFloat(parts[2]);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
+      out.push({ id: parts[0], lat: lat, lon: lon });
+    }
+    return out;
+  }
+
+  function findNearbyToiletsOffline(lat, lon, radiusM, maxResults) {
+    if (!toiletsSites) return [];
+    const coslat = Math.cos(lat * Math.PI / 180);
+    const results = [];
+    for (const s of toiletsSites) {
+      const dLat = s.lat - lat;
+      const dLon = (s.lon - lon) * coslat;
+      const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
+      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, distM: distM, bearing: bearingTo(lat, lon, s.lat, s.lon) });
+    }
+    results.sort((a, b) => a.distM - b.distM);
+    return results.slice(0, maxResults);
+  }
+
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let toiletsGpsMarker = null;
+  let toiletsClickMarker = null;
+  let toiletsMarkers = [];
+
+  function clearToiletsMarkers() {
+    toiletsMarkers.forEach((m) => toiletsMap.removeLayer(m));
+    toiletsMarkers = [];
+  }
+
+  function renderToiletsResults(lat, lon, source, items) {
+    clearToiletsMarkers();
+    const bounds = [[lat, lon]];
+    if (items.length === 0) {
+      toiletsTableBody.className = '';
+      toiletsTableBody.innerHTML = `<tr><td colspan="3" class="dim">Aucune toilette dans un rayon de ${TOILETS_RADIUS_M / 1000} km</td></tr>`;
+    } else {
+      toiletsTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
+      toiletsTableBody.innerHTML = items.map((it) => `
+        <tr>
+          <td class="copyable">${it.name || 'Toilettes'}</td>
+          <td class="copyable">${fmtDistanceM(it.distM)}</td>
+          <td class="copyable">${it.bearing}</td>
+        </tr>
+      `).join('');
+      for (const it of items) {
+        const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: TOILETS_COLOR, weight: 2, fillColor: TOILETS_COLOR, fillOpacity: 0.6 })
+          .bindPopup(`<strong>${it.name || 'Toilettes'}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+          .addTo(toiletsMap);
+        toiletsMarkers.push(marker);
+        bounds.push([it.lat, it.lon]);
+      }
+    }
+    toiletsStatusEl.textContent = `${items.length} résultat(s) · rayon ${TOILETS_RADIUS_M / 1000} km`;
+    toiletsMap._homeView = { bounds: bounds };
+    toiletsMap.fitBounds(bounds, { padding: [24, 24] });
+  }
+
+  async function updateToiletsNearby(lat, lon, source) {
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
+    toiletsBtn.disabled = true;
+    updateMiniSourceBadge(toiletsSourceBadge, source);
+
+    if (source === 'carte') {
+      if (toiletsClickMarker) { toiletsMap.removeLayer(toiletsClickMarker); }
+      toiletsClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(toiletsMap);
+    } else {
+      if (toiletsGpsMarker) { toiletsMap.removeLayer(toiletsGpsMarker); }
+      toiletsGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(toiletsMap);
+    }
+
+    if (toiletsSites) {
+      const results = findNearbyToiletsOffline(lat, lon, TOILETS_RADIUS_M, TOILETS_MAX_RESULTS);
+      renderToiletsResults(lat, lon, source, results);
+      toiletsBtn.disabled = false;
+      return;
+    }
+
+    toiletsStatusEl.textContent = 'Recherche…';
+    try {
+      const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+      const data = await res.json();
+      const items = (data.elements || [])
+        .map((el) => {
+          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+          if (elat == null || elon == null) return null;
+          return { name: (el.tags && el.tags.name) || 'Toilettes', lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.distM - b.distM)
+        .slice(0, TOILETS_MAX_RESULTS);
+      renderToiletsResults(lat, lon, source, items);
+    } catch (e) {
+      toiletsStatusEl.textContent = 'Service Overpass indisponible';
+      toiletsTableBody.className = '';
+      toiletsTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
+    } finally {
+      toiletsBtn.disabled = false;
+    }
+  }
+
+  toiletsBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      toiletsStatusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    updateToiletsNearby(point.lat, point.lon);
+  });
+
+  // La carte de cette section est elle-même cliquable : ça relance la recherche
+  // centrée sur le point cliqué, indépendamment de la position de référence globale.
+  toiletsMap.on('click', (e) => {
+    updateToiletsNearby(e.latlng.lat, e.latlng.lng, 'carte');
+  });
+
+  // Téléchargement silencieux, sans interface dédiée : comme département/commune, ça se
+  // fait automatiquement au chargement de la page. En cas d'échec, la recherche retombe
+  // simplement sur Overpass en direct (toiletsSites reste null).
+  async function downloadToilets() {
+    if (toiletsLoading || toiletsSites) return;
+    toiletsLoading = true;
+    try {
+      const text = await fetchTextWithProgress(TOILETS_URL, TOILETS_RAW_BYTES, () => {});
+      toiletsSites = parseToiletsCsv(text);
+      localStorage.setItem(TOILETS_DOWNLOADED_STORAGE_KEY, '1');
+      const point = getReferencePoint();
+      if (point) updateToiletsNearby(point.lat, point.lon);
+    } catch (e) {
+      // Échec silencieux : la recherche retombera sur Overpass en direct.
+    } finally {
+      toiletsLoading = false;
+    }
+  }
+
+  downloadToilets();
+
+  // --- Eau potable (jeu de données téléchargeable, hors ligne, sur demande) ---
+  // Même schéma que les antennes ANFR : hors ligne si téléchargé, repli sur Overpass en direct sinon.
+  const DRINKING_WATER_URL = 'data/drinking-water.min.csv';
+  const DRINKING_WATER_RAW_BYTES = 747017;
+  const DRINKING_WATER_DOWNLOADED_STORAGE_KEY = 'ousuisje_drinking_water_downloaded';
+  const DRINKING_WATER_RADIUS_M = 2000;
+  const DRINKING_WATER_MAX_RESULTS = 20;
+  const DRINKING_WATER_COLOR = '#2AABE2';
+
+  let drinkingWaterSites = null;
+  let drinkingWaterLoading = false;
+
+  function parseDrinkingWaterCsv(text) {
+    const out = [];
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      const parts = line.split(';');
+      const lat = parseFloat(parts[1]);
+      const lon = parseFloat(parts[2]);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
+      out.push({ id: parts[0], lat: lat, lon: lon });
+    }
+    return out;
+  }
+
+  function findNearbyDrinkingWaterOffline(lat, lon, radiusM, maxResults) {
+    if (!drinkingWaterSites) return [];
+    const coslat = Math.cos(lat * Math.PI / 180);
+    const results = [];
+    for (const s of drinkingWaterSites) {
+      const dLat = s.lat - lat;
+      const dLon = (s.lon - lon) * coslat;
+      const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
+      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, distM: distM, bearing: bearingTo(lat, lon, s.lat, s.lon) });
+    }
+    results.sort((a, b) => a.distM - b.distM);
+    return results.slice(0, maxResults);
+  }
+
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let drinkingWaterGpsMarker = null;
+  let drinkingWaterClickMarker = null;
+  let drinkingWaterMarkers = [];
+
+  function clearDrinkingWaterMarkers() {
+    drinkingWaterMarkers.forEach((m) => drinkingWaterMap.removeLayer(m));
+    drinkingWaterMarkers = [];
+  }
+
+  function renderDrinkingWaterResults(lat, lon, source, items) {
+    clearDrinkingWaterMarkers();
+    const bounds = [[lat, lon]];
+    if (items.length === 0) {
+      drinkingWaterTableBody.className = '';
+      drinkingWaterTableBody.innerHTML = `<tr><td colspan="3" class="dim">Aucun point d'eau potable dans un rayon de ${DRINKING_WATER_RADIUS_M / 1000} km</td></tr>`;
+    } else {
+      drinkingWaterTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
+      drinkingWaterTableBody.innerHTML = items.map((it) => `
+        <tr>
+          <td class="copyable">${it.name || 'Eau potable'}</td>
+          <td class="copyable">${fmtDistanceM(it.distM)}</td>
+          <td class="copyable">${it.bearing}</td>
+        </tr>
+      `).join('');
+      for (const it of items) {
+        const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: DRINKING_WATER_COLOR, weight: 2, fillColor: DRINKING_WATER_COLOR, fillOpacity: 0.6 })
+          .bindPopup(`<strong>${it.name || 'Eau potable'}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+          .addTo(drinkingWaterMap);
+        drinkingWaterMarkers.push(marker);
+        bounds.push([it.lat, it.lon]);
+      }
+    }
+    drinkingWaterStatusEl.textContent = `${items.length} résultat(s) · rayon ${DRINKING_WATER_RADIUS_M / 1000} km`;
+    drinkingWaterMap._homeView = { bounds: bounds };
+    drinkingWaterMap.fitBounds(bounds, { padding: [24, 24] });
+  }
+
+  async function updateDrinkingWaterNearby(lat, lon, source) {
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
+    drinkingWaterBtn.disabled = true;
+    updateMiniSourceBadge(drinkingWaterSourceBadge, source);
+
+    if (source === 'carte') {
+      if (drinkingWaterClickMarker) { drinkingWaterMap.removeLayer(drinkingWaterClickMarker); }
+      drinkingWaterClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(drinkingWaterMap);
+    } else {
+      if (drinkingWaterGpsMarker) { drinkingWaterMap.removeLayer(drinkingWaterGpsMarker); }
+      drinkingWaterGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(drinkingWaterMap);
+    }
+
+    if (drinkingWaterSites) {
+      const results = findNearbyDrinkingWaterOffline(lat, lon, DRINKING_WATER_RADIUS_M, DRINKING_WATER_MAX_RESULTS);
+      renderDrinkingWaterResults(lat, lon, source, results);
+      drinkingWaterBtn.disabled = false;
+      return;
+    }
+
+    drinkingWaterStatusEl.textContent = 'Recherche…';
+    try {
+      const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+      const data = await res.json();
+      const items = (data.elements || [])
+        .map((el) => {
+          if (el.lat == null || el.lon == null) return null;
+          return { name: (el.tags && el.tags.name) || 'Eau potable', lat: el.lat, lon: el.lon, distM: distanceMetersApprox(lat, lon, el.lat, el.lon), bearing: bearingTo(lat, lon, el.lat, el.lon) };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.distM - b.distM)
+        .slice(0, DRINKING_WATER_MAX_RESULTS);
+      renderDrinkingWaterResults(lat, lon, source, items);
+    } catch (e) {
+      drinkingWaterStatusEl.textContent = 'Service Overpass indisponible';
+      drinkingWaterTableBody.className = '';
+      drinkingWaterTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
+    } finally {
+      drinkingWaterBtn.disabled = false;
+    }
+  }
+
+  drinkingWaterBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      drinkingWaterStatusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    updateDrinkingWaterNearby(point.lat, point.lon);
+  });
+
+  // La carte de cette section est elle-même cliquable : ça relance la recherche
+  // centrée sur le point cliqué, indépendamment de la position de référence globale.
+  drinkingWaterMap.on('click', (e) => {
+    updateDrinkingWaterNearby(e.latlng.lat, e.latlng.lng, 'carte');
+  });
+
+  // Téléchargement silencieux, sans interface dédiée : comme département/commune, ça se
+  // fait automatiquement au chargement de la page. En cas d'échec, la recherche retombe
+  // simplement sur Overpass en direct (drinkingWaterSites reste null).
+  async function downloadDrinkingWater() {
+    if (drinkingWaterLoading || drinkingWaterSites) return;
+    drinkingWaterLoading = true;
+    try {
+      const text = await fetchTextWithProgress(DRINKING_WATER_URL, DRINKING_WATER_RAW_BYTES, () => {});
+      drinkingWaterSites = parseDrinkingWaterCsv(text);
+      localStorage.setItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY, '1');
+      const point = getReferencePoint();
+      if (point) updateDrinkingWaterNearby(point.lat, point.lon);
+    } catch (e) {
+      // Échec silencieux : la recherche retombera sur Overpass en direct.
+    } finally {
+      drinkingWaterLoading = false;
+    }
+  }
+
+  downloadDrinkingWater();
+
+  setupNearbyOverpassFeature({
+    btn: foodBtn,
+    statusEl: foodStatusEl,
+    tableBody: foodTableBody,
+    map: foodMap,
+    badgeEl: foodSourceBadge,
+    color: '#E24A4A',
+    radiusM: 2000,
+    maxResults: 20,
+    defaultName: 'Restauration',
+    emptyLabel: 'Aucun endroit pour manger trouvé',
+    buildQuery: (lat, lon, r) =>
+      `[out:json][timeout:20];(node["amenity"~"restaurant|fast_food|cafe"](around:${r},${lat},${lon});way["amenity"~"restaurant|fast_food|cafe"](around:${r},${lat},${lon}););out center 200;`
+  });
+
+  // --- Sections personnalisées par mot-clé (réglages) ---
+  // Traduit quelques mots-clés français courants vers les tags OSM correspondants ;
+  // pour un mot-clé inconnu, on cherche en repli dans amenity/shop/name (comme du texte libre).
+  const KEYWORD_TAG_MAP = {
+    'pharmacie': 'amenity=pharmacy',
+    'boulangerie': 'shop=bakery',
+    'boucherie': 'shop=butcher',
+    'banque': 'amenity=bank',
+    'distributeur': 'amenity=atm',
+    'distributeur de billets': 'amenity=atm',
+    'atm': 'amenity=atm',
+    'supermarché': 'shop=supermarket',
+    'supermarche': 'shop=supermarket',
+    'epicerie': 'shop=convenience',
+    'épicerie': 'shop=convenience',
+    'hopital': 'amenity=hospital',
+    'hôpital': 'amenity=hospital',
+    'medecin': 'amenity=doctors',
+    'médecin': 'amenity=doctors',
+    'dentiste': 'amenity=dentist',
+    'veterinaire': 'amenity=veterinary',
+    'vétérinaire': 'amenity=veterinary',
+    'hotel': 'tourism=hotel',
+    'hôtel': 'tourism=hotel',
+    'camping': 'tourism=camp_site',
+    'coiffeur': 'shop=hairdresser',
+    'essence': 'amenity=fuel',
+    'station-service': 'amenity=fuel',
+    'station essence': 'amenity=fuel',
+    'parking': 'amenity=parking',
+    'bar': 'amenity=bar',
+    'cinema': 'amenity=cinema',
+    'cinéma': 'amenity=cinema',
+    'bibliotheque': 'amenity=library',
+    'bibliothèque': 'amenity=library',
+    'poste': 'amenity=post_office',
+    'laverie': 'shop=laundry',
+    'pressing': 'shop=dry_cleaning',
+    'fleuriste': 'shop=florist',
+    'librairie': 'shop=books',
+    'vetements': 'shop=clothes',
+    'vêtements': 'shop=clothes',
+    'opticien': 'shop=optician',
+    'musee': 'tourism=museum',
+    'musée': 'tourism=museum',
+    'ecole': 'amenity=school',
+    'école': 'amenity=school',
+    'gare': 'railway=station',
+    'aire de jeux': 'leisure=playground',
+    'garage': 'shop=car_repair',
+    'boucher': 'shop=butcher',
+    'patisserie': 'shop=pastry',
+    'pâtisserie': 'shop=pastry',
+    'bijouterie': 'shop=jewelry',
+    'animalerie': 'shop=pet',
+    'quincaillerie': 'shop=hardware',
+    'jardinerie': 'shop=garden_centre'
+  };
+  const CUSTOM_SECTION_COLORS = ['#4FD1C5', '#E8A33D', '#8B5CF6', '#22A6D9', '#F2994A', '#2FB344', '#6C7A89', '#2AABE2'];
+  const CUSTOM_SECTIONS_KEY = 'ousuisje_alpha_custom_sections';
+  let customSectionSeq = 0;
+
+  function loadCustomSections() {
+    try {
+      const raw = localStorage.getItem(CUSTOM_SECTIONS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveCustomSections(list) {
+    localStorage.setItem(CUSTOM_SECTIONS_KEY, JSON.stringify(list));
+  }
+
+  function buildQueryForKeyword(keyword) {
+    const kw = keyword.trim().toLowerCase();
+    const mapped = KEYWORD_TAG_MAP[kw];
+    if (mapped) {
+      const eq = mapped.indexOf('=');
+      const tagKey = mapped.slice(0, eq);
+      const tagVal = mapped.slice(eq + 1);
+      return (lat, lon, r) =>
+        `[out:json][timeout:20];(node["${tagKey}"="${tagVal}"](around:${r},${lat},${lon});way["${tagKey}"="${tagVal}"](around:${r},${lat},${lon}););out center 200;`;
+    }
+    const esc = kw.replace(/["\\]/g, '');
+    return (lat, lon, r) =>
+      `[out:json][timeout:20];(nwr["amenity"~"${esc}",i](around:${r},${lat},${lon});nwr["shop"~"${esc}",i](around:${r},${lat},${lon});nwr["name"~"${esc}",i](around:${r},${lat},${lon}););out center 200;`;
+  }
+
+  const customSectionsAnchor = $('customSectionsAnchor');
+  const settingsCustomList = $('settingsCustomList');
+
+  function addCustomSection(keyword, opts) {
+    opts = opts || {};
+    const label = opts.label || (keyword.charAt(0).toUpperCase() + keyword.slice(1));
+    const id = 'custom-' + (customSectionSeq++);
+    const mapId = 'customMap' + id;
+    const color = CUSTOM_SECTION_COLORS[customSectionSeq % CUSTOM_SECTION_COLORS.length];
+
+    const details = document.createElement('details');
+    details.className = 'feature';
+    details.dataset.section = id;
+    details.innerHTML = `
+      <summary class="feature-summary">
+        <span style="flex:1;">${label}</span>
+        <button type="button" class="feature-summary-remove" title="Retirer cette section">✕</button>
+        <span class="feature-chevron">▾</span>
+      </summary>
+      <div class="feature-body">
+        <button type="button" class="btn-secondary custom-search-btn">Trouver « ${label} »</button>
+        <div class="source-mini-badge is-hidden custom-source-badge">Source : —</div>
+        <div class="map-wrap">
+          <div id="${mapId}"></div>
+          <div class="map-footer"><span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span></div>
+        </div>
+        <div class="addr-panel">
+          <div class="addr-head"><span>${label}</span><span class="custom-status">—</span></div>
+          <table class="poi-table">
+            <thead><tr><th>Nom</th><th>Distance</th><th>Direction</th></tr></thead>
+            <tbody class="custom-table-body"><tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>
+          </table>
+        </div>
+        <p class="osm-credit">Résultat : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API) — section personnalisée ajoutée depuis les réglages.</p>
+      </div>
+    `;
+    customSectionsAnchor.parentNode.insertBefore(details, customSectionsAnchor);
+    wireAccordionSection(details);
+
+    const checkLabel = document.createElement('label');
+    checkLabel.className = 'settings-check';
+    checkLabel.innerHTML = `<input type="checkbox" data-section="${id}" checked><span>${label} (perso.)</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button><button type="button" class="settings-check-remove" title="Retirer">✕</button></span>`;
+    // Enfant direct de settingsPanel (comme les sections natives), pas de settingsCustomList :
+    // ça permet à cette section d'être réorganisée au même titre que les sections natives.
+    settingsPanel.insertBefore(checkLabel, settingsCustomList);
+    const cb = checkLabel.querySelector('input');
+    wireVisibilityCheckbox(cb);
+    wireReorderHandle(checkLabel);
+
+    const btn = details.querySelector('.custom-search-btn');
+    const statusEl = details.querySelector('.custom-status');
+    const tableBody = details.querySelector('.custom-table-body');
+    const badgeEl = details.querySelector('.custom-source-badge');
+    const secMap = initSecondaryMap(mapId);
+
+    setupNearbyOverpassFeature({
+      btn: btn,
+      statusEl: statusEl,
+      tableBody: tableBody,
+      map: secMap,
+      badgeEl: badgeEl,
+      color: color,
+      radiusM: 5000,
+      maxResults: 20,
+      defaultName: label,
+      emptyLabel: `Aucun résultat pour « ${label} »`,
+      buildQuery: buildQueryForKeyword(keyword)
+    });
+
+    function removeThisSection() {
+      const idx = featureSections.indexOf(details);
+      if (idx !== -1) featureSections.splice(idx, 1);
+      const cbIdx = sectionCheckboxes.indexOf(cb);
+      if (cbIdx !== -1) sectionCheckboxes.splice(cbIdx, 1);
+      const mapIdx = allMaps.indexOf(secMap);
+      if (mapIdx !== -1) allMaps.splice(mapIdx, 1);
+      if (secMap.remove) secMap.remove();
+      details.remove();
+      checkLabel.remove();
+      saveCustomSections(loadCustomSections().filter((s) => s.id !== id));
+      const prefs = loadVisibilityPrefs();
+      delete prefs[id];
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+    }
+    details.querySelector('.feature-summary-remove').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      removeThisSection();
+    });
+    checkLabel.querySelector('.settings-check-remove').addEventListener('click', removeThisSection);
+
+    if (!opts.silent) {
+      saveCustomSections(loadCustomSections().concat([{ id: id, keyword: keyword, label: label }]));
+      applySectionVisibility();
+      details.open = true; // ouvre la nouvelle section (referme les autres via l'accordéon)
+    }
+
+    return details;
+  }
+
+  // Recrée les sections personnalisées ajoutées lors d'une visite précédente.
+  loadCustomSections().forEach((s) => {
+    customSectionSeq = Math.max(customSectionSeq, parseInt((s.id || '').replace('custom-', ''), 10) + 1 || 0);
+  });
+  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { label: s.label, silent: true }));
+  applySectionVisibility();
+
+  // Toutes les sections (natives + personnalisées recréées) sont maintenant en place :
+  // capture l'ordre par défaut, câble les poignées déjà présentes, puis applique un
+  // éventuel ordre sauvegardé (ce qui peut aussi replacer les <details> correspondantes).
+  const DEFAULT_SECTION_ORDER = currentSectionOrder();
+  reorderableCheckLabels().forEach(wireReorderHandle);
+  const storedSectionOrder = loadSectionOrder();
+  if (storedSectionOrder) applySectionOrder(storedSectionOrder);
+
+  const customSectionInput = $('customSectionInput');
+  const customSectionAddBtn = $('customSectionAddBtn');
+  customSectionAddBtn.addEventListener('click', () => {
+    const kw = customSectionInput.value.trim();
+    if (!kw) return;
+    addCustomSection(kw);
+    customSectionInput.value = '';
+  });
+  customSectionInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); customSectionAddBtn.click(); }
+  });
+
+  async function loadOfflineGeoData() {
+    if (offlineDataPromise) return offlineDataPromise;
+    offlineDataPromise = (async () => {
+      const [deptRes, communesRes] = await Promise.all([
+        fetch(OFFLINE_DEPT_URL),
+        fetch(OFFLINE_COMMUNES_URL)
+      ]);
+      if (!deptRes.ok || !communesRes.ok) throw new Error('offline geo data unavailable');
+      offlineDepts = await deptRes.json();
+      const text = await communesRes.text();
+      offlineCommunesByCode = new Map();
+      offlineCommunes = text.split('\n').filter(Boolean).map((line) => {
+        const parts = line.split(';');
+        const entry = [parts[0], parts[1], parseFloat(parts[2]), parseFloat(parts[3]), parts[4] || ''];
+        offlineCommunesByCode.set(parts[0], entry);
+        return entry;
+      });
+    })();
+    return offlineDataPromise;
+  }
+
+  const offlineMap = initSecondaryMap('offlineMap');
+  let offlineDeptLayer = null;
+  let offlineCommuneLayer = null;
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let offlineGpsMarker = null;
+  let offlineClickMarker = null;
+
+  function drawDeptOnMap(code) {
+    if (offlineDeptLayer) { offlineMap.removeLayer(offlineDeptLayer); offlineDeptLayer = null; }
+    const entry = offlineDepts[code];
+    if (!entry) return null;
+    const polys = entry.p.map((poly) =>
+      L.polygon(
+        poly.map((ring) => ring.map(([lon, lat]) => [lat, lon])),
+        { color: '#12695C', weight: 3, fillColor: '#12695C', fillOpacity: 0.12 }
+      )
+    );
+    offlineDeptLayer = L.featureGroup(polys).addTo(offlineMap);
+    return offlineDeptLayer;
+  }
+
+  function drawCommuneCircleOnMap(commune) {
+    if (offlineCommuneLayer) { offlineMap.removeLayer(offlineCommuneLayer); offlineCommuneLayer = null; }
+    const radiusM = communeIndicativeRadiusMeters(commune);
+    offlineCommuneLayer = L.circle([commune.lat, commune.lon], {
+      radius: radiusM,
+      color: '#95600F',
+      weight: 3,
+      dashArray: '6 6',
+      fillColor: '#95600F',
+      fillOpacity: 0.14
+    }).addTo(offlineMap);
+    return offlineCommuneLayer;
+  }
+
+  function drawCommuneExactOnMap(commune) {
+    if (offlineCommuneLayer) { offlineMap.removeLayer(offlineCommuneLayer); offlineCommuneLayer = null; }
+    const polys = geojsonToPolys(commune.geometry).map((poly) =>
+      L.polygon(
+        poly.map((ring) => ring.map(([lon, lat]) => [lat, lon])),
+        { color: '#95600F', weight: 3, fillColor: '#95600F', fillOpacity: 0.18 }
+      )
+    );
+    offlineCommuneLayer = L.featureGroup(polys).addTo(offlineMap);
+    return offlineCommuneLayer;
+  }
+
+  async function updateOfflineGeo(lat, lon, source) {
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
+    updateMiniSourceBadge(offlineSourceBadge, source);
+    const colorClass = source === 'carte' ? 'v-teal' : 'v-amber';
+    try {
+      await loadOfflineGeoData();
+      const dept = findDepartement(lon, lat);
+      offlineDeptEl.textContent = dept ? `${dept.nom} (${dept.code})` : 'Introuvable';
+      offlineDeptEl.classList.toggle('dim', !dept);
+      offlineDeptEl.classList.toggle('copyable', !!dept);
+      offlineDeptEl.classList.remove('v-amber', 'v-teal');
+      if (dept) offlineDeptEl.classList.add(colorClass);
+
+      const region = dept ? DEPT_TO_REGION[dept.code] : null;
+      offlineRegionEl.textContent = region || 'Introuvable';
+      offlineRegionEl.classList.toggle('dim', !region);
+      offlineRegionEl.classList.toggle('copyable', !!region);
+      offlineRegionEl.classList.remove('v-amber', 'v-teal');
+      if (region) offlineRegionEl.classList.add(colorClass);
+
+      let commune = (dept && communeContoursTier !== 'centroides') ? findCommuneExact(lon, lat, dept.code) : null;
+      const communeExact = !!commune;
+      if (!commune) commune = findCommuneApprox(lat, lon);
+
+      offlineCommuneEl.classList.remove('v-amber', 'v-teal');
+      offlineCPEl.classList.remove('v-amber', 'v-teal');
+      if (commune) {
+        offlineCommuneEl.textContent = commune.nom;
+        offlineCommuneEl.classList.remove('dim');
+        offlineCommuneEl.classList.add('copyable', colorClass);
+        const cp = communePostalCode(commune.code);
+        offlineCPEl.textContent = cp || 'Non disponible';
+        offlineCPEl.classList.toggle('dim', !cp);
+        offlineCPEl.classList.toggle('copyable', !!cp);
+        if (cp) offlineCPEl.classList.add(colorClass);
+      } else {
+        offlineCommuneEl.textContent = 'Introuvable';
+        offlineCommuneEl.classList.add('dim');
+        offlineCommuneEl.classList.remove('copyable');
+        offlineCPEl.textContent = '—';
+        offlineCPEl.classList.add('dim');
+        offlineCPEl.classList.remove('copyable');
+      }
+      if (source === 'carte') {
+        if (offlineClickMarker) { offlineMap.removeLayer(offlineClickMarker); }
+        offlineClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(offlineMap);
+      } else {
+        if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }
+        offlineGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(offlineMap);
+      }
+
+      const deptLayer = dept ? drawDeptOnMap(dept.code) : null;
+      const communeLayer = commune ? (communeExact ? drawCommuneExactOnMap(commune) : drawCommuneCircleOnMap(commune)) : null;
+
+      if (communeLayer) {
+        // Calcule le zoom "un cran plus large que l'ajustement parfait" directement à partir
+        // des limites de la commune (indépendant du zoom courant de la carte), pour éviter
+        // qu'un dézoom d'un cran ne s'accumule à chaque nouvelle recherche.
+        const communeBounds = communeLayer.getBounds();
+        const fitZoom = offlineMap.getBoundsZoom(communeBounds, false, L.point(16, 16));
+        const zoom = Math.max(fitZoom - 1, 0);
+        const center = communeBounds.getCenter();
+        offlineMap.setView(center, zoom);
+        offlineMap._homeView = { center: center, zoom: zoom };
+      } else if (deptLayer) {
+        offlineMap.fitBounds(deptLayer.getBounds(), { padding: [16, 16] });
+        offlineMap._homeView = { bounds: deptLayer.getBounds() };
+      }
+    } catch (e) {
+      offlineDeptEl.textContent = 'Données indisponibles';
+      offlineDeptEl.classList.add('dim');
+      offlineDeptEl.classList.remove('copyable', 'v-amber', 'v-teal');
+      offlineRegionEl.textContent = 'Données indisponibles';
+      offlineRegionEl.classList.add('dim');
+      offlineRegionEl.classList.remove('copyable', 'v-amber', 'v-teal');
+    }
+  }
+
+  offlineGeoBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      offlineDeptEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      offlineDeptEl.classList.add('dim');
+      offlineDeptEl.classList.remove('copyable', 'v-amber', 'v-teal');
+      offlineRegionEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      offlineRegionEl.classList.add('dim');
+      offlineRegionEl.classList.remove('copyable', 'v-amber', 'v-teal');
+      return;
+    }
+    updateOfflineGeo(point.lat, point.lon);
+  });
+
+  // La carte de cette section est elle-même cliquable : relance la recherche à cet endroit.
+  offlineMap.on('click', (e) => {
+    updateOfflineGeo(e.latlng.lat, e.latlng.lng, 'carte');
+  });
+
+  loadOfflineGeoData().catch(() => {});
+
+  // --- Service worker, installation, partage ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+
+  const installBtn = $('installBtn');
+  const installNote = $('installNote');
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none';
+        installNote.textContent = 'Application installée ✓';
+      }
+      deferredPrompt = null;
+    } else if (isIOS) {
+      installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
+    } else {
+      installNote.textContent = 'Ouvrez le menu de votre navigateur et choisissez « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».';
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    installNote.textContent = 'Application installée ✓';
+  });
+
+  if (isStandalone) {
+    installBtn.style.display = 'none';
+    installNote.textContent = 'Application installée ✓';
+  } else if (isIOS) {
+    installNote.textContent = 'Sur iPhone/iPad : appuyez sur Partager, puis « Sur l\'écran d\'accueil ».';
+  }
+
+  const shareBtn = $('shareBtn');
+  const shareNote = $('shareNote');
+  shareBtn.addEventListener('click', async () => {
+    const shareData = {
+      title: 'OuSuisJe',
+      text: "OuSuisJe — retrouvez votre adresse, l'altitude et les points d'intérêt autour de vous.",
+      url: 'https://www.ousuisje.fun/'
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (e) {
+        // Partage annulé ou échoué : rien à faire.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+      shareNote.textContent = 'Lien copié ✓';
+      setTimeout(() => { shareNote.textContent = ''; }, 2500);
+    } catch (e) {
+      shareNote.textContent = shareData.url;
+    }
+  });
+
+  // --- Compteur de visites ---
+  const visitCount = $('visitCount');
+  fetch('https://countapi.mileshilliard.com/api/v1/hit/ousuisje-fun-site-visits')
+    .then((r) => r.json())
+    .then((data) => { visitCount.textContent = data.value.toLocaleString('fr-FR'); })
+    .catch(() => { visitCount.textContent = '—'; });
+})();
+</script>
+</body>
+</html>

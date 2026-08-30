@@ -124,6 +124,9 @@
       <div id="autoStopCountdown" class="countdown"></div>
       <div class="addr-panel">
         <div class="addr-row"><span class="k">Coordonnées</span><span id="diagPosition" class="v dim placeholder">—</span></div>
+        <div class="addr-row"><span class="k">Coordonnées (DMS)</span><span id="diagPositionDms" class="v dim placeholder">—</span></div>
+        <div class="addr-row"><span class="k">Coordonnées (DDM)</span><span id="diagPositionDdm" class="v dim placeholder">—</span></div>
+        <div class="addr-row"><span class="k">Coordonnées (lat, lon)</span><span id="diagPositionPlain" class="v dim placeholder">—</span></div>
         <div class="addr-row"><span class="k">Vitesse</span><span id="spdVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Cap</span><span id="hdgVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Heure</span><span id="tsVal" class="v dim">—</span></div>
@@ -569,7 +572,7 @@
   </div>
 
   <p class="feedback-note">Une suggestion, un bug à signaler ? N'hésitez pas à écrire à l'adresse indiquée dans les <a href="mentions-legales.html" class="inline">mentions légales</a>.</p>
-  <p class="version-note">Version 0.9</p>
+  <p class="version-note">Version 1.0</p>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -581,6 +584,9 @@
   const statusDot = $('statusDot');
   const statusText = $('statusText');
   const diagPosition = $('diagPosition');
+  const diagPositionDms = $('diagPositionDms');
+  const diagPositionDdm = $('diagPositionDdm');
+  const diagPositionPlain = $('diagPositionPlain');
   const accVal = $('accVal');
   const altVal = $('altVal');
   const spdVal = $('spdVal');
@@ -1143,6 +1149,21 @@
 
   function fmtCoord(v) { return v.toFixed(6) + '°'; }
 
+  // Autres écritures usuelles d'une coordonnée GPS (v toujours positive : le signe/la
+  // lettre cardinale sont gérés par l'appelant).
+  function fmtDMS(v) {
+    const deg = Math.floor(v);
+    const minFull = (v - deg) * 60;
+    const min = Math.floor(minFull);
+    const sec = (minFull - min) * 60;
+    return `${deg}°${String(min).padStart(2, '0')}'${sec.toFixed(1).padStart(4, '0')}"`;
+  }
+  function fmtDDM(v) {
+    const deg = Math.floor(v);
+    const min = (v - deg) * 60;
+    return `${deg}°${min.toFixed(3)}'`;
+  }
+
   function setAddrField(el, value, colorClass) {
     el.textContent = value || '—';
     el.classList.toggle('dim', !value);
@@ -1606,6 +1627,19 @@
 
     diagPosition.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtCoord(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtCoord(Math.abs(longitude));
     diagPosition.classList.remove('dim', 'placeholder');
+    diagPosition.classList.add('copyable');
+
+    diagPositionDms.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtDMS(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtDMS(Math.abs(longitude));
+    diagPositionDms.classList.remove('dim', 'placeholder');
+    diagPositionDms.classList.add('copyable');
+
+    diagPositionDdm.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtDDM(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtDDM(Math.abs(longitude));
+    diagPositionDdm.classList.remove('dim', 'placeholder');
+    diagPositionDdm.classList.add('copyable');
+
+    diagPositionPlain.textContent = latitude.toFixed(6) + ', ' + longitude.toFixed(6);
+    diagPositionPlain.classList.remove('dim', 'placeholder');
+    diagPositionPlain.classList.add('copyable');
 
     accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
     accVal.classList.remove('dim');
@@ -1621,22 +1655,31 @@
     const isMoving = lastKnownSpeedKmh != null && lastKnownSpeedKmh >= 2;
     spdVal.textContent = isMoving ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : '—';
     spdVal.classList.toggle('dim', !isMoving);
+    spdVal.classList.toggle('copyable', isMoving);
     hdgVal.textContent = (isMoving && heading != null && !Number.isNaN(heading)) ? Math.round(heading) + '°' : '—';
-    hdgVal.classList.toggle('dim', !(isMoving && heading != null && !Number.isNaN(heading)));
+    const hasHeading = isMoving && heading != null && !Number.isNaN(heading);
+    hdgVal.classList.toggle('dim', !hasHeading);
+    hdgVal.classList.toggle('copyable', hasHeading);
     tsVal.textContent = new Date(pos.timestamp).toLocaleTimeString('fr-FR');
     tsVal.classList.remove('dim');
+    tsVal.classList.add('copyable');
     altAccVal.textContent = altitudeAccuracy != null ? '± ' + Math.round(altitudeAccuracy) + ' m' : '—';
     altAccVal.classList.toggle('dim', altitudeAccuracy == null);
+    altAccVal.classList.toggle('copyable', altitudeAccuracy != null);
 
     diagFixState.textContent = 'Fix valide';
     diagFixState.classList.remove('dim');
+    diagFixState.classList.add('copyable');
     const ageSec = lastFixReceivedAt != null ? Math.max(0, Math.round((Date.now() - lastFixReceivedAt) / 1000)) : null;
     diagFixAge.textContent = ageSec != null ? ageSec + ' s' : '—';
     diagFixAge.classList.toggle('dim', ageSec == null);
+    diagFixAge.classList.toggle('copyable', ageSec != null);
     diagFixCount.textContent = String(fixCount);
     diagFixCount.classList.remove('dim');
+    diagFixCount.classList.add('copyable');
     diagRawAcc.textContent = accuracy != null ? accuracy.toFixed(1) + ' m' : '—';
     diagRawAcc.classList.toggle('dim', accuracy == null);
+    diagRawAcc.classList.toggle('copyable', accuracy != null);
 
     placeGpsMarker(latitude, longitude, accuracy);
     setStatus('live', 'Localisation GPS active');
@@ -1657,6 +1700,7 @@
     locateBtn.disabled = false;
     diagFixState.textContent = 'Erreur';
     diagFixState.classList.add('dim');
+    diagFixState.classList.remove('copyable');
   }
 
   function updateCountdownDisplay() {
@@ -1680,6 +1724,7 @@
     setStatus('err', err.code === err.TIMEOUT ? 'Délai dépassé, nouvelle tentative…' : 'Signal GPS perdu, nouvelle tentative…');
     diagFixState.textContent = 'Signal perdu';
     diagFixState.classList.add('dim');
+    diagFixState.classList.remove('copyable');
   }
 
   function beginWatch() {
@@ -1739,6 +1784,7 @@
     locateBtn.disabled = false;
     diagFixState.textContent = lastPos ? 'Inactif — dernière position conservée' : 'Inactif';
     diagFixState.classList.add('dim');
+    diagFixState.classList.remove('copyable');
     recentFixes = [];
     lastKnownSpeedKmh = null;
   }

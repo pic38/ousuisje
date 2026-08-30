@@ -200,8 +200,10 @@
           <span id="oeCompareStatus">—</span>
         </div>
         <div class="addr-row"><span class="k">Altitude GPS</span><span id="oeGpsVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Altitude Open-Elevation</span><span id="oeVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Écart</span><span id="oeDiffVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude Open-Elevation au point GPS</span><span id="oeVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart GPS - Open-Elevation(GPS)</span><span id="oeDiffVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude Open-Elevation au point cliqué sur la carte</span><span id="oeClickVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart Open-Elevation(Point cliqué) - Open-Elevation(GPS)</span><span id="oeDiffGpsClickVal" class="v dim">—</span></div>
       </div>
       <p class="osm-credit">Altitude : service public <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (données SRTM)</p>
     </div>
@@ -586,7 +588,9 @@
   const oeCompareStatus = $('oeCompareStatus');
   const oeGpsVal = $('oeGpsVal');
   const oeVal = $('oeVal');
+  const oeClickVal = $('oeClickVal');
   const oeDiffVal = $('oeDiffVal');
+  const oeDiffGpsClickVal = $('oeDiffGpsClickVal');
 
   const poiBtn = $('poiBtn');
   const poiStatus = $('poiStatus');
@@ -1230,59 +1234,6 @@
     return val != null ? val : null;
   }
 
-  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, serviceName, fetchFn, pointOverride) {
-    const point = pointOverride || getReferencePoint();
-    if (!point) {
-      statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
-      return;
-    }
-    const { lat, lon } = point;
-    const pointColorClass = point.source === 'carte' ? 'v-teal' : 'v-amber';
-    statusEl.textContent = 'Recherche…';
-    try {
-      const elevation = await fetchFn(lat, lon);
-      const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude + altitudeOffsetM : null;
-
-      gpsEl.classList.remove('v-amber', 'v-teal');
-      if (gpsAlt != null) {
-        gpsEl.textContent = Math.round(gpsAlt) + ' m';
-        gpsEl.classList.remove('dim');
-        gpsEl.classList.add('copyable', 'v-amber');
-      } else {
-        gpsEl.textContent = 'Non fournie par le GPS';
-        gpsEl.classList.add('dim');
-        gpsEl.classList.remove('copyable');
-      }
-
-      sourceEl.classList.remove('v-amber', 'v-teal');
-      if (elevation != null) {
-        sourceEl.textContent = Math.round(elevation) + ' m';
-        sourceEl.classList.remove('dim');
-        sourceEl.classList.add('copyable', pointColorClass);
-      } else {
-        sourceEl.textContent = 'Indisponible pour ce point';
-        sourceEl.classList.add('dim');
-        sourceEl.classList.remove('copyable');
-      }
-
-      diffEl.classList.remove('v-amber', 'v-teal');
-      if (gpsAlt != null && elevation != null) {
-        const diff = gpsAlt - elevation;
-        diffEl.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
-        diffEl.classList.remove('dim');
-        diffEl.classList.add('copyable', pointColorClass);
-      } else {
-        diffEl.textContent = '—';
-        diffEl.classList.add('dim');
-        diffEl.classList.remove('copyable');
-      }
-
-      statusEl.textContent = 'Comparaison effectuée';
-    } catch (e) {
-      statusEl.textContent = 'Service ' + serviceName + ' indisponible';
-    }
-  }
-
   const altitudeMap = initSecondaryMap('altitudeMap');
   // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
   // doit pas faire disparaître le point de la position GPS, et inversement.
@@ -1302,9 +1253,9 @@
   }
 
   // --- IGN : altitude au point GPS ET au point cliqué sur la carte, avec deux écarts ---
-  // (essai, page bêta uniquement) : contrairement à runAltitudeCompare (un seul point à la
-  // fois, réutilisé tel quel pour le bloc Open-Elevation ci-dessous), ce bloc IGN garde en
-  // mémoire les deux valeurs séparément pour les comparer entre elles.
+  // (essai, page bêta uniquement) : les deux valeurs sont gardées en mémoire séparément
+  // pour les comparer entre elles, plutôt qu'une seule à la fois. Même schéma repris pour
+  // le bloc Open-Elevation plus bas.
   let ignAltAtGps = null;
   let ignAltAtClick = null;
 
@@ -1396,6 +1347,99 @@
     }
   }
 
+  // --- Open-Elevation : même schéma que le bloc IGN ci-dessus (altitude au point GPS ET
+  // au point cliqué sur la carte, avec deux écarts suivis indépendamment). ---
+  let oeAltAtGps = null;
+  let oeAltAtClick = null;
+
+  function refreshOeDiffs() {
+    const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude + altitudeOffsetM : null;
+
+    oeDiffVal.classList.remove('v-amber', 'v-teal');
+    if (gpsAlt != null && oeAltAtGps != null) {
+      const diff = gpsAlt - oeAltAtGps;
+      oeDiffVal.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+      oeDiffVal.classList.remove('dim');
+      oeDiffVal.classList.add('copyable', 'v-amber');
+    } else {
+      oeDiffVal.textContent = '—';
+      oeDiffVal.classList.add('dim');
+      oeDiffVal.classList.remove('copyable');
+    }
+
+    oeDiffGpsClickVal.classList.remove('v-amber', 'v-teal');
+    if (oeAltAtGps != null && oeAltAtClick != null) {
+      const diff = oeAltAtClick - oeAltAtGps;
+      oeDiffGpsClickVal.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+      oeDiffGpsClickVal.classList.remove('dim');
+      oeDiffGpsClickVal.classList.add('copyable', 'v-teal');
+    } else {
+      oeDiffGpsClickVal.textContent = '—';
+      oeDiffGpsClickVal.classList.add('dim');
+      oeDiffGpsClickVal.classList.remove('copyable');
+    }
+  }
+
+  async function updateOeAtGpsPoint() {
+    const point = getReferencePoint();
+    if (!point) {
+      oeCompareStatus.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    oeCompareStatus.textContent = 'Recherche…';
+
+    const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude + altitudeOffsetM : null;
+    oeGpsVal.classList.remove('v-amber', 'v-teal');
+    if (gpsAlt != null) {
+      oeGpsVal.textContent = Math.round(gpsAlt) + ' m';
+      oeGpsVal.classList.remove('dim');
+      oeGpsVal.classList.add('copyable', 'v-amber');
+    } else {
+      oeGpsVal.textContent = 'Non fournie par le GPS';
+      oeGpsVal.classList.add('dim');
+      oeGpsVal.classList.remove('copyable');
+    }
+
+    try {
+      oeAltAtGps = await fetchOpenElevationAltitude(point.lat, point.lon);
+      oeVal.classList.remove('v-amber', 'v-teal');
+      if (oeAltAtGps != null) {
+        oeVal.textContent = Math.round(oeAltAtGps) + ' m';
+        oeVal.classList.remove('dim');
+        oeVal.classList.add('copyable', 'v-amber');
+      } else {
+        oeVal.textContent = 'Indisponible pour ce point';
+        oeVal.classList.add('dim');
+        oeVal.classList.remove('copyable');
+      }
+      refreshOeDiffs();
+      oeCompareStatus.textContent = 'Comparaison effectuée';
+    } catch (e) {
+      oeCompareStatus.textContent = 'Service Open-Elevation indisponible';
+    }
+  }
+
+  async function updateOeAtClickPoint(lat, lon) {
+    oeCompareStatus.textContent = 'Recherche…';
+    try {
+      oeAltAtClick = await fetchOpenElevationAltitude(lat, lon);
+      oeClickVal.classList.remove('v-amber', 'v-teal');
+      if (oeAltAtClick != null) {
+        oeClickVal.textContent = Math.round(oeAltAtClick) + ' m';
+        oeClickVal.classList.remove('dim');
+        oeClickVal.classList.add('copyable', 'v-teal');
+      } else {
+        oeClickVal.textContent = 'Indisponible pour ce point';
+        oeClickVal.classList.add('dim');
+        oeClickVal.classList.remove('copyable');
+      }
+      refreshOeDiffs();
+      oeCompareStatus.textContent = 'Comparaison effectuée';
+    } catch (e) {
+      oeCompareStatus.textContent = 'Service Open-Elevation indisponible';
+    }
+  }
+
   altCompareBtn.addEventListener('click', () => {
     const point = getReferencePoint();
     if (point) placeAltitudeMapMarker(point.lat, point.lon, point.source);
@@ -1404,7 +1448,7 @@
   oeCompareBtn.addEventListener('click', () => {
     const point = getReferencePoint();
     if (point) placeAltitudeMapMarker(point.lat, point.lon, point.source);
-    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude);
+    updateOeAtGpsPoint();
   });
 
   // La carte de cette section est elle-même cliquable : compare l'altitude au point choisi,
@@ -1413,7 +1457,7 @@
     const point = { lat: e.latlng.lat, lon: e.latlng.lng, source: 'carte' };
     placeAltitudeMapMarker(point.lat, point.lon, point.source);
     updateIgnAtClickPoint(point.lat, point.lon);
-    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point);
+    updateOeAtClickPoint(point.lat, point.lon);
   });
 
   // --- Points d'intérêt (Overpass API) ---

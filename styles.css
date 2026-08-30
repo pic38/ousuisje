@@ -208,6 +208,18 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
 .settings-custom-input:focus { outline: 1px solid var(--teal); }
 .settings-custom-add .settings-bulk-btn { flex: 0 0 auto; padding: 8px 14px; }
 
+.altitude-offset-input {
+  width: 68px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.altitude-offset-input:focus { outline: 1px solid var(--teal); }
+
 .feature-summary-remove {
   background: none;
   border: none;

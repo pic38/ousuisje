@@ -128,6 +128,11 @@
         <div class="addr-row"><span class="k">Cap</span><span id="hdgVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Heure GPS</span><span id="tsVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Précision altitude GPS</span><span id="altAccVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Décalage altitude</span>
+          <span class="v" style="display:flex; align-items:center; gap:6px;">
+            <input type="number" id="altOffsetInput" step="1" placeholder="0" class="altitude-offset-input" /> m
+          </span>
+        </div>
         <div class="addr-row"><span class="k">État du fix</span><span id="diagFixState" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Âge du relevé</span><span id="diagFixAge" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Relevés reçus</span><span id="diagFixCount" class="v dim">0</span></div>
@@ -542,6 +547,7 @@
   const hdgVal = $('hdgVal');
   const tsVal = $('tsVal');
   const altAccVal = $('altAccVal');
+  const altOffsetInput = $('altOffsetInput');
   const accuracyWarning = $('accuracyWarning');
   const locateBtn = $('locateBtn');
   const autoStopCheckbox = $('autoStopCheckbox');
@@ -1051,6 +1057,18 @@
   let lastFixReceivedAt = null;
   let autoStopRemaining = 0;
   const AUTO_STOP_SECONDS = 60;
+
+  // --- Décalage manuel d'altitude (correction ajoutée à l'altitude brute du GPS) ---
+  const ALT_OFFSET_STORAGE_KEY = 'ousuisje_altitude_offset_m';
+  let altitudeOffsetM = parseFloat(localStorage.getItem(ALT_OFFSET_STORAGE_KEY));
+  if (!Number.isFinite(altitudeOffsetM)) altitudeOffsetM = 0;
+  if (altitudeOffsetM) altOffsetInput.value = String(altitudeOffsetM);
+  altOffsetInput.addEventListener('input', () => {
+    const v = parseFloat(altOffsetInput.value);
+    altitudeOffsetM = Number.isFinite(v) ? v : 0;
+    localStorage.setItem(ALT_OFFSET_STORAGE_KEY, String(altitudeOffsetM));
+    if (lastPos) updateUI(lastPos);
+  });
   const isFirefox = /firefox/i.test(navigator.userAgent);
   const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
 
@@ -1224,7 +1242,7 @@
     statusEl.textContent = 'Recherche…';
     try {
       const elevation = await fetchFn(lat, lon);
-      const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude : null;
+      const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude + altitudeOffsetM : null;
 
       gpsEl.classList.remove('v-amber', 'v-teal');
       if (gpsAlt != null) {
@@ -1331,7 +1349,7 @@
     } else {
       accuracyWarning.style.display = 'none';
     }
-    altVal.textContent = altitude != null ? Math.round(altitude) + ' m' : 'Non fournie';
+    altVal.textContent = altitude != null ? Math.round(altitude + altitudeOffsetM) + ' m' : 'Non fournie';
     altVal.classList.toggle('dim', altitude == null);
     const isMoving = lastKnownSpeedKmh != null && lastKnownSpeedKmh >= 2;
     spdVal.textContent = isMoving ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : '—';

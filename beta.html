@@ -190,23 +190,18 @@
             <div class="altitude-profile-track"></div>
             <div class="altitude-profile-marker" id="apMarkerGps">
               <span class="altitude-profile-dot altitude-profile-dot-gps"></span>
-              <b class="altitude-profile-val" id="apValGps">—</b>
+              <span class="altitude-profile-label">GPS <b id="apValGps">—</b></span>
             </div>
             <div class="altitude-profile-gap" id="apGapGpsIgn">—</div>
             <div class="altitude-profile-marker" id="apMarkerIgnGps">
               <span class="altitude-profile-dot altitude-profile-dot-ign-gps"></span>
-              <b class="altitude-profile-val" id="apValIgnGps">—</b>
+              <span class="altitude-profile-label">IGN (GPS) <b id="apValIgnGps">—</b></span>
             </div>
             <div class="altitude-profile-gap" id="apGapIgnClick">—</div>
             <div class="altitude-profile-marker" id="apMarkerIgnClick">
               <span class="altitude-profile-dot altitude-profile-dot-ign-click"></span>
-              <b class="altitude-profile-val" id="apValIgnClick">—</b>
+              <span class="altitude-profile-label">IGN (clic) <b id="apValIgnClick">—</b></span>
             </div>
-          </div>
-          <div class="altitude-profile-legend">
-            <span class="altitude-profile-legend-item"><span class="altitude-profile-dot altitude-profile-dot-gps"></span>GPS</span>
-            <span class="altitude-profile-legend-item"><span class="altitude-profile-dot altitude-profile-dot-ign-gps"></span>IGN (GPS)</span>
-            <span class="altitude-profile-legend-item"><span class="altitude-profile-dot altitude-profile-dot-ign-click"></span>IGN (clic)</span>
           </div>
         </div>
         <div class="addr-row"><span class="k">Altitude GPS</span><span id="altGpsVal" class="v dim">—</span></div>
@@ -1336,7 +1331,27 @@
     const pad = (max - min) * 0.18;
     min -= pad;
     max += pad;
-    const topPercentOf = (value) => 100 - ((value - min) / (max - min)) * 100;
+    const rawTopPercentOf = (value) => 100 - ((value - min) / (max - min)) * 100;
+
+    // Écarte les repères trop proches les uns des autres (par ex. un point cliqué sur une
+    // montagne toute proche : GPS et IGN(GPS) se retrouvent alors compressés l'un contre
+    // l'autre à l'échelle de la règle) pour que leurs étiquettes ne se chevauchent jamais —
+    // quitte à s'écarter un peu de la proportionnalité stricte dans ce cas précis.
+    const MIN_GAP_PCT = 26;
+    const topByPointId = new Map();
+    const sorted = known.slice().sort((a, b) => rawTopPercentOf(a.value) - rawTopPercentOf(b.value));
+    let prevTop = null;
+    sorted.forEach((p) => {
+      let top = rawTopPercentOf(p.value);
+      if (prevTop != null && top - prevTop < MIN_GAP_PCT) top = prevTop + MIN_GAP_PCT;
+      topByPointId.set(p.id, top);
+      prevTop = top;
+    });
+    const maxTop = Math.max(...Array.from(topByPointId.values()));
+    const overflow = maxTop - 96; // garde un peu de marge en bas de la règle
+    if (overflow > 0) {
+      topByPointId.forEach((top, id) => topByPointId.set(id, Math.max(2, top - overflow)));
+    }
 
     points.forEach((p) => {
       const markerEl = $(p.id);
@@ -1345,23 +1360,23 @@
         return;
       }
       markerEl.classList.remove('is-hidden');
-      markerEl.style.top = topPercentOf(p.value) + '%';
+      markerEl.style.top = topByPointId.get(p.id) + '%';
       $(p.valId).textContent = Math.round(p.value) + ' m';
     });
 
-    function positionGap(gapId, value1, value2, diff) {
+    function positionGap(gapId, id1, id2, value1, value2, diff) {
       const gapEl = $(gapId);
       if (value1 == null || value2 == null) {
         gapEl.classList.add('is-hidden');
         return;
       }
       gapEl.classList.remove('is-hidden');
-      gapEl.style.top = ((topPercentOf(value1) + topPercentOf(value2)) / 2) + '%';
+      gapEl.style.top = ((topByPointId.get(id1) + topByPointId.get(id2)) / 2) + '%';
       gapEl.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
     }
 
-    positionGap('apGapGpsIgn', gpsAlt, ignAltAtGps, gpsAlt != null && ignAltAtGps != null ? gpsAlt - ignAltAtGps : null);
-    positionGap('apGapIgnClick', ignAltAtGps, ignAltAtClick, ignAltAtGps != null && ignAltAtClick != null ? ignAltAtClick - ignAltAtGps : null);
+    positionGap('apGapGpsIgn', 'apMarkerGps', 'apMarkerIgnGps', gpsAlt, ignAltAtGps, gpsAlt != null && ignAltAtGps != null ? gpsAlt - ignAltAtGps : null);
+    positionGap('apGapIgnClick', 'apMarkerIgnGps', 'apMarkerIgnClick', ignAltAtGps, ignAltAtClick, ignAltAtGps != null && ignAltAtClick != null ? ignAltAtClick - ignAltAtGps : null);
   }
 
   async function updateIgnAtGpsPoint() {

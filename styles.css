@@ -166,6 +166,24 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
   flex-shrink: 0;
 }
 .settings-check-remove:hover { color: var(--danger); }
+.settings-check-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.settings-move-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 5px;
+  border-radius: 6px;
+}
+.settings-move-btn:hover:not(:disabled) { color: var(--teal); background: var(--surface-2); }
+.settings-move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .settings-custom-add {
   display: flex;
   gap: 8px;

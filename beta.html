@@ -33,17 +33,17 @@
     <button type="button" id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
   </div>
   <label class="settings-check"><input type="checkbox" data-section="localisation" checked><span>Localisation administrative</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Réglages et détails GPS</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Réglages et détails GPS (Mode hors ligne)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="poi" checked><span>Points d'intérêt à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte IGN</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="offline-geo"><span>Département et commune (hors ligne)</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="antennas"><span>Antennes relais 2G 3G 4G 5G (hors ligne)</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="offline-geo"><span>Département et commune (Mode hors ligne)</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="antennas"><span>Antennes relais 2G 3G 4G 5G (Mode hors ligne)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="pools"><span>Piscines à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-sites"><span>Sites d'escalade à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable à proximité (Mode hors ligne)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="food" checked><span>De quoi manger à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de pluie</span></label>
   <div id="settingsCustomList"></div>
@@ -110,7 +110,7 @@
   </details>
 
   <details class="feature" data-section="diag">
-    <summary class="feature-summary"><span>Réglages et détails GPS</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Réglages et détails GPS (Mode hors ligne)</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <label class="keep-alive-toggle">
         <input type="checkbox" id="autoLocateCheckbox" />
@@ -201,12 +201,12 @@
   </details>
 
   <details class="feature" data-section="offline-geo">
-    <summary class="feature-summary"><span>Département et commune (hors ligne)</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Département et commune (Mode hors ligne)</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <button type="button" id="offlineGeoBtn" class="btn-secondary">Trouver le département et la commune</button>
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Département et commune (hors ligne)</span>
+          <span>Département et commune (Mode hors ligne)</span>
         </div>
         <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
@@ -258,7 +258,7 @@
   </details>
 
   <details class="feature" data-section="antennas">
-    <summary class="feature-summary"><span>Antennes relais 2G 3G 4G 5G (hors ligne)</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Antennes relais 2G 3G 4G 5G (Mode hors ligne)</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <div class="addr-panel">
         <div class="addr-head">
@@ -472,7 +472,7 @@
   </details>
 
   <details class="feature" data-section="drinking-water">
-    <summary class="feature-summary"><span>Eau potable à proximité</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Eau potable à proximité (Mode hors ligne)</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <div class="addr-panel">
         <div class="addr-head">
@@ -1553,7 +1553,7 @@
 
   loadRadar();
 
-  // --- Département et commune (hors ligne) (données pré-téléchargées) ---
+  // --- Département et commune (Mode hors ligne) (données pré-téléchargées) ---
   const OFFLINE_DEPT_URL = 'data/departements.min.json';
   const OFFLINE_COMMUNES_URL = 'data/communes.min.csv';
 

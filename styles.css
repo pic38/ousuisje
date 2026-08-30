@@ -52,6 +52,14 @@ details.feature { width: 100%; }
 .feature-summary::-webkit-details-marker { display: none; }
 .feature-summary::marker { content: ""; }
 .feature-summary:hover { background: var(--surface-2); }
+.feature-mode-badge {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .feature-chevron { color: var(--teal); font-size: 12px; flex-shrink: 0; transition: transform 0.15s ease; }
 details.feature[open] > .feature-summary {
   border-bottom-left-radius: 0;

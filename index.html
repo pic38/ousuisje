@@ -213,8 +213,6 @@
         <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Code postal</span><span id="offlineCP" class="v dim">—</span></div>
       </div>
-      <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). Mis à jour à chaque nouvelle recherche dans cette section (GPS ou clic sur cette carte). Par défaut, la commune est une estimation par proximité au centre-bourg : elle peut être erronée près d'une frontière communale — voir ci-dessous pour télécharger les vrais contours.</p>
-
       <div class="source-mini-badge is-hidden" id="offlineSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="offlineMap"></div>
@@ -226,7 +224,6 @@
       <div class="addr-panel">
         <div class="addr-head">
           <span>Contours précis des communes (optionnel)</span>
-          <span id="contoursStatus" class="dim">Non téléchargés</span>
         </div>
         <table class="contours-table">
           <colgroup>
@@ -257,9 +254,7 @@
           </tbody>
         </table>
       </div>
-      <p class="osm-credit">
-        Les deux versions viennent du même tracé source (IGN Admin Express), simplifié différemment pour réduire la taille du fichier (projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>). La <strong>version simplifiée</strong> ne garde qu'environ 5% des points du tracé d'origine : les grandes lignes sont fidèles, mais les détails fins (petites presqu'îles, méandres serrés) peuvent être coupés, avec une erreur possible sur une bande de quelques dizaines de mètres près de ces zones. La <strong>pleine précision</strong> garde environ 25% des points et colle au tracé réel à environ 1 mètre près partout, pour un téléchargement ~2,4x plus lourd. Une fois téléchargée, une version remplace l'estimation par proximité par le vrai contour de la commune, y compris hors connexion — jusqu'à la prochaine mise à jour de l'app, qui vide le cache et redemande un téléchargement.
-      </p>
+      <p class="osm-credit">Contours : © IGN Admin Express, via le projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a></p>
     </div>
   </details>
 
@@ -288,7 +283,7 @@
           </tbody>
         </table>
       </div>
-      <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). L'API officielle n'étant pas interrogeable directement depuis un navigateur, ce fichier est un instantané figé (127 000 sites — ANFR met à jour sa base chaque semaine) préparé à l'avance plutôt qu'une requête en direct.</p>
+      <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). Ce fichier est un instantané figé (127 000 sites — ANFR met à jour sa base chaque semaine).</p>
 
       <button type="button" id="antennasSearchBtn" class="btn-secondary">Trouver les antennes à proximité</button>
 
@@ -664,7 +659,6 @@
   const offlineDeptEl = $('offlineDept');
   const offlineCommuneEl = $('offlineCommune');
   const offlineCPEl = $('offlineCP');
-  const contoursStatusEl = $('contoursStatus');
   const activateCentroidesBtn = $('activateCentroides');
   const downloadSimplifieeBtn = $('downloadSimplifiee');
   const downloadPreciseBtn = $('downloadPrecise');
@@ -936,6 +930,24 @@
     badgeEl.textContent = 'Source : ' + (source === 'carte' ? 'Point cliqué sur la carte' : 'Position GPS');
   }
 
+  // Chaque texte de résultat de recherche (valeurs d'adresse, cellules de tableau) est
+  // cliquable pour en copier le contenu — délégation unique, fonctionne aussi pour les
+  // lignes régénérées dynamiquement à chaque recherche et les sections personnalisées.
+  document.addEventListener('click', async (e) => {
+    const target = e.target.closest('.v.copyable, td.copyable');
+    if (!target) return;
+    const text = target.textContent.trim();
+    if (!text || text === '—' || text === 'Copié ✓') return;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = target.textContent;
+      target.textContent = 'Copié ✓';
+      setTimeout(() => { if (target.textContent === 'Copié ✓') target.textContent = original; }, 1200);
+    } catch (err) {
+      // Copie impossible (permissions du navigateur) : rien de plus à faire.
+    }
+  });
+
   function updateExternalLinks(latitude, longitude) {
     osmLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
     googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
@@ -1032,9 +1044,12 @@
 
   function fmtCoord(v) { return v.toFixed(6) + '°'; }
 
-  function setAddrField(el, value) {
+  function setAddrField(el, value, colorClass) {
     el.textContent = value || '—';
     el.classList.toggle('dim', !value);
+    el.classList.toggle('copyable', !!value);
+    el.classList.remove('v-amber', 'v-teal');
+    if (colorClass && value) el.classList.add(colorClass);
   }
 
   // --- Limitation de débit Nominatim (politique d'usage : 1 requête/seconde max) ---
@@ -1053,6 +1068,7 @@
 
   async function doGeocode(latitude, longitude, source) {
     const requestId = ++geocodeRequestId;
+    const colorClass = source === 'gps' ? 'v-amber' : 'v-teal';
     updateMiniSourceBadge(mapSourceBadge, source);
     addrStatus.textContent = 'Recherche…';
     try {
@@ -1082,13 +1098,13 @@
         departement = `${departement} (${deptNum})`;
       }
 
-      setAddrField(addrAdresse, adresse);
-      setAddrField(addrLieuDit, lieuDit);
-      setAddrField(addrCP, codePostal);
-      setAddrField(addrCommune, commune);
-      setAddrField(addrDept, departement);
-      setAddrField(addrRegion, region);
-      setAddrField(addrPays, pays);
+      setAddrField(addrAdresse, adresse, colorClass);
+      setAddrField(addrLieuDit, lieuDit, colorClass);
+      setAddrField(addrCP, codePostal, colorClass);
+      setAddrField(addrCommune, commune, colorClass);
+      setAddrField(addrDept, departement, colorClass);
+      setAddrField(addrRegion, region, colorClass);
+      setAddrField(addrPays, pays, colorClass);
 
       addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
       shareAddressBtn.disabled = !(adresse || commune);
@@ -1165,34 +1181,44 @@
       return;
     }
     const { lat, lon } = point;
+    const pointColorClass = point.source === 'carte' ? 'v-teal' : 'v-amber';
     statusEl.textContent = 'Recherche…';
     try {
       const elevation = await fetchFn(lat, lon);
       const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude : null;
 
+      gpsEl.classList.remove('v-amber', 'v-teal');
       if (gpsAlt != null) {
         gpsEl.textContent = Math.round(gpsAlt) + ' m';
         gpsEl.classList.remove('dim');
+        gpsEl.classList.add('copyable', 'v-amber');
       } else {
         gpsEl.textContent = 'Non fournie par le GPS';
         gpsEl.classList.add('dim');
+        gpsEl.classList.remove('copyable');
       }
 
+      sourceEl.classList.remove('v-amber', 'v-teal');
       if (elevation != null) {
         sourceEl.textContent = Math.round(elevation) + ' m';
         sourceEl.classList.remove('dim');
+        sourceEl.classList.add('copyable', pointColorClass);
       } else {
         sourceEl.textContent = 'Indisponible pour ce point';
         sourceEl.classList.add('dim');
+        sourceEl.classList.remove('copyable');
       }
 
+      diffEl.classList.remove('v-amber', 'v-teal');
       if (gpsAlt != null && elevation != null) {
         const diff = gpsAlt - elevation;
         diffEl.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
         diffEl.classList.remove('dim');
+        diffEl.classList.add('copyable', pointColorClass);
       } else {
         diffEl.textContent = '—';
         diffEl.classList.add('dim');
+        diffEl.classList.remove('copyable');
       }
 
       statusEl.textContent = 'Comparaison effectuée';
@@ -1662,11 +1688,6 @@
     return null;
   }
 
-  function updateOverallContoursStatus() {
-    contoursStatusEl.textContent = `Actif : ${CONTOUR_TIERS[communeContoursTier].label} ✓`;
-    contoursStatusEl.classList.remove('dim');
-  }
-
   // Supprime une URL du cache du service worker (toutes versions confondues), pour libérer
   // l'espace occupé par des données téléchargées à la demande (contours, antennes).
   async function deleteCachedUrl(url) {
@@ -1705,7 +1726,6 @@
   }
 
   function refreshContoursUI() {
-    updateOverallContoursStatus();
     updateTierUI('centroides');
     updateTierUI('simplifiee');
     updateTierUI('precise');
@@ -1900,14 +1920,16 @@
     const bounds = [[lat, lon]];
 
     if (results.length === 0) {
+      antennasTableBody.className = '';
       antennasTableBody.innerHTML = `<tr><td colspan="4" class="dim">Aucune antenne dans un rayon de ${ANTENNA_RADIUS_M / 1000} km</td></tr>`;
     } else {
+      antennasTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
       antennasTableBody.innerHTML = results.map((r) => `
         <tr>
-          <td style="color:${operatorColor(r.op)};">${r.op}</td>
-          <td>${r.gens.join(', ')}</td>
-          <td>${fmtDistanceM(r.distM)}</td>
-          <td>${r.bearing}</td>
+          <td class="copyable" style="color:${operatorColor(r.op)};">${r.op}</td>
+          <td class="copyable">${r.gens.join(', ')}</td>
+          <td class="copyable">${fmtDistanceM(r.distM)}</td>
+          <td class="copyable">${r.bearing}</td>
         </tr>
       `).join('');
       for (const r of results) {
@@ -2042,13 +2064,15 @@
         const bounds = [[lat, lon]];
 
         if (items.length === 0) {
+          tableBody.className = '';
           tableBody.innerHTML = `<tr><td colspan="3" class="dim">${emptyLabel} dans un rayon de ${radiusM / 1000} km</td></tr>`;
         } else {
+          tableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
           tableBody.innerHTML = items.map((it) => `
             <tr>
-              <td>${it.name}</td>
-              <td>${fmtDistanceM(it.distM)}</td>
-              <td>${it.bearing}</td>
+              <td class="copyable">${it.name}</td>
+              <td class="copyable">${fmtDistanceM(it.distM)}</td>
+              <td class="copyable">${it.bearing}</td>
             </tr>
           `).join('');
           for (const it of items) {
@@ -2492,28 +2516,39 @@
       source = (refPoint && refPoint.source) || 'gps';
     }
     updateMiniSourceBadge(offlineSourceBadge, source);
+    const colorClass = source === 'carte' ? 'v-teal' : 'v-amber';
     offlineGeoStatus.textContent = 'Calcul…';
     try {
       await loadOfflineGeoData();
       const dept = findDepartement(lon, lat);
       offlineDeptEl.textContent = dept ? `${dept.nom} (${dept.code})` : 'Introuvable';
       offlineDeptEl.classList.toggle('dim', !dept);
+      offlineDeptEl.classList.toggle('copyable', !!dept);
+      offlineDeptEl.classList.remove('v-amber', 'v-teal');
+      if (dept) offlineDeptEl.classList.add(colorClass);
 
       let commune = (dept && communeContoursTier !== 'centroides') ? findCommuneExact(lon, lat, dept.code) : null;
       const communeExact = !!commune;
       if (!commune) commune = findCommuneApprox(lat, lon);
 
+      offlineCommuneEl.classList.remove('v-amber', 'v-teal');
+      offlineCPEl.classList.remove('v-amber', 'v-teal');
       if (commune) {
         offlineCommuneEl.textContent = commune.nom;
         offlineCommuneEl.classList.remove('dim');
+        offlineCommuneEl.classList.add('copyable', colorClass);
         const cp = communePostalCode(commune.code);
         offlineCPEl.textContent = cp || 'Non disponible';
         offlineCPEl.classList.toggle('dim', !cp);
+        offlineCPEl.classList.toggle('copyable', !!cp);
+        if (cp) offlineCPEl.classList.add(colorClass);
       } else {
         offlineCommuneEl.textContent = 'Introuvable';
         offlineCommuneEl.classList.add('dim');
+        offlineCommuneEl.classList.remove('copyable');
         offlineCPEl.textContent = '—';
         offlineCPEl.classList.add('dim');
+        offlineCPEl.classList.remove('copyable');
       }
       offlineGeoStatus.textContent = 'Hors ligne ✓';
       offlineGeoStatus.classList.remove('dim');

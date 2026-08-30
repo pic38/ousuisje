@@ -1222,21 +1222,21 @@
 
   const altitudeMap = initSecondaryMap('altitudeMap');
   let altitudeMapMarker = null;
-  function placeAltitudeMapMarker(lat, lon) {
+  function placeAltitudeMapMarker(lat, lon, source) {
     if (altitudeMapMarker) { altitudeMap.removeLayer(altitudeMapMarker); }
-    altitudeMapMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(altitudeMap);
+    altitudeMapMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(altitudeMap);
     altitudeMap.setView([lat, lon], 13);
     altitudeMap._homeView = { center: [lat, lon], zoom: 13 };
   }
 
   altCompareBtn.addEventListener('click', () => {
     const point = getReferencePoint();
-    if (point) placeAltitudeMapMarker(point.lat, point.lon);
+    if (point) placeAltitudeMapMarker(point.lat, point.lon, point.source);
     runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude);
   });
   oeCompareBtn.addEventListener('click', () => {
     const point = getReferencePoint();
-    if (point) placeAltitudeMapMarker(point.lat, point.lon);
+    if (point) placeAltitudeMapMarker(point.lat, point.lon, point.source);
     runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude);
   });
 
@@ -1244,7 +1244,7 @@
   // indépendamment de la position de référence globale.
   altitudeMap.on('click', (e) => {
     const point = { lat: e.latlng.lat, lon: e.latlng.lng, source: 'carte' };
-    placeAltitudeMapMarker(point.lat, point.lon);
+    placeAltitudeMapMarker(point.lat, point.lon, point.source);
     runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude, point, 'point sélectionné sur cette carte');
     runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point, 'point sélectionné sur cette carte');
   });
@@ -1900,10 +1900,14 @@
 
   const antennaMap = initSecondaryMap('antennaMap');
 
-  function updateAntennasNearby(lat, lon, sourceLabel) {
+  function updateAntennasNearby(lat, lon, sourceLabel, source) {
     if (sourceLabel === undefined) sourceLabel = getSourceLabel();
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
     if (antennaGpsMarker) { antennaMap.removeLayer(antennaGpsMarker); }
-    antennaGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(antennaMap);
+    antennaGpsMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(antennaMap);
 
     if (!antennaSites) {
       antennasSearchStatusEl.textContent = 'Téléchargez les données ci-dessus';
@@ -1942,7 +1946,7 @@
 
   // La carte des antennes est elle-même cliquable : relance la recherche à cet endroit.
   antennaMap.on('click', (e) => {
-    updateAntennasNearby(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte');
+    updateAntennasNearby(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte', 'carte');
   });
 
   antennasSearchBtn.addEventListener('click', () => {
@@ -2024,12 +2028,16 @@
     let markers = [];
     let originMarker = null;
 
-    async function runSearch(lat, lon, sourceLabel) {
+    async function runSearch(lat, lon, sourceLabel, source) {
+      if (source === undefined) {
+        const refPoint = getReferencePoint();
+        source = (refPoint && refPoint.source) || 'gps';
+      }
       btn.disabled = true;
       statusEl.textContent = 'Recherche…';
 
       if (originMarker) { map.removeLayer(originMarker); }
-      originMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(map);
+      originMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(map);
 
       try {
         const query = buildQuery(lat, lon, radiusM);
@@ -2093,7 +2101,7 @@
     // La carte de cette section est elle-même cliquable : ça relance la recherche
     // centrée sur le point cliqué, indépendamment de la position de référence globale.
     map.on('click', (e) => {
-      runSearch(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte');
+      runSearch(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte', 'carte');
     });
   }
 
@@ -2486,24 +2494,35 @@
     return offlineCommuneLayer;
   }
 
-  async function updateOfflineGeo(lat, lon) {
+  async function updateOfflineGeo(lat, lon, source) {
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
+    const colorClass = source === 'carte' ? 'v-teal' : 'v-amber';
     offlineGeoStatus.textContent = 'Calcul…';
     try {
       await loadOfflineGeoData();
       const dept = findDepartement(lon, lat);
       offlineDeptEl.textContent = dept ? `${dept.nom} (${dept.code})` : 'Introuvable';
       offlineDeptEl.classList.toggle('dim', !dept);
+      offlineDeptEl.classList.remove('v-amber', 'v-teal');
+      if (dept) offlineDeptEl.classList.add(colorClass);
 
       let commune = (dept && communeContoursTier !== 'centroides') ? findCommuneExact(lon, lat, dept.code) : null;
       const communeExact = !!commune;
       if (!commune) commune = findCommuneApprox(lat, lon);
 
+      offlineCommuneEl.classList.remove('v-amber', 'v-teal');
+      offlineCPEl.classList.remove('v-amber', 'v-teal');
       if (commune) {
         offlineCommuneEl.textContent = commune.nom;
         offlineCommuneEl.classList.remove('dim');
+        offlineCommuneEl.classList.add(colorClass);
         const cp = communePostalCode(commune.code);
         offlineCPEl.textContent = cp || 'Non disponible';
         offlineCPEl.classList.toggle('dim', !cp);
+        if (cp) offlineCPEl.classList.add(colorClass);
       } else {
         offlineCommuneEl.textContent = 'Introuvable';
         offlineCommuneEl.classList.add('dim');
@@ -2514,7 +2533,7 @@
       offlineGeoStatus.classList.remove('dim');
 
       if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }
-      offlineGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(offlineMap);
+      offlineGpsMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(offlineMap);
 
       const deptLayer = dept ? drawDeptOnMap(dept.code) : null;
       const communeLayer = commune ? (communeExact ? drawCommuneExactOnMap(commune) : drawCommuneCircleOnMap(commune)) : null;
@@ -2550,7 +2569,7 @@
 
   // La carte de cette section est elle-même cliquable : relance la recherche à cet endroit.
   offlineMap.on('click', (e) => {
-    updateOfflineGeo(e.latlng.lat, e.latlng.lng);
+    updateOfflineGeo(e.latlng.lat, e.latlng.lng, 'carte');
   });
 
   loadOfflineGeoData()

@@ -499,6 +499,68 @@ h1 {
 .addr-row .v.v-amber { color: var(--amber); }
 .addr-row .v.v-teal { color: var(--teal); }
 .addr-row .v.dim.v-amber, .addr-row .v.dim.v-teal { color: var(--muted); font-weight: 400; }
+
+/* Mini profil altimétrique vertical : trois marqueurs positionnés proportionnellement à
+   leur altitude sur une règle verticale (GPS / IGN au point GPS / IGN au point cliqué),
+   étiquette (nom + valeur) directement à côté de chaque point, et les deux écarts affichés
+   entre les marqueurs qu'ils relient. Un espacement minimal est imposé entre marqueurs
+   voisins (voir updateAltitudeProfile) pour que les étiquettes ne se chevauchent jamais,
+   même quand un des écarts est très grand (ex. point cliqué sur un relief tout proche). */
+.altitude-profile { margin: 14px 16px 8px; }
+.altitude-profile.is-hidden { display: none; }
+.altitude-profile-ruler {
+  position: relative;
+  height: 150px;
+  margin-left: 8px;
+}
+.altitude-profile-track {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--line);
+  border-radius: 2px;
+}
+.altitude-profile-marker {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.altitude-profile-marker.is-hidden { display: none; }
+.altitude-profile-dot {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--surface);
+}
+.altitude-profile-dot-gps { background: var(--amber); border-radius: 50%; }
+.altitude-profile-dot-ign-gps { background: var(--amber); border-radius: 2px; transform: rotate(45deg); }
+.altitude-profile-dot-ign-click { background: var(--teal); border-radius: 2px; transform: rotate(45deg); }
+.altitude-profile-label {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.altitude-profile-label b { color: var(--text); font-weight: 700; }
+.altitude-profile-gap {
+  position: absolute;
+  left: 128px;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+.altitude-profile-gap.is-hidden { display: none; }
 .v.copyable, td.copyable { cursor: pointer; }
 .v.copyable:hover, td.copyable:hover { text-decoration: underline; }
 

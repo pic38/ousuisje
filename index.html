@@ -207,7 +207,6 @@
       <div class="addr-panel">
         <div class="addr-head">
           <span>Département et commune hors ligne</span>
-          <span id="offlineGeoStatus" class="dim">Chargement des données…</span>
         </div>
         <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
@@ -264,7 +263,6 @@
       <div class="addr-panel">
         <div class="addr-head">
           <span>Antennes relais ANFR (hors ligne, sur demande)</span>
-          <span id="antennasDlStatus" class="dim">Non téléchargées</span>
         </div>
         <table class="contours-table">
           <colgroup>
@@ -655,7 +653,6 @@
 
   const offlineGeoBtn = $('offlineGeoBtn');
   const offlineSourceBadge = $('offlineSourceBadge');
-  const offlineGeoStatus = $('offlineGeoStatus');
   const offlineDeptEl = $('offlineDept');
   const offlineCommuneEl = $('offlineCommune');
   const offlineCPEl = $('offlineCP');
@@ -668,7 +665,6 @@
   const tierStatusEls = { centroides: $('statusCentroides'), simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
   const tierDeleteButtons = { simplifiee: deleteSimplifieeBtn, precise: deletePreciseBtn };
 
-  const antennasDlStatusEl = $('antennasDlStatus');
   const antennasRowStatusEl = $('antennasRowStatus');
   const downloadAntennasBtn = $('downloadAntennas');
   const deleteAntennasBtn = $('deleteAntennas');
@@ -1867,6 +1863,44 @@
     return OPERATOR_COLORS[op] || ANTENNA_DEFAULT_COLOR;
   }
 
+  // Regroupe les sites (quasi) à la même position — mutualisation d'un même mât par
+  // plusieurs opérateurs — pour n'afficher qu'un seul marqueur "camembert" par lieu.
+  // Arrondi à 5 décimales (~1 m) : suffisant pour fusionner un même site, pas pour
+  // confondre deux sites réellement distincts.
+  function groupAntennasByLocation(results) {
+    // Distance réelle plutôt qu'un simple arrondi de coordonnées : deux opérateurs sur un
+    // même mât mutualisé peuvent avoir géocodé leur site avec un léger écart l'un de l'autre.
+    const MERGE_DISTANCE_M = 30;
+    const groups = [];
+    for (const r of results) {
+      const group = groups.find((g) => distanceMetersApprox(g[0].lat, g[0].lon, r.lat, r.lon) <= MERGE_DISTANCE_M);
+      if (group) group.push(r); else groups.push([r]);
+    }
+    return groups;
+  }
+
+  function polarPoint(cx, cy, radius, angleDeg) {
+    const rad = (angleDeg - 90) * Math.PI / 180;
+    return [cx + radius * Math.cos(rad), cy + radius * Math.sin(rad)];
+  }
+
+  // Icône "camembert" : une part colorée par opérateur partageant le site (2 à 4 couleurs).
+  function buildAntennaPieIcon(ops) {
+    const colors = ops.map(operatorColor);
+    const size = 18;
+    const r = size / 2;
+    const anglePer = 360 / colors.length;
+    let paths = '';
+    for (let i = 0; i < colors.length; i++) {
+      const [x1, y1] = polarPoint(r, r, r, i * anglePer);
+      const [x2, y2] = polarPoint(r, r, r, (i + 1) * anglePer);
+      const largeArc = anglePer > 180 ? 1 : 0;
+      paths += `<path d="M ${r} ${r} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z" fill="${colors[i]}" stroke="#0B1220" stroke-width="1"/>`;
+    }
+    const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+    return L.divIcon({ className: 'antenna-pie-marker', html: svg, iconSize: [size, size], iconAnchor: [r, r] });
+  }
+
   function fmtDistanceM(d) {
     return d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km';
   }
@@ -1932,13 +1966,25 @@
           <td class="copyable">${r.bearing}</td>
         </tr>
       `).join('');
-      for (const r of results) {
-        const color = operatorColor(r.op);
-        const marker = L.circleMarker([r.lat, r.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-          .bindPopup(`<strong>${r.op}</strong><br>${r.gens.join(', ')}<br>${fmtDistanceM(r.distM)} · ${r.bearing}<br>${gotoLinkHtml(r.lat, r.lon)}`)
-          .addTo(antennaMap);
-        antennaMarkers.push(marker);
-        bounds.push([r.lat, r.lon]);
+      for (const group of groupAntennasByLocation(results)) {
+        const first = group[0];
+        bounds.push([first.lat, first.lon]);
+        if (group.length === 1) {
+          const color = operatorColor(first.op);
+          const marker = L.circleMarker([first.lat, first.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
+            .bindPopup(`<strong>${first.op}</strong><br>${first.gens.join(', ')}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
+            .addTo(antennaMap);
+          antennaMarkers.push(marker);
+        } else {
+          // Site mutualisé par plusieurs opérateurs : un marqueur camembert avec une part
+          // par opérateur, plutôt que plusieurs points superposés.
+          const icon = buildAntennaPieIcon(group.map((g) => g.op));
+          const popupLines = group.map((g) => `<strong style="color:${operatorColor(g.op)};">${g.op}</strong> — ${g.gens.join(', ')}`).join('<br>');
+          const marker = L.marker([first.lat, first.lon], { icon: icon })
+            .bindPopup(`${popupLines}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
+            .addTo(antennaMap);
+          antennaMarkers.push(marker);
+        }
       }
     }
     antennasSearchStatusEl.textContent = `${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
@@ -1978,8 +2024,6 @@
       localStorage.setItem(ANTENNAS_DOWNLOADED_STORAGE_KEY, '1');
       downloadAntennasBtn.textContent = 'Téléchargées';
       antennasRowStatusEl.textContent = 'Téléchargées';
-      antennasDlStatusEl.textContent = 'Téléchargées';
-      antennasDlStatusEl.classList.remove('dim');
       deleteAntennasBtn.style.display = '';
       const point = getReferencePoint();
       if (point) updateAntennasNearby(point.lat, point.lon);
@@ -2003,8 +2047,6 @@
     downloadAntennasBtn.textContent = 'Télécharger';
     antennasRowStatusEl.textContent = 'Non téléchargées';
     antennasRowStatusEl.classList.add('dim');
-    antennasDlStatusEl.textContent = 'Non téléchargées';
-    antennasDlStatusEl.classList.add('dim');
     deleteAntennasBtn.style.display = 'none';
     antennasLoading = false;
     downloadAntennasBtn.disabled = false;
@@ -2517,7 +2559,6 @@
     }
     updateMiniSourceBadge(offlineSourceBadge, source);
     const colorClass = source === 'carte' ? 'v-teal' : 'v-amber';
-    offlineGeoStatus.textContent = 'Calcul…';
     try {
       await loadOfflineGeoData();
       const dept = findDepartement(lon, lat);
@@ -2550,9 +2591,6 @@
         offlineCPEl.classList.add('dim');
         offlineCPEl.classList.remove('copyable');
       }
-      offlineGeoStatus.textContent = 'Hors ligne ✓';
-      offlineGeoStatus.classList.remove('dim');
-
       if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }
       offlineGpsMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(offlineMap);
 
@@ -2574,15 +2612,18 @@
         offlineMap._homeView = { bounds: deptLayer.getBounds() };
       }
     } catch (e) {
-      offlineGeoStatus.textContent = 'Données indisponibles';
+      offlineDeptEl.textContent = 'Données indisponibles';
+      offlineDeptEl.classList.add('dim');
+      offlineDeptEl.classList.remove('copyable', 'v-amber', 'v-teal');
     }
   }
 
   offlineGeoBtn.addEventListener('click', () => {
     const point = getReferencePoint();
     if (!point) {
-      offlineGeoStatus.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
-      offlineGeoStatus.classList.remove('dim');
+      offlineDeptEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      offlineDeptEl.classList.add('dim');
+      offlineDeptEl.classList.remove('copyable', 'v-amber', 'v-teal');
       return;
     }
     updateOfflineGeo(point.lat, point.lon);
@@ -2593,9 +2634,7 @@
     updateOfflineGeo(e.latlng.lat, e.latlng.lng, 'carte');
   });
 
-  loadOfflineGeoData()
-    .then(() => { offlineGeoStatus.textContent = 'Prêt'; })
-    .catch(() => { offlineGeoStatus.textContent = 'Données indisponibles'; });
+  loadOfflineGeoData().catch(() => {});
 
   // --- Service worker, installation, partage ---
   if ('serviceWorker' in navigator) {

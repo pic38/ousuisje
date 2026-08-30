@@ -78,12 +78,6 @@
   </div>
   <p id="accuracyWarning" class="accuracy-warning" style="display:none;"></p>
 
-  <div id="sourceBadge" class="source-badge source-badge-none is-hidden">
-    <span id="sourceBadgeDot" class="source-badge-dot"></span>
-    <span id="sourceBadgeText">Aucun point sélectionné pour l'instant</span>
-  </div>
-  <p id="badgeHint" class="badge-hint is-hidden">(Point utilisé par toutes les sections ci-dessous.)</p>
-
   <details class="feature" data-section="localisation" open>
     <summary class="feature-summary"><span>Localisation administrative</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
@@ -92,6 +86,7 @@
         <div class="addr-head">
           <span id="addrStatus">—</span>
         </div>
+        <div class="addr-row"><span class="k">Source</span><span id="addrSourceEl" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Lieu-dit</span><span id="addrLieuDit" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Code postal</span><span id="addrCP" class="v dim">—</span></div>
@@ -605,9 +600,6 @@
   const altAccVal = $('altAccVal');
   const accuracyWarning = $('accuracyWarning');
   const locateBtn = $('locateBtn');
-  const sourceBadge = $('sourceBadge');
-  const sourceBadgeText = $('sourceBadgeText');
-  const badgeHint = $('badgeHint');
   const autoStopCheckbox = $('autoStopCheckbox');
   const autoLocateCheckbox = $('autoLocateCheckbox');
   const autoStopCountdown = $('autoStopCountdown');
@@ -622,6 +614,7 @@
   const diagRawAcc = $('diagRawAcc');
 
   const addrStatus = $('addrStatus');
+  const addrSourceEl = $('addrSourceEl');
   const addrAdresse = $('addrAdresse');
   const addrLieuDit = $('addrLieuDit');
   const addrCP = $('addrCP');
@@ -899,38 +892,20 @@
   let gpsAccuracyCircle = null;
   let radarGpsMarker = null;
   let clickMarker = null;
-  let lastQueriedPoint = null; // { lat, lon, source: 'gps' | 'carte' } — dernière action explicite de l'utilisateur
-  let lastClickPoint = null;
   let hasCenteredOnGps = false;
   let hasCenteredRadarOnGps = false;
 
-  function updateSourceBadge() {
-    if (!lastQueriedPoint) {
-      sourceBadge.classList.add('is-hidden');
-      badgeHint.classList.add('is-hidden');
-      return;
-    }
-    sourceBadge.classList.remove('is-hidden');
-    badgeHint.classList.remove('is-hidden');
-    sourceBadge.classList.remove('source-badge-gps', 'source-badge-carte', 'source-badge-none');
-    if (lastQueriedPoint.source === 'carte') {
-      sourceBadge.classList.add('source-badge-carte');
-      sourceBadgeText.textContent = 'Point sélectionné sur la carte';
-    } else {
-      sourceBadge.classList.add('source-badge-gps');
-      sourceBadgeText.textContent = 'Position GPS';
-    }
-  }
-
+  // Chaque section est indépendante : le point de référence par défaut d'une section (utilisé
+  // par son propre bouton de recherche) est toujours la position GPS actuelle, jamais un point
+  // choisi dans une AUTRE section — cliquer sur la carte de "Localisation administrative" ne met
+  // donc plus à jour les autres sections. Chaque section garde sa propre carte cliquable pour
+  // interroger un point précis, indépendamment des autres.
   function getSourceLabel() {
-    if (lastQueriedPoint) return lastQueriedPoint.source === 'gps' ? 'Position GPS' : 'Point sélectionné sur la carte';
-    if (lastPos) return 'Position GPS';
-    return 'point sélectionné';
+    return lastPos ? 'Position GPS' : 'point sélectionné';
   }
 
   function getReferencePoint() {
-    if (lastQueriedPoint) return lastQueriedPoint;
-    if (lastPos) return { lat: lastPos.coords.latitude, lon: lastPos.coords.longitude };
+    if (lastPos) return { lat: lastPos.coords.latitude, lon: lastPos.coords.longitude, source: 'gps' };
     return null;
   }
 
@@ -983,9 +958,6 @@
       clickMarker.setLatLng(latlng);
     }
     updateExternalLinks(latitude, longitude);
-    lastQueriedPoint = { lat: latitude, lon: longitude, source: 'carte' };
-    lastClickPoint = { lat: latitude, lon: longitude };
-    updateSourceBadge();
   }
 
   let watchId = null;
@@ -1057,6 +1029,9 @@
   async function doGeocode(latitude, longitude, source) {
     const requestId = ++geocodeRequestId;
     const colorClass = source === 'gps' ? 'v-amber' : 'v-teal';
+    addrSourceEl.textContent = source === 'gps' ? 'Position GPS' : 'Point sélectionné sur la carte';
+    addrSourceEl.classList.remove('dim', 'v-amber', 'v-teal');
+    addrSourceEl.classList.add(colorClass);
     addrStatus.textContent = 'Recherche…';
     try {
       const res = await fetchNominatim(
@@ -1129,13 +1104,6 @@
     }
   });
 
-  // Une nouvelle position de référence (GPS via bouton, ou clic sur la carte) met aussi
-  // à jour les sections hors-ligne (département/commune, antennes) — fusion des deux pages.
-  function onNewReferencePoint(lat, lon) {
-    updateOfflineGeo(lat, lon);
-    updateAntennasNearby(lat, lon);
-  }
-
   geocodeBtn.addEventListener('click', () => {
     if (!lastPos) {
       addrStatus.textContent = "Activez d'abord la localisation GPS.";
@@ -1143,17 +1111,13 @@
       return;
     }
     const { latitude, longitude } = lastPos.coords;
-    lastQueriedPoint = { lat: latitude, lon: longitude, source: 'gps' };
-    updateSourceBadge();
     doGeocode(latitude, longitude, 'gps');
-    onNewReferencePoint(latitude, longitude);
   });
 
   map.on('click', (e) => {
     const { lat, lng } = e.latlng;
     placeClickMarker(lat, lng);
     doGeocode(lat, lng, 'carte');
-    onNewReferencePoint(lat, lng);
   });
 
   // --- Sources d'altitude ---
@@ -1301,7 +1265,6 @@
     diagRawAcc.classList.toggle('dim', accuracy == null);
 
     placeGpsMarker(latitude, longitude, accuracy);
-    updateSourceBadge();
     setStatus('live', 'Localisation GPS active');
   }
 
@@ -1405,7 +1368,6 @@
     diagFixState.classList.add('dim');
     recentFixes = [];
     lastKnownSpeedKmh = null;
-    updateSourceBadge();
   }
 
   const AUTO_STOP_STORAGE_KEY = 'ousuisje_gps_auto_stop';
@@ -2529,7 +2491,7 @@
         offlineCPEl.textContent = '—';
         offlineCPEl.classList.add('dim');
       }
-      offlineGeoStatus.textContent = 'Hors ligne ✓';
+      offlineGeoStatus.textContent = 'Hors ligne ✓ · ' + (source === 'carte' ? 'Point sélectionné sur la carte' : 'Position GPS');
       offlineGeoStatus.classList.remove('dim');
 
       if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }

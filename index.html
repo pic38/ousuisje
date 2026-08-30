@@ -34,17 +34,15 @@
   </div>
   <label class="settings-check"><input type="checkbox" data-section="localisation" checked><span>Localisation administrative</span></label>
   <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Réglages et détails GPS</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="poi" checked><span>Points d'intérêt à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="poi" checked><span>Points d'intérêt</span></label>
   <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span>Altitude depuis carte IGN</span></label>
   <label class="settings-check"><input type="checkbox" data-section="offline-geo"><span>Département et commune</span></label>
   <label class="settings-check"><input type="checkbox" data-section="antennas"><span>Antennes relais 2G 3G 4G 5G</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="pools"><span>Piscines à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="climbing-sites"><span>Sites d'escalade à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="food" checked><span>De quoi manger à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span>Escape games</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="food" checked><span>De quoi manger</span></label>
   <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de précipitations</span></label>
   <div id="settingsCustomList"></div>
   <div class="settings-custom-add">
@@ -140,9 +138,9 @@
   </details>
 
   <details class="feature" data-section="poi">
-    <summary class="feature-summary"><span>Points d'intérêt à proximité</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Points d'intérêt</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button type="button" id="poiBtn" class="btn-secondary">Trouver les points d'intérêt à proximité</button>
+      <button type="button" id="poiBtn" class="btn-secondary">Trouver les points d'intérêt</button>
 
       <div class="source-mini-badge is-hidden" id="poiSourceBadge">Source : —</div>
       <div class="map-wrap">
@@ -154,7 +152,7 @@
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Points d'intérêt à proximité</span>
+          <span>Points d'intérêt</span>
           <span id="poiStatus">—</span>
         </div>
         <table class="poi-table">
@@ -287,7 +285,7 @@
       </div>
       <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). Ce fichier est un instantané figé (127 000 sites — ANFR met à jour sa base chaque semaine).</p>
 
-      <button type="button" id="antennasSearchBtn" class="btn-secondary">Trouver les antennes à proximité</button>
+      <button type="button" id="antennasSearchBtn" class="btn-secondary">Trouver les antennes</button>
 
       <div class="source-mini-badge is-hidden" id="antennaSourceBadge">Source : —</div>
       <div class="map-wrap">
@@ -299,7 +297,7 @@
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Antennes à proximité</span>
+          <span>Antennes</span>
           <span id="antennasSearchStatus">—</span>
         </div>
         <div id="antennaOperatorFilter" class="operator-filter">
@@ -321,9 +319,9 @@
   </details>
 
   <details class="feature" data-section="escape-games">
-    <summary class="feature-summary"><span>Escape games à proximité</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Escape games</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button type="button" id="escapeGamesBtn" class="btn-secondary">Trouver les escape games à proximité</button>
+      <button type="button" id="escapeGamesBtn" class="btn-secondary">Trouver les escape games</button>
 
       <div class="source-mini-badge is-hidden" id="escapeGamesSourceBadge">Source : —</div>
       <div class="map-wrap">
@@ -335,7 +333,7 @@
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Escape games à proximité</span>
+          <span>Escape games</span>
           <span id="escapeGamesStatus">—</span>
         </div>
         <table class="poi-table">
@@ -351,72 +349,10 @@
     </div>
   </details>
 
-  <details class="feature" data-section="pools">
-    <summary class="feature-summary"><span>Piscines à proximité</span><span class="feature-chevron">▾</span></summary>
-    <div class="feature-body">
-      <button type="button" id="poolsBtn" class="btn-secondary">Trouver les piscines à proximité</button>
-
-      <div class="source-mini-badge is-hidden" id="poolsSourceBadge">Source : —</div>
-      <div class="map-wrap">
-        <div id="poolsMap"></div>
-        <div class="map-footer">
-          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
-        </div>
-      </div>
-
-      <div class="addr-panel">
-        <div class="addr-head">
-          <span>Piscines à proximité</span>
-          <span id="poolsStatus">—</span>
-        </div>
-        <table class="poi-table">
-          <thead>
-            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
-          </thead>
-          <tbody id="poolsTableBody">
-            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="osm-credit">Piscines : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
-    </div>
-  </details>
-
-  <details class="feature" data-section="climbing-sites">
-    <summary class="feature-summary"><span>Sites d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
-    <div class="feature-body">
-      <button type="button" id="climbingSitesBtn" class="btn-secondary">Trouver les sites d'escalade à proximité</button>
-
-      <div class="source-mini-badge is-hidden" id="climbingSitesSourceBadge">Source : —</div>
-      <div class="map-wrap">
-        <div id="climbingSitesMap"></div>
-        <div class="map-footer">
-          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
-        </div>
-      </div>
-
-      <div class="addr-panel">
-        <div class="addr-head">
-          <span>Sites d'escalade à proximité</span>
-          <span id="climbingSitesStatus">—</span>
-        </div>
-        <table class="poi-table">
-          <thead>
-            <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
-          </thead>
-          <tbody id="climbingSitesTableBody">
-            <tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="osm-credit">Sites d'escalade : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
-    </div>
-  </details>
-
   <details class="feature" data-section="climbing-gyms">
-    <summary class="feature-summary"><span>Salles d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Salles d'escalade</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button type="button" id="climbingGymsBtn" class="btn-secondary">Trouver les salles d'escalade à proximité</button>
+      <button type="button" id="climbingGymsBtn" class="btn-secondary">Trouver les salles d'escalade</button>
 
       <div class="source-mini-badge is-hidden" id="climbingGymsSourceBadge">Source : —</div>
       <div class="map-wrap">
@@ -428,7 +364,7 @@
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Salles d'escalade à proximité</span>
+          <span>Salles d'escalade</span>
           <span id="climbingGymsStatus">—</span>
         </div>
         <table class="poi-table">
@@ -445,31 +381,9 @@
   </details>
 
   <details class="feature" data-section="toilets">
-    <summary class="feature-summary"><span>Toilettes à proximité</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Toilettes</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <div class="addr-panel">
-        <div class="addr-head">
-          <span>Toilettes (hors ligne, sur demande)</span>
-        </div>
-        <table class="contours-table">
-          <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
-          </colgroup>
-          <thead>
-            <tr><th>Jeu de données</th><th>Statut</th><th></th><th></th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Toilettes, France entière (330 Ko)</td>
-              <td id="toiletsRowStatus" class="dim">Non téléchargées</td>
-              <td><button type="button" id="downloadToilets" class="btn-secondary">Télécharger</button></td>
-              <td><button type="button" id="deleteToilets" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <button type="button" id="toiletsBtn" class="btn-secondary">Trouver les toilettes à proximité</button>
+      <button type="button" id="toiletsBtn" class="btn-secondary">Trouver les toilettes</button>
 
       <div class="source-mini-badge is-hidden" id="toiletsSourceBadge">Source : —</div>
       <div class="map-wrap">
@@ -481,7 +395,7 @@
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Toilettes à proximité</span>
+          <span>Toilettes</span>
           <span id="toiletsStatus">—</span>
         </div>
         <table class="poi-table">
@@ -498,31 +412,9 @@
   </details>
 
   <details class="feature" data-section="drinking-water">
-    <summary class="feature-summary"><span>Eau potable à proximité</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Eau potable</span><span class="feature-mode-badge">Mode hors ligne</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <div class="addr-panel">
-        <div class="addr-head">
-          <span>Points d'eau potable (hors ligne, sur demande)</span>
-        </div>
-        <table class="contours-table">
-          <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
-          </colgroup>
-          <thead>
-            <tr><th>Jeu de données</th><th>Statut</th><th></th><th></th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Points d'eau potable, France entière (310 Ko)</td>
-              <td id="drinkingWaterRowStatus" class="dim">Non téléchargés</td>
-              <td><button type="button" id="downloadDrinkingWater" class="btn-secondary">Télécharger</button></td>
-              <td><button type="button" id="deleteDrinkingWater" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <button type="button" id="drinkingWaterBtn" class="btn-secondary">Trouver des points d'eau potable à proximité</button>
+      <button type="button" id="drinkingWaterBtn" class="btn-secondary">Trouver des points d'eau potable</button>
 
       <div class="source-mini-badge is-hidden" id="drinkingWaterSourceBadge">Source : —</div>
       <div class="map-wrap">
@@ -534,7 +426,7 @@
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Eau potable à proximité</span>
+          <span>Eau potable</span>
           <span id="drinkingWaterStatus">—</span>
         </div>
         <table class="poi-table">
@@ -551,9 +443,9 @@
   </details>
 
   <details class="feature" data-section="food">
-    <summary class="feature-summary"><span>De quoi manger à proximité</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>De quoi manger</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button type="button" id="foodBtn" class="btn-secondary">Trouver de quoi manger à proximité</button>
+      <button type="button" id="foodBtn" class="btn-secondary">Trouver de quoi manger</button>
 
       <div class="source-mini-badge is-hidden" id="foodSourceBadge">Source : —</div>
       <div class="map-wrap">
@@ -565,7 +457,7 @@
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>De quoi manger à proximité</span>
+          <span>De quoi manger</span>
           <span id="foodStatus">—</span>
         </div>
         <table class="poi-table">
@@ -726,14 +618,6 @@
   const escapeGamesStatusEl = $('escapeGamesStatus');
   const escapeGamesTableBody = $('escapeGamesTableBody');
   const escapeGamesSourceBadge = $('escapeGamesSourceBadge');
-  const poolsBtn = $('poolsBtn');
-  const poolsStatusEl = $('poolsStatus');
-  const poolsTableBody = $('poolsTableBody');
-  const poolsSourceBadge = $('poolsSourceBadge');
-  const climbingSitesBtn = $('climbingSitesBtn');
-  const climbingSitesStatusEl = $('climbingSitesStatus');
-  const climbingSitesTableBody = $('climbingSitesTableBody');
-  const climbingSitesSourceBadge = $('climbingSitesSourceBadge');
   const climbingGymsBtn = $('climbingGymsBtn');
   const climbingGymsStatusEl = $('climbingGymsStatus');
   const climbingGymsTableBody = $('climbingGymsTableBody');
@@ -742,16 +626,10 @@
   const toiletsStatusEl = $('toiletsStatus');
   const toiletsTableBody = $('toiletsTableBody');
   const toiletsSourceBadge = $('toiletsSourceBadge');
-  const toiletsRowStatusEl = $('toiletsRowStatus');
-  const downloadToiletsBtn = $('downloadToilets');
-  const deleteToiletsBtn = $('deleteToilets');
   const drinkingWaterBtn = $('drinkingWaterBtn');
   const drinkingWaterStatusEl = $('drinkingWaterStatus');
   const drinkingWaterTableBody = $('drinkingWaterTableBody');
   const drinkingWaterSourceBadge = $('drinkingWaterSourceBadge');
-  const drinkingWaterRowStatusEl = $('drinkingWaterRowStatus');
-  const downloadDrinkingWaterBtn = $('downloadDrinkingWater');
-  const deleteDrinkingWaterBtn = $('deleteDrinkingWater');
   const foodBtn = $('foodBtn');
   const foodStatusEl = $('foodStatus');
   const foodTableBody = $('foodTableBody');
@@ -787,7 +665,7 @@
 
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
-  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas', 'climbing-sites', 'pools', 'offline-geo']); // masquées par défaut tant que l'utilisateur ne les active pas
+  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas', 'offline-geo']); // masquées par défaut tant que l'utilisateur ne les active pas
   const settingsBtn = $('settingsBtn');
   const settingsPanel = $('settingsPanel');
   const sectionCheckboxes = [];
@@ -874,7 +752,7 @@
   const FRANCE_BOUNDS = [[41.2, -5.3], [51.2, 9.7]];
 
   // Bouton "maison" : revient à la vue par défaut de cette carte — les derniers résultats
-  // à proximité si elle en a (bounds mémorisées dans targetMap._homeView), sinon la France
+  // si elle en a (bounds mémorisées dans targetMap._homeView), sinon la France
   // entière. Chaque fonctionnalité met à jour targetMap._homeView à chaque nouvelle recherche.
   function addHomeControl(targetMap) {
     const HomeControl = L.Control.extend({
@@ -1320,7 +1198,7 @@
     runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point);
   });
 
-  // --- Points d'intérêt à proximité (Overpass API) ---
+  // --- Points d'intérêt (Overpass API) ---
   function bearingTo(lat1, lon1, lat2, lon2) {
     const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
     const Δλ = (lon2 - lon1) * Math.PI / 180;
@@ -2169,7 +2047,7 @@
   deleteAntennasBtn.addEventListener('click', deleteAntennas);
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
-  // --- Points d'intérêt à proximité, en direct via Overpass (escape games, piscines, escalade) ---
+  // --- Points d'intérêt, en direct via Overpass (escape games, salles d'escalade) ---
   function distanceMetersApprox(lat1, lon1, lat2, lon2) {
     const coslat = Math.cos(lat1 * Math.PI / 180);
     const dLat = lat2 - lat1;
@@ -2272,8 +2150,6 @@
 
   const poiMap = initSecondaryMap('poiMap');
   const escapeGamesMap = initSecondaryMap('escapeGamesMap');
-  const poolsMap = initSecondaryMap('poolsMap');
-  const climbingSitesMap = initSecondaryMap('climbingSitesMap');
   const climbingGymsMap = initSecondaryMap('climbingGymsMap');
   const toiletsMap = initSecondaryMap('toiletsMap');
   const drinkingWaterMap = initSecondaryMap('drinkingWaterMap');
@@ -2307,36 +2183,6 @@
     emptyLabel: 'Aucun escape game trouvé',
     buildQuery: (lat, lon, r) =>
       `[out:json][timeout:20];(node["leisure"="escape_game"](around:${r},${lat},${lon});way["leisure"="escape_game"](around:${r},${lat},${lon}););out center 200;`
-  });
-
-  setupNearbyOverpassFeature({
-    btn: poolsBtn,
-    statusEl: poolsStatusEl,
-    tableBody: poolsTableBody,
-    map: poolsMap,
-    badgeEl: poolsSourceBadge,
-    color: '#22A6D9',
-    radiusM: 20000,
-    maxResults: 20,
-    defaultName: 'Piscine',
-    emptyLabel: 'Aucune piscine trouvée',
-    buildQuery: (lat, lon, r) =>
-      `[out:json][timeout:20];(node["leisure"="sports_centre"]["sport"~"swimming"](around:${r},${lat},${lon});way["leisure"="sports_centre"]["sport"~"swimming"](around:${r},${lat},${lon}););out center 200;`
-  });
-
-  setupNearbyOverpassFeature({
-    btn: climbingSitesBtn,
-    statusEl: climbingSitesStatusEl,
-    tableBody: climbingSitesTableBody,
-    map: climbingSitesMap,
-    badgeEl: climbingSitesSourceBadge,
-    color: '#8D6E52',
-    radiusM: 50000,
-    maxResults: 20,
-    defaultName: "Site d'escalade",
-    emptyLabel: "Aucun site d'escalade trouvé",
-    buildQuery: (lat, lon, r) =>
-      `[out:json][timeout:20];(node["climbing"="crag"](around:${r},${lat},${lon});way["climbing"="crag"](around:${r},${lat},${lon}););out center 200;`
   });
 
   setupNearbyOverpassFeature({
@@ -2497,58 +2343,25 @@
     updateToiletsNearby(e.latlng.lat, e.latlng.lng, 'carte');
   });
 
+  // Téléchargement silencieux, sans interface dédiée : comme département/commune, ça se
+  // fait automatiquement au chargement de la page. En cas d'échec, la recherche retombe
+  // simplement sur Overpass en direct (toiletsSites reste null).
   async function downloadToilets() {
-    if (toiletsLoading) return;
-    const alreadyDownloaded = localStorage.getItem(TOILETS_DOWNLOADED_STORAGE_KEY) === '1';
+    if (toiletsLoading || toiletsSites) return;
     toiletsLoading = true;
-    downloadToiletsBtn.disabled = true;
-    toiletsRowStatusEl.classList.remove('dim');
-    toiletsRowStatusEl.textContent = alreadyDownloaded ? 'Chargement…' : 'Téléchargement… 0%';
     try {
-      const text = await fetchTextWithProgress(TOILETS_URL, TOILETS_RAW_BYTES, (frac) => {
-        if (alreadyDownloaded) return;
-        const pct = Math.round(frac * 100);
-        toiletsRowStatusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
-      });
-      toiletsRowStatusEl.textContent = 'Analyse du fichier…';
+      const text = await fetchTextWithProgress(TOILETS_URL, TOILETS_RAW_BYTES, () => {});
       toiletsSites = parseToiletsCsv(text);
       localStorage.setItem(TOILETS_DOWNLOADED_STORAGE_KEY, '1');
-      downloadToiletsBtn.textContent = 'Téléchargées';
-      toiletsRowStatusEl.textContent = 'Téléchargées';
-      deleteToiletsBtn.style.display = '';
       const point = getReferencePoint();
       if (point) updateToiletsNearby(point.lat, point.lon);
     } catch (e) {
-      toiletsRowStatusEl.textContent = 'Échec du téléchargement';
+      // Échec silencieux : la recherche retombera sur Overpass en direct.
     } finally {
       toiletsLoading = false;
-      downloadToiletsBtn.disabled = !!toiletsSites;
     }
   }
 
-  async function deleteToilets() {
-    if (toiletsLoading) return;
-    toiletsLoading = true;
-    downloadToiletsBtn.disabled = true;
-    deleteToiletsBtn.disabled = true;
-    await deleteCachedUrl(TOILETS_URL);
-    toiletsSites = null;
-    clearToiletsMarkers();
-    localStorage.removeItem(TOILETS_DOWNLOADED_STORAGE_KEY);
-    downloadToiletsBtn.textContent = 'Télécharger';
-    toiletsRowStatusEl.textContent = 'Non téléchargées';
-    toiletsRowStatusEl.classList.add('dim');
-    deleteToiletsBtn.style.display = 'none';
-    toiletsLoading = false;
-    downloadToiletsBtn.disabled = false;
-    deleteToiletsBtn.disabled = false;
-    const point = getReferencePoint();
-    if (point) updateToiletsNearby(point.lat, point.lon);
-  }
-
-  downloadToiletsBtn.addEventListener('click', downloadToilets);
-  deleteToiletsBtn.addEventListener('click', deleteToilets);
-  // Téléchargées par défaut (comme l'eau potable et département/commune), sans attendre un clic.
   downloadToilets();
 
   // --- Eau potable (jeu de données téléchargeable, hors ligne, sur demande) ---
@@ -2691,58 +2504,25 @@
     updateDrinkingWaterNearby(e.latlng.lat, e.latlng.lng, 'carte');
   });
 
+  // Téléchargement silencieux, sans interface dédiée : comme département/commune, ça se
+  // fait automatiquement au chargement de la page. En cas d'échec, la recherche retombe
+  // simplement sur Overpass en direct (drinkingWaterSites reste null).
   async function downloadDrinkingWater() {
-    if (drinkingWaterLoading) return;
-    const alreadyDownloaded = localStorage.getItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY) === '1';
+    if (drinkingWaterLoading || drinkingWaterSites) return;
     drinkingWaterLoading = true;
-    downloadDrinkingWaterBtn.disabled = true;
-    drinkingWaterRowStatusEl.classList.remove('dim');
-    drinkingWaterRowStatusEl.textContent = alreadyDownloaded ? 'Chargement…' : 'Téléchargement… 0%';
     try {
-      const text = await fetchTextWithProgress(DRINKING_WATER_URL, DRINKING_WATER_RAW_BYTES, (frac) => {
-        if (alreadyDownloaded) return;
-        const pct = Math.round(frac * 100);
-        drinkingWaterRowStatusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
-      });
-      drinkingWaterRowStatusEl.textContent = 'Analyse du fichier…';
+      const text = await fetchTextWithProgress(DRINKING_WATER_URL, DRINKING_WATER_RAW_BYTES, () => {});
       drinkingWaterSites = parseDrinkingWaterCsv(text);
       localStorage.setItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY, '1');
-      downloadDrinkingWaterBtn.textContent = 'Téléchargés';
-      drinkingWaterRowStatusEl.textContent = 'Téléchargés';
-      deleteDrinkingWaterBtn.style.display = '';
       const point = getReferencePoint();
       if (point) updateDrinkingWaterNearby(point.lat, point.lon);
     } catch (e) {
-      drinkingWaterRowStatusEl.textContent = 'Échec du téléchargement';
+      // Échec silencieux : la recherche retombera sur Overpass en direct.
     } finally {
       drinkingWaterLoading = false;
-      downloadDrinkingWaterBtn.disabled = !!drinkingWaterSites;
     }
   }
 
-  async function deleteDrinkingWater() {
-    if (drinkingWaterLoading) return;
-    drinkingWaterLoading = true;
-    downloadDrinkingWaterBtn.disabled = true;
-    deleteDrinkingWaterBtn.disabled = true;
-    await deleteCachedUrl(DRINKING_WATER_URL);
-    drinkingWaterSites = null;
-    clearDrinkingWaterMarkers();
-    localStorage.removeItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY);
-    downloadDrinkingWaterBtn.textContent = 'Télécharger';
-    drinkingWaterRowStatusEl.textContent = 'Non téléchargés';
-    drinkingWaterRowStatusEl.classList.add('dim');
-    deleteDrinkingWaterBtn.style.display = 'none';
-    drinkingWaterLoading = false;
-    downloadDrinkingWaterBtn.disabled = false;
-    deleteDrinkingWaterBtn.disabled = false;
-    const point = getReferencePoint();
-    if (point) updateDrinkingWaterNearby(point.lat, point.lon);
-  }
-
-  downloadDrinkingWaterBtn.addEventListener('click', downloadDrinkingWater);
-  deleteDrinkingWaterBtn.addEventListener('click', deleteDrinkingWater);
-  // Téléchargées par défaut (comme les données département/commune), sans attendre un clic.
   downloadDrinkingWater();
 
   setupNearbyOverpassFeature({
@@ -2864,19 +2644,19 @@
     details.dataset.section = id;
     details.innerHTML = `
       <summary class="feature-summary">
-        <span style="flex:1;">${label} à proximité</span>
+        <span style="flex:1;">${label}</span>
         <button type="button" class="feature-summary-remove" title="Retirer cette section">✕</button>
         <span class="feature-chevron">▾</span>
       </summary>
       <div class="feature-body">
-        <button type="button" class="btn-secondary custom-search-btn">Trouver « ${label} » à proximité</button>
+        <button type="button" class="btn-secondary custom-search-btn">Trouver « ${label} »</button>
         <div class="source-mini-badge is-hidden custom-source-badge">Source : —</div>
         <div class="map-wrap">
           <div id="${mapId}"></div>
           <div class="map-footer"><span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span></div>
         </div>
         <div class="addr-panel">
-          <div class="addr-head"><span>${label} à proximité</span><span class="custom-status">—</span></div>
+          <div class="addr-head"><span>${label}</span><span class="custom-status">—</span></div>
           <table class="poi-table">
             <thead><tr><th>Nom</th><th>Distance</th><th>Direction</th></tr></thead>
             <tbody class="custom-table-body"><tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>

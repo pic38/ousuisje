@@ -185,13 +185,13 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
 .settings-move-btn:hover:not(:disabled) { color: var(--teal); background: var(--surface-2); }
 .settings-move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .settings-drag-handle {
+  display: inline-flex;
+  align-items: center;
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1;
   cursor: grab;
-  padding: 4px 3px;
+  padding: 4px 5px;
   border-radius: 6px;
   touch-action: none;
   user-select: none;

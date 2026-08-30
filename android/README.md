@@ -13,28 +13,29 @@ publiable sur F-Droid.
   Android.
 - Icônes de lancement générées à partir de `icons/icon-512.png` (legacy + adaptive icon).
 - Assets embarqués : `index.html`, `styles.css`, `data/*` (copie figée au moment du scaffold).
+- Wrapper Gradle (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`) : fichiers
+  officiels récupérés depuis le tag `v8.7.0` du dépôt `gradle/gradle`.
 
-## Ce qu'il manque avant de compiler
+## Vérifié (JDK 17, sans Android SDK)
 
-Le wrapper Gradle (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`) n'est
-**pas** inclus : je ne peux pas le générer ni le vérifier sans Gradle/JDK dans cet
-environnement. Deux façons de le créer :
-
-1. **Android Studio** : ouvrir ce dossier (`android/`) comme projet — Android Studio
-   propose de créer/réparer le wrapper automatiquement à la synchronisation.
-2. **En ligne de commande**, si Gradle est installé sur ta machine :
-   ```sh
-   cd android
-   gradle wrapper --gradle-version 8.7
-   ```
-   Committer ensuite `gradlew`, `gradlew.bat` et `gradle/wrapper/gradle-wrapper.jar`
-   (les deux premiers, le `.jar` se commit normalement aussi, contrairement au reste
-   de `.gradle/`/`build/`).
-
-Une fois le wrapper en place :
 ```sh
-./gradlew assembleDebug   # APK de debug, non signé
+./gradlew tasks           # BUILD SUCCESSFUL — toute la config Gradle/Kotlin DSL est valide
+./gradlew assembleDebug   # échoue uniquement faute de SDK Android installé
 ```
+
+## Ce qu'il manque avant de produire un APK
+
+Le **SDK Android** (plateforme + build-tools) n'est pas installé dans cet environnement,
+donc `assembleDebug`/`assembleRelease` n'ont pas pu être vérifiés jusqu'au bout. Deux
+façons de compiler un APK :
+
+1. **Android Studio** : ouvrir ce dossier (`android/`) comme projet — il propose
+   d'installer le SDK manquant automatiquement.
+2. **En ligne de commande**, avec le SDK déjà installé (`ANDROID_HOME` défini ou
+   `android/local.properties` avec `sdk.dir=...`) :
+   ```sh
+   ./gradlew assembleDebug   # APK de debug, non signé
+   ```
 
 ## Garder les assets à jour
 

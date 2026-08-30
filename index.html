@@ -22,15 +22,15 @@
 </head>
 <body>
 
-<button id="settingsBtn" class="settings-btn" aria-label="Réglages" aria-expanded="false" aria-haspopup="true">⚙</button>
+<button type="button" id="settingsBtn" class="settings-btn" aria-label="Réglages" aria-expanded="false" aria-haspopup="true">⚙</button>
 <div id="settingsPanel" class="settings-panel is-hidden">
   <div class="settings-panel-title">Sections affichées</div>
   <div class="settings-bulk">
-    <button id="settingsResetDefault" type="button" class="settings-bulk-btn">Affichage par défaut</button>
+    <button type="button" id="settingsResetDefault" type="button" class="settings-bulk-btn">Affichage par défaut</button>
   </div>
   <div class="settings-bulk">
-    <button id="settingsCheckAll" type="button" class="settings-bulk-btn">Tout cocher</button>
-    <button id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
+    <button type="button" id="settingsCheckAll" type="button" class="settings-bulk-btn">Tout cocher</button>
+    <button type="button" id="settingsUncheckAll" type="button" class="settings-bulk-btn">Tout décocher</button>
   </div>
   <label class="settings-check"><input type="checkbox" data-section="localisation" checked><span>Localisation administrative</span></label>
   <label class="settings-check"><input type="checkbox" data-section="diag" checked><span>Réglages et détails GPS</span></label>
@@ -59,7 +59,7 @@
     <h1>Trouvez l'adresse et plus encore !</h1>
   </header>
 
-  <button id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
+  <button type="button" id="locateBtn" class="btn-primary">Activer la localisation GPS</button>
 
   <div class="status-line">
     <span id="statusDot" class="dot"></span>
@@ -81,12 +81,11 @@
   <details class="feature" data-section="localisation" open>
     <summary class="feature-summary"><span>Localisation administrative</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
+      <button type="button" id="geocodeBtn" class="btn-secondary">Trouver l'adresse correspondant à ma localisation GPS</button>
       <div class="addr-panel">
         <div class="addr-head">
           <span id="addrStatus">—</span>
         </div>
-        <div class="addr-row"><span class="k">Source</span><span id="addrSourceEl" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Adresse</span><span id="addrAdresse" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Lieu-dit</span><span id="addrLieuDit" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Code postal</span><span id="addrCP" class="v dim">—</span></div>
@@ -95,12 +94,13 @@
         <div class="addr-row"><span class="k">Région</span><span id="addrRegion" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Pays</span><span id="addrPays" class="v dim">—</span></div>
       </div>
-      <button id="shareAddressBtn" class="btn-secondary" disabled>Partager l'adresse</button>
+      <button type="button" id="shareAddressBtn" class="btn-secondary" disabled>Partager l'adresse</button>
 
+      <div class="source-mini-badge is-hidden" id="mapSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="map"></div>
         <div class="map-footer">
-          <span class="map-hint">La carte est cliquable : sélectionnez un point pour en connaître l'adresse.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
           <a id="googleMapsLink" class="map-link" href="https://www.google.com/maps" target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
           <a id="osmLink" class="map-link" href="https://www.openstreetmap.org" target="_blank" rel="noopener">Ouvrir dans OpenStreetMap ↗</a>
         </div>
@@ -139,12 +139,13 @@
   <details class="feature" data-section="poi">
     <summary class="feature-summary"><span>Points d'intérêt à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="poiBtn" class="btn-secondary">Chercher les points d'intérêt à proximité</button>
+      <button type="button" id="poiBtn" class="btn-secondary">Trouver les points d'intérêt à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="poiSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="poiMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 points d'intérêt les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -153,7 +154,7 @@
           <span>Points d'intérêt à proximité</span>
           <span id="poiStatus">—</span>
         </div>
-        <table id="poiTable" class="poi-table">
+        <table class="poi-table">
           <thead><tr><th>Nom</th><th>Distance</th><th>Direction</th></tr></thead>
           <tbody id="poiTableBody"><tr><td colspan="3" class="dim">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr></tbody>
         </table>
@@ -165,14 +166,15 @@
   <details class="feature" data-section="altitude">
     <summary class="feature-summary"><span>Altitude depuis carte IGN</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
+      <div class="source-mini-badge is-hidden" id="altitudeSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="altitudeMap"></div>
         <div class="map-footer">
-          <span class="map-hint">La carte est cliquable : sélectionnez un point pour comparer son altitude IGN et Open-Elevation.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
-      <button id="altCompareBtn" class="btn-secondary">Altitude IGN (plus précis, France uniquement)</button>
+      <button type="button" id="altCompareBtn" class="btn-secondary">Altitude IGN (plus précis, France uniquement)</button>
       <div class="addr-panel">
         <div class="addr-head">
           <span>Comparaison d'altitude — IGN</span>
@@ -184,7 +186,7 @@
       </div>
       <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
 
-      <button id="oeCompareBtn" class="btn-secondary">Altitude Open-Elevation (moins précis, Monde entier)</button>
+      <button type="button" id="oeCompareBtn" class="btn-secondary">Altitude Open-Elevation (moins précis, Monde entier)</button>
       <div class="addr-panel">
         <div class="addr-head">
           <span>Comparaison d'altitude — Open-Elevation</span>
@@ -201,7 +203,7 @@
   <details class="feature" data-section="offline-geo">
     <summary class="feature-summary"><span>Département et commune hors ligne</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="offlineGeoBtn" class="btn-secondary">Rechercher le département et la commune</button>
+      <button type="button" id="offlineGeoBtn" class="btn-secondary">Trouver le département et la commune</button>
       <div class="addr-panel">
         <div class="addr-head">
           <span>Département et commune hors ligne</span>
@@ -211,12 +213,13 @@
         <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Code postal</span><span id="offlineCP" class="v dim">—</span></div>
       </div>
-      <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). Mis à jour à chaque nouvelle position (GPS ou clic sur la carte principale). Par défaut, la commune est une estimation par proximité au centre-bourg : elle peut être erronée près d'une frontière communale — voir ci-dessous pour télécharger les vrais contours.</p>
+      <p class="osm-credit">Calcul 100% local, sans connexion, à partir de contours et de centroïdes de communes pré-téléchargés (© IGN Admin Express / INSEE). Mis à jour à chaque nouvelle recherche dans cette section (GPS ou clic sur cette carte). Par défaut, la commune est une estimation par proximité au centre-bourg : elle peut être erronée près d'une frontière communale — voir ci-dessous pour télécharger les vrais contours.</p>
 
+      <div class="source-mini-badge is-hidden" id="offlineSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="offlineMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Contour du département (exact, en teal). Commune en ambre : cercle indicatif par défaut, ou contour exact une fois les données précises téléchargées ci-dessous. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -236,20 +239,20 @@
             <tr>
               <td>Cercles (1,4 Mo)</td>
               <td id="statusCentroides" class="dim">Téléchargées, actives</td>
-              <td><button id="activateCentroides" class="btn-secondary" disabled>Actif ✓</button></td>
+              <td><button type="button" id="activateCentroides" class="btn-secondary" disabled>Actif ✓</button></td>
               <td></td>
             </tr>
             <tr>
               <td>Polygones (6,7 Mo)</td>
               <td id="statusSimplifiee" class="dim">Non téléchargée</td>
-              <td><button id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
-              <td><button id="deleteSimplifiee" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+              <td><button type="button" id="downloadSimplifiee" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deleteSimplifiee" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
             </tr>
             <tr>
               <td>Détaillée (16 Mo)</td>
               <td id="statusPrecise" class="dim">Non téléchargée</td>
-              <td><button id="downloadPrecise" class="btn-secondary">Télécharger</button></td>
-              <td><button id="deletePrecise" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+              <td><button type="button" id="downloadPrecise" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deletePrecise" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
             </tr>
           </tbody>
         </table>
@@ -279,20 +282,21 @@
             <tr>
               <td>Sites ANFR, 4 opérateurs (1,3 Mo)</td>
               <td id="antennasRowStatus" class="dim">Non téléchargées</td>
-              <td><button id="downloadAntennas" class="btn-secondary">Télécharger</button></td>
-              <td><button id="deleteAntennas" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+              <td><button type="button" id="downloadAntennas" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deleteAntennas" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
             </tr>
           </tbody>
         </table>
       </div>
       <p class="osm-credit">Source : <a class="inline" href="https://data.anfr.fr/visualisation/information/?id=observatoire_2g_3g_4g" target="_blank" rel="noopener">ANFR, Observatoire 2G/3G/4G/5G</a> (licence ouverte). L'API officielle n'étant pas interrogeable directement depuis un navigateur, ce fichier est un instantané figé (127 000 sites — ANFR met à jour sa base chaque semaine) préparé à l'avance plutôt qu'une requête en direct.</p>
 
-      <button id="antennasSearchBtn" class="btn-secondary">Chercher les antennes à proximité</button>
+      <button type="button" id="antennasSearchBtn" class="btn-secondary">Trouver les antennes à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="antennaSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="antennaMap"></div>
         <div class="map-footer">
-          <span class="map-hint"><span style="color:#FF7900;">●</span> Orange <span style="color:#E2001A;">●</span> SFR <span style="color:#0055A4;">●</span> Bouygues Telecom <span style="color:#2FB344;">●</span> Free Mobile — la carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -312,7 +316,7 @@
             <tr><th>Opérateur</th><th>Générations</th><th>Distance</th><th>Direction</th></tr>
           </thead>
           <tbody id="antennasTableBody">
-            <tr><td colspan="4" class="dim">Téléchargez les données, puis activez la localisation ou cliquez sur la carte</td></tr>
+            <tr><td colspan="4" class="dim">Téléchargez les données, puis lancez une recherche.</td></tr>
           </tbody>
         </table>
       </div>
@@ -322,12 +326,13 @@
   <details class="feature" data-section="escape-games">
     <summary class="feature-summary"><span>Escape games à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="escapeGamesBtn" class="btn-secondary">Chercher les escape games à proximité</button>
+      <button type="button" id="escapeGamesBtn" class="btn-secondary">Trouver les escape games à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="escapeGamesSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="escapeGamesMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 escape games les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -336,7 +341,7 @@
           <span>Escape games à proximité</span>
           <span id="escapeGamesStatus">—</span>
         </div>
-        <table id="escapeGamesTable" class="poi-table">
+        <table class="poi-table">
           <thead>
             <tr><th>Nom</th><th>Distance</th><th>Direction</th></tr>
           </thead>
@@ -352,12 +357,13 @@
   <details class="feature" data-section="pools">
     <summary class="feature-summary"><span>Piscines à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="poolsBtn" class="btn-secondary">Chercher les piscines à proximité</button>
+      <button type="button" id="poolsBtn" class="btn-secondary">Trouver les piscines à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="poolsSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="poolsMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 piscines publiques les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -382,12 +388,13 @@
   <details class="feature" data-section="climbing-sites">
     <summary class="feature-summary"><span>Sites d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="climbingSitesBtn" class="btn-secondary">Chercher les sites d'escalade à proximité</button>
+      <button type="button" id="climbingSitesBtn" class="btn-secondary">Trouver les sites d'escalade à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="climbingSitesSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="climbingSitesMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 sites d'escalade extérieurs (falaises, blocs) les plus proches, dans un rayon de 50 km. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -412,12 +419,13 @@
   <details class="feature" data-section="climbing-gyms">
     <summary class="feature-summary"><span>Salles d'escalade à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="climbingGymsBtn" class="btn-secondary">Chercher les salles d'escalade à proximité</button>
+      <button type="button" id="climbingGymsBtn" class="btn-secondary">Trouver les salles d'escalade à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="climbingGymsSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="climbingGymsMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 salles d'escalade (bloc, voie) les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -442,12 +450,13 @@
   <details class="feature" data-section="toilets">
     <summary class="feature-summary"><span>Toilettes à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="toiletsBtn" class="btn-secondary">Chercher les toilettes à proximité</button>
+      <button type="button" id="toiletsBtn" class="btn-secondary">Trouver les toilettes à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="toiletsSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="toiletsMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 toilettes publiques les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -472,12 +481,13 @@
   <details class="feature" data-section="drinking-water">
     <summary class="feature-summary"><span>Eau potable à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="drinkingWaterBtn" class="btn-secondary">Chercher des points d'eau potable à proximité</button>
+      <button type="button" id="drinkingWaterBtn" class="btn-secondary">Trouver des points d'eau potable à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="drinkingWaterSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="drinkingWaterMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 points d'eau potable les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -502,12 +512,13 @@
   <details class="feature" data-section="food">
     <summary class="feature-summary"><span>De quoi manger à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
-      <button id="foodBtn" class="btn-secondary">Chercher de quoi manger à proximité</button>
+      <button type="button" id="foodBtn" class="btn-secondary">Trouver de quoi manger à proximité</button>
 
+      <div class="source-mini-badge is-hidden" id="foodSourceBadge">Source : —</div>
       <div class="map-wrap">
         <div id="foodMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Les 10 restaurants, snacks et cafés les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span>
+          <span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span>
         </div>
       </div>
 
@@ -525,7 +536,7 @@
           </tbody>
         </table>
       </div>
-      <p class="osm-credit">Restauration : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
+      <p class="osm-credit">De quoi manger : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
     </div>
   </details>
 
@@ -545,9 +556,9 @@
           <span id="radarTimestamp">Chargement…</span>
         </div>
         <div style="padding: 12px 16px; display:flex; align-items:center; justify-content:center; gap:10px;">
-          <button id="radarPrev" class="btn-secondary" style="padding:10px 14px;">◂</button>
-          <button id="radarPlay" class="btn-primary" style="padding:10px 20px;">▶ Lecture</button>
-          <button id="radarNext" class="btn-secondary" style="padding:10px 14px;">▸</button>
+          <button type="button" id="radarPrev" class="btn-secondary" style="padding:10px 14px;">◂</button>
+          <button type="button" id="radarPlay" class="btn-primary" style="padding:10px 20px;">▶ Lecture</button>
+          <button type="button" id="radarNext" class="btn-secondary" style="padding:10px 14px;">▸</button>
         </div>
         <div class="addr-row"><span class="k">Opacité du radar</span>
           <span class="v" style="display:flex; align-items:center; gap:8px;">
@@ -573,9 +584,9 @@
   </footer>
 
   <div class="actions">
-    <button id="installBtn" class="btn-secondary">Ajouter à l'écran d'accueil</button>
+    <button type="button" id="installBtn" class="btn-secondary">Ajouter à l'écran d'accueil</button>
     <p id="installNote" class="install-note"></p>
-    <button id="shareBtn" class="btn-secondary">Partager OuSuisJe</button>
+    <button type="button" id="shareBtn" class="btn-secondary">Partager OuSuisJe</button>
     <p id="shareNote" class="install-note"></p>
   </div>
 
@@ -614,7 +625,7 @@
   const diagRawAcc = $('diagRawAcc');
 
   const addrStatus = $('addrStatus');
-  const addrSourceEl = $('addrSourceEl');
+  const mapSourceBadge = $('mapSourceBadge');
   const addrAdresse = $('addrAdresse');
   const addrLieuDit = $('addrLieuDit');
   const addrCP = $('addrCP');
@@ -623,6 +634,7 @@
   const addrRegion = $('addrRegion');
   const addrPays = $('addrPays');
 
+  const altitudeSourceBadge = $('altitudeSourceBadge');
   const altCompareBtn = $('altCompareBtn');
   const altCompareStatus = $('altCompareStatus');
   const altGpsVal = $('altGpsVal');
@@ -638,6 +650,7 @@
   const poiBtn = $('poiBtn');
   const poiStatus = $('poiStatus');
   const poiTableBody = $('poiTableBody');
+  const poiSourceBadge = $('poiSourceBadge');
 
   const radarTimestamp = $('radarTimestamp');
   const radarPrev = $('radarPrev');
@@ -646,6 +659,7 @@
   const radarOpacity = $('radarOpacity');
 
   const offlineGeoBtn = $('offlineGeoBtn');
+  const offlineSourceBadge = $('offlineSourceBadge');
   const offlineGeoStatus = $('offlineGeoStatus');
   const offlineDeptEl = $('offlineDept');
   const offlineCommuneEl = $('offlineCommune');
@@ -665,30 +679,38 @@
   const downloadAntennasBtn = $('downloadAntennas');
   const deleteAntennasBtn = $('deleteAntennas');
   const antennasSearchBtn = $('antennasSearchBtn');
+  const antennaSourceBadge = $('antennaSourceBadge');
   const antennasSearchStatusEl = $('antennasSearchStatus');
   const antennasTableBody = $('antennasTableBody');
 
   const escapeGamesBtn = $('escapeGamesBtn');
   const escapeGamesStatusEl = $('escapeGamesStatus');
   const escapeGamesTableBody = $('escapeGamesTableBody');
+  const escapeGamesSourceBadge = $('escapeGamesSourceBadge');
   const poolsBtn = $('poolsBtn');
   const poolsStatusEl = $('poolsStatus');
   const poolsTableBody = $('poolsTableBody');
+  const poolsSourceBadge = $('poolsSourceBadge');
   const climbingSitesBtn = $('climbingSitesBtn');
   const climbingSitesStatusEl = $('climbingSitesStatus');
   const climbingSitesTableBody = $('climbingSitesTableBody');
+  const climbingSitesSourceBadge = $('climbingSitesSourceBadge');
   const climbingGymsBtn = $('climbingGymsBtn');
   const climbingGymsStatusEl = $('climbingGymsStatus');
   const climbingGymsTableBody = $('climbingGymsTableBody');
+  const climbingGymsSourceBadge = $('climbingGymsSourceBadge');
   const toiletsBtn = $('toiletsBtn');
   const toiletsStatusEl = $('toiletsStatus');
   const toiletsTableBody = $('toiletsTableBody');
+  const toiletsSourceBadge = $('toiletsSourceBadge');
   const drinkingWaterBtn = $('drinkingWaterBtn');
   const drinkingWaterStatusEl = $('drinkingWaterStatus');
   const drinkingWaterTableBody = $('drinkingWaterTableBody');
+  const drinkingWaterSourceBadge = $('drinkingWaterSourceBadge');
   const foodBtn = $('foodBtn');
   const foodStatusEl = $('foodStatus');
   const foodTableBody = $('foodTableBody');
+  const foodSourceBadge = $('foodSourceBadge');
 
   // --- Sections dépliables : une seule ouverte à la fois, alignée en haut de l'écran ---
   // (tableau mutable : les sections ajoutées dynamiquement par mot-clé s'y ajoutent aussi)
@@ -900,13 +922,18 @@
   // choisi dans une AUTRE section — cliquer sur la carte de "Localisation administrative" ne met
   // donc plus à jour les autres sections. Chaque section garde sa propre carte cliquable pour
   // interroger un point précis, indépendamment des autres.
-  function getSourceLabel() {
-    return lastPos ? 'Position GPS' : 'point sélectionné';
-  }
-
   function getReferencePoint() {
     if (lastPos) return { lat: lastPos.coords.latitude, lon: lastPos.coords.longitude, source: 'gps' };
     return null;
+  }
+
+  // Badge discret affiché au-dessus de chaque carte, indiquant l'origine du dernier point
+  // utilisé par CETTE section (position GPS ou point cliqué sur SA propre carte).
+  function updateMiniSourceBadge(badgeEl, source) {
+    if (!badgeEl) return;
+    badgeEl.classList.remove('is-hidden', 'source-mini-gps', 'source-mini-carte');
+    badgeEl.classList.add(source === 'carte' ? 'source-mini-carte' : 'source-mini-gps');
+    badgeEl.textContent = 'Source : ' + (source === 'carte' ? 'Point cliqué sur la carte' : 'Position GPS');
   }
 
   function updateExternalLinks(latitude, longitude) {
@@ -1005,11 +1032,9 @@
 
   function fmtCoord(v) { return v.toFixed(6) + '°'; }
 
-  function setAddrField(el, value, colorClass) {
+  function setAddrField(el, value) {
     el.textContent = value || '—';
     el.classList.toggle('dim', !value);
-    el.classList.remove('v-amber', 'v-teal');
-    if (colorClass) el.classList.add(colorClass);
   }
 
   // --- Limitation de débit Nominatim (politique d'usage : 1 requête/seconde max) ---
@@ -1028,10 +1053,7 @@
 
   async function doGeocode(latitude, longitude, source) {
     const requestId = ++geocodeRequestId;
-    const colorClass = source === 'gps' ? 'v-amber' : 'v-teal';
-    addrSourceEl.textContent = source === 'gps' ? 'Position GPS' : 'Point sélectionné sur la carte';
-    addrSourceEl.classList.remove('dim', 'v-amber', 'v-teal');
-    addrSourceEl.classList.add(colorClass);
+    updateMiniSourceBadge(mapSourceBadge, source);
     addrStatus.textContent = 'Recherche…';
     try {
       const res = await fetchNominatim(
@@ -1060,13 +1082,13 @@
         departement = `${departement} (${deptNum})`;
       }
 
-      setAddrField(addrAdresse, adresse, colorClass);
-      setAddrField(addrLieuDit, lieuDit, colorClass);
-      setAddrField(addrCP, codePostal, colorClass);
-      setAddrField(addrCommune, commune, colorClass);
-      setAddrField(addrDept, departement, colorClass);
-      setAddrField(addrRegion, region, colorClass);
-      setAddrField(addrPays, pays, colorClass);
+      setAddrField(addrAdresse, adresse);
+      setAddrField(addrLieuDit, lieuDit);
+      setAddrField(addrCP, codePostal);
+      setAddrField(addrCommune, commune);
+      setAddrField(addrDept, departement);
+      setAddrField(addrRegion, region);
+      setAddrField(addrPays, pays);
 
       addrStatus.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
       shareAddressBtn.disabled = !(adresse || commune);
@@ -1136,14 +1158,13 @@
     return val != null ? val : null;
   }
 
-  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, sourceLabel, fetchFn, pointOverride, sourceLabelOverride) {
+  async function runAltitudeCompare(statusEl, gpsEl, sourceEl, diffEl, serviceName, fetchFn, pointOverride) {
     const point = pointOverride || getReferencePoint();
     if (!point) {
       statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
       return;
     }
     const { lat, lon } = point;
-    const pointColorClass = point.source === 'carte' ? 'v-teal' : 'v-amber';
     statusEl.textContent = 'Recherche…';
     try {
       const elevation = await fetchFn(lat, lon);
@@ -1156,14 +1177,10 @@
         gpsEl.textContent = 'Non fournie par le GPS';
         gpsEl.classList.add('dim');
       }
-      gpsEl.classList.remove('v-amber', 'v-teal');
-      gpsEl.classList.add('v-amber');
 
-      sourceEl.classList.remove('v-amber', 'v-teal');
       if (elevation != null) {
         sourceEl.textContent = Math.round(elevation) + ' m';
         sourceEl.classList.remove('dim');
-        sourceEl.classList.add(pointColorClass);
       } else {
         sourceEl.textContent = 'Indisponible pour ce point';
         sourceEl.classList.add('dim');
@@ -1178,9 +1195,9 @@
         diffEl.classList.add('dim');
       }
 
-      statusEl.textContent = 'Point comparé : ' + (sourceLabelOverride || getSourceLabel());
+      statusEl.textContent = 'Comparaison effectuée';
     } catch (e) {
-      statusEl.textContent = 'Service ' + sourceLabel + ' indisponible';
+      statusEl.textContent = 'Service ' + serviceName + ' indisponible';
     }
   }
 
@@ -1191,6 +1208,7 @@
     altitudeMapMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(altitudeMap);
     altitudeMap.setView([lat, lon], 13);
     altitudeMap._homeView = { center: [lat, lon], zoom: 13 };
+    updateMiniSourceBadge(altitudeSourceBadge, source);
   }
 
   altCompareBtn.addEventListener('click', () => {
@@ -1209,8 +1227,8 @@
   altitudeMap.on('click', (e) => {
     const point = { lat: e.latlng.lat, lon: e.latlng.lng, source: 'carte' };
     placeAltitudeMapMarker(point.lat, point.lon, point.source);
-    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude, point, 'point sélectionné sur cette carte');
-    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point, 'point sélectionné sur cette carte');
+    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude, point);
+    runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point);
   });
 
   // --- Points d'intérêt à proximité (Overpass API) ---
@@ -1862,12 +1880,12 @@
 
   const antennaMap = initSecondaryMap('antennaMap');
 
-  function updateAntennasNearby(lat, lon, sourceLabel, source) {
-    if (sourceLabel === undefined) sourceLabel = getSourceLabel();
+  function updateAntennasNearby(lat, lon, source) {
     if (source === undefined) {
       const refPoint = getReferencePoint();
       source = (refPoint && refPoint.source) || 'gps';
     }
+    updateMiniSourceBadge(antennaSourceBadge, source);
     if (antennaGpsMarker) { antennaMap.removeLayer(antennaGpsMarker); }
     antennaGpsMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(antennaMap);
 
@@ -1901,14 +1919,14 @@
         bounds.push([r.lat, r.lon]);
       }
     }
-    antennasSearchStatusEl.textContent = `Autour de : ${sourceLabel} · ${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
+    antennasSearchStatusEl.textContent = `${results.length} site(s) · rayon ${ANTENNA_RADIUS_M} m`;
     antennaMap._homeView = { bounds: bounds };
     antennaMap.fitBounds(bounds, { padding: [24, 24] });
   }
 
   // La carte des antennes est elle-même cliquable : relance la recherche à cet endroit.
   antennaMap.on('click', (e) => {
-    updateAntennasNearby(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte', 'carte');
+    updateAntennasNearby(e.latlng.lat, e.latlng.lng, 'carte');
   });
 
   antennasSearchBtn.addEventListener('click', () => {
@@ -1986,17 +2004,18 @@
   }
 
   function setupNearbyOverpassFeature(config) {
-    const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel } = config;
+    const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
     let markers = [];
     let originMarker = null;
 
-    async function runSearch(lat, lon, sourceLabel, source) {
+    async function runSearch(lat, lon, source) {
       if (source === undefined) {
         const refPoint = getReferencePoint();
         source = (refPoint && refPoint.source) || 'gps';
       }
       btn.disabled = true;
       statusEl.textContent = 'Recherche…';
+      updateMiniSourceBadge(badgeEl, source);
 
       if (originMarker) { map.removeLayer(originMarker); }
       originMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(map);
@@ -2040,7 +2059,7 @@
             bounds.push([it.lat, it.lon]);
           }
         }
-        statusEl.textContent = `Autour de : ${sourceLabel} · ${items.length} résultat(s) · rayon ${radiusM / 1000} km`;
+        statusEl.textContent = `${items.length} résultat(s) · rayon ${radiusM / 1000} km`;
         map._homeView = { bounds: bounds };
         map.fitBounds(bounds, { padding: [24, 24] });
       } catch (e) {
@@ -2057,13 +2076,13 @@
         statusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
         return;
       }
-      runSearch(point.lat, point.lon, getSourceLabel());
+      runSearch(point.lat, point.lon);
     });
 
     // La carte de cette section est elle-même cliquable : ça relance la recherche
     // centrée sur le point cliqué, indépendamment de la position de référence globale.
     map.on('click', (e) => {
-      runSearch(e.latlng.lat, e.latlng.lng, 'point sélectionné sur cette carte', 'carte');
+      runSearch(e.latlng.lat, e.latlng.lng, 'carte');
     });
   }
 
@@ -2081,9 +2100,10 @@
     statusEl: poiStatus,
     tableBody: poiTableBody,
     map: poiMap,
+    badgeEl: poiSourceBadge,
     color: '#4FD1C5',
     radiusM: 1500,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: "Point d'intérêt",
     emptyLabel: "Aucun point d'intérêt trouvé",
     buildQuery: (lat, lon, r) =>
@@ -2095,9 +2115,10 @@
     statusEl: escapeGamesStatusEl,
     tableBody: escapeGamesTableBody,
     map: escapeGamesMap,
+    badgeEl: escapeGamesSourceBadge,
     color: '#8B5CF6',
     radiusM: 20000,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: 'Escape game',
     emptyLabel: 'Aucun escape game trouvé',
     buildQuery: (lat, lon, r) =>
@@ -2109,9 +2130,10 @@
     statusEl: poolsStatusEl,
     tableBody: poolsTableBody,
     map: poolsMap,
+    badgeEl: poolsSourceBadge,
     color: '#22A6D9',
     radiusM: 20000,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: 'Piscine',
     emptyLabel: 'Aucune piscine trouvée',
     buildQuery: (lat, lon, r) =>
@@ -2123,9 +2145,10 @@
     statusEl: climbingSitesStatusEl,
     tableBody: climbingSitesTableBody,
     map: climbingSitesMap,
+    badgeEl: climbingSitesSourceBadge,
     color: '#8D6E52',
     radiusM: 50000,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: "Site d'escalade",
     emptyLabel: "Aucun site d'escalade trouvé",
     buildQuery: (lat, lon, r) =>
@@ -2137,9 +2160,10 @@
     statusEl: climbingGymsStatusEl,
     tableBody: climbingGymsTableBody,
     map: climbingGymsMap,
+    badgeEl: climbingGymsSourceBadge,
     color: '#F2994A',
     radiusM: 20000,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: "Salle d'escalade",
     emptyLabel: "Aucune salle d'escalade trouvée",
     buildQuery: (lat, lon, r) =>
@@ -2151,9 +2175,10 @@
     statusEl: toiletsStatusEl,
     tableBody: toiletsTableBody,
     map: toiletsMap,
+    badgeEl: toiletsSourceBadge,
     color: '#6C7A89',
     radiusM: 2000,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: 'Toilettes',
     emptyLabel: 'Aucune toilette trouvée',
     buildQuery: (lat, lon, r) =>
@@ -2165,9 +2190,10 @@
     statusEl: drinkingWaterStatusEl,
     tableBody: drinkingWaterTableBody,
     map: drinkingWaterMap,
+    badgeEl: drinkingWaterSourceBadge,
     color: '#2AABE2',
     radiusM: 2000,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: 'Eau potable',
     emptyLabel: "Aucun point d'eau potable trouvé",
     buildQuery: (lat, lon, r) =>
@@ -2179,9 +2205,10 @@
     statusEl: foodStatusEl,
     tableBody: foodTableBody,
     map: foodMap,
+    badgeEl: foodSourceBadge,
     color: '#E24A4A',
     radiusM: 2000,
-    maxResults: 10,
+    maxResults: 20,
     defaultName: 'Restauration',
     emptyLabel: 'Aucun endroit pour manger trouvé',
     buildQuery: (lat, lon, r) =>
@@ -2297,10 +2324,11 @@
         <span class="feature-chevron">▾</span>
       </summary>
       <div class="feature-body">
-        <button type="button" class="btn-secondary custom-search-btn">Chercher « ${label} » à proximité</button>
+        <button type="button" class="btn-secondary custom-search-btn">Trouver « ${label} » à proximité</button>
+        <div class="source-mini-badge is-hidden custom-source-badge">Source : —</div>
         <div class="map-wrap">
           <div id="${mapId}"></div>
-          <div class="map-footer"><span class="map-hint">Les 10 résultats les plus proches de la position actuelle. La carte est cliquable pour relancer la recherche ailleurs.</span></div>
+          <div class="map-footer"><span class="map-hint">La carte est cliquable pour relancer la recherche ailleurs.</span></div>
         </div>
         <div class="addr-panel">
           <div class="addr-head"><span>${label} à proximité</span><span class="custom-status">—</span></div>
@@ -2325,6 +2353,7 @@
     const btn = details.querySelector('.custom-search-btn');
     const statusEl = details.querySelector('.custom-status');
     const tableBody = details.querySelector('.custom-table-body');
+    const badgeEl = details.querySelector('.custom-source-badge');
     const secMap = initSecondaryMap(mapId);
 
     setupNearbyOverpassFeature({
@@ -2332,9 +2361,10 @@
       statusEl: statusEl,
       tableBody: tableBody,
       map: secMap,
+      badgeEl: badgeEl,
       color: color,
       radiusM: 5000,
-      maxResults: 10,
+      maxResults: 20,
       defaultName: label,
       emptyLabel: `Aucun résultat pour « ${label} »`,
       buildQuery: buildQueryForKeyword(keyword)
@@ -2461,37 +2491,31 @@
       const refPoint = getReferencePoint();
       source = (refPoint && refPoint.source) || 'gps';
     }
-    const colorClass = source === 'carte' ? 'v-teal' : 'v-amber';
+    updateMiniSourceBadge(offlineSourceBadge, source);
     offlineGeoStatus.textContent = 'Calcul…';
     try {
       await loadOfflineGeoData();
       const dept = findDepartement(lon, lat);
       offlineDeptEl.textContent = dept ? `${dept.nom} (${dept.code})` : 'Introuvable';
       offlineDeptEl.classList.toggle('dim', !dept);
-      offlineDeptEl.classList.remove('v-amber', 'v-teal');
-      if (dept) offlineDeptEl.classList.add(colorClass);
 
       let commune = (dept && communeContoursTier !== 'centroides') ? findCommuneExact(lon, lat, dept.code) : null;
       const communeExact = !!commune;
       if (!commune) commune = findCommuneApprox(lat, lon);
 
-      offlineCommuneEl.classList.remove('v-amber', 'v-teal');
-      offlineCPEl.classList.remove('v-amber', 'v-teal');
       if (commune) {
         offlineCommuneEl.textContent = commune.nom;
         offlineCommuneEl.classList.remove('dim');
-        offlineCommuneEl.classList.add(colorClass);
         const cp = communePostalCode(commune.code);
         offlineCPEl.textContent = cp || 'Non disponible';
         offlineCPEl.classList.toggle('dim', !cp);
-        if (cp) offlineCPEl.classList.add(colorClass);
       } else {
         offlineCommuneEl.textContent = 'Introuvable';
         offlineCommuneEl.classList.add('dim');
         offlineCPEl.textContent = '—';
         offlineCPEl.classList.add('dim');
       }
-      offlineGeoStatus.textContent = 'Hors ligne ✓ · ' + (source === 'carte' ? 'Point sélectionné sur la carte' : 'Position GPS');
+      offlineGeoStatus.textContent = 'Hors ligne ✓';
       offlineGeoStatus.classList.remove('dim');
 
       if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }

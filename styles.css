@@ -455,9 +455,28 @@ h1 {
 .addr-row .k { color: var(--muted); }
 .addr-row .v { font-weight: 600; text-align: right; }
 .addr-row .v.dim { color: var(--muted); font-weight: 400; }
-.addr-row .v.v-amber { color: var(--amber); }
-.addr-row .v.v-teal { color: var(--teal); }
-.addr-row .v.dim.v-amber, .addr-row .v.dim.v-teal { color: var(--muted); font-weight: 400; }
+
+/* --- Badge discret "Source" au-dessus de chaque carte --- */
+.source-mini-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.source-mini-badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.source-mini-badge.is-hidden { display: none; }
+.source-mini-badge.source-mini-gps { color: var(--amber); }
+.source-mini-badge.source-mini-gps::before { background: var(--amber); box-shadow: 0 0 5px var(--amber); }
+.source-mini-badge.source-mini-carte { color: var(--teal); }
+.source-mini-badge.source-mini-carte::before { background: var(--teal); box-shadow: 0 0 5px var(--teal); }
 
 /* --- POI table --- */
 .poi-table {

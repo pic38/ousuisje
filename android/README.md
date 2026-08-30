@@ -47,6 +47,19 @@ cp ../data/*.csv ../data/*.json app/src/main/assets/data/
 ```
 (à terme, un script ou une étape de build pourrait automatiser cette copie).
 
+**Après cette copie, retirer à nouveau le bouton "Ajouter à l'écran d'accueil"** (absent
+du site telle qu'écrite, il n'est retiré que dans cette copie Android — cp écrase donc
+ce retrait à chaque rafraîchissement, il faut le refaire) :
+- HTML : supprimer `<button id="installBtn">…</button>` et `<p id="installNote">…</p>`
+  (dans `.actions`, juste avant le bouton `shareBtn`).
+- JS : supprimer tout le bloc `const installBtn = $('installBtn'); … } else if (isIOS) { … }`
+  juste avant `const shareBtn = $('shareBtn');` (déclarations `installBtn`/`installNote`/
+  `isIOS`/`isStandalone`/`deferredPrompt`, les listeners `beforeinstallprompt`/`appinstalled`,
+  et le bloc `if (isStandalone) { … }` de fin) — sans ça, `installBtn.addEventListener(...)`
+  plante sur `null` puisque l'élément n'existe plus.
+Ce bouton n'a pas de sens une fois l'appli installée nativement ; le reste du site (bouton
+Partager notamment) n'est pas concerné.
+
 À noter : `sw.js` (service worker) n'est pas exploité ici — inutile, puisque tous les
 fichiers sont déjà embarqués dans l'APK au lieu d'être mis en cache après coup. Le code
 du site appelle déjà `navigator.serviceWorker.register(...).catch(() => {})`, donc son

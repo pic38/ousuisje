@@ -474,6 +474,28 @@
   <details class="feature" data-section="drinking-water">
     <summary class="feature-summary"><span>Eau potable à proximité</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Points d'eau potable (hors ligne, sur demande)</span>
+        </div>
+        <table class="contours-table">
+          <colgroup>
+            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+          </colgroup>
+          <thead>
+            <tr><th>Jeu de données</th><th>Statut</th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Points d'eau potable, France entière (310 Ko)</td>
+              <td id="drinkingWaterRowStatus" class="dim">Non téléchargés</td>
+              <td><button type="button" id="downloadDrinkingWater" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deleteDrinkingWater" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <button type="button" id="drinkingWaterBtn" class="btn-secondary">Trouver des points d'eau potable à proximité</button>
 
       <div class="source-mini-badge is-hidden" id="drinkingWaterSourceBadge">Source : —</div>
@@ -697,6 +719,9 @@
   const drinkingWaterStatusEl = $('drinkingWaterStatus');
   const drinkingWaterTableBody = $('drinkingWaterTableBody');
   const drinkingWaterSourceBadge = $('drinkingWaterSourceBadge');
+  const drinkingWaterRowStatusEl = $('drinkingWaterRowStatus');
+  const downloadDrinkingWaterBtn = $('downloadDrinkingWater');
+  const deleteDrinkingWaterBtn = $('deleteDrinkingWater');
   const foodBtn = $('foodBtn');
   const foodStatusEl = $('foodStatus');
   const foodTableBody = $('foodTableBody');
@@ -2275,20 +2300,198 @@
       `[out:json][timeout:20];(node["amenity"="toilets"](around:${r},${lat},${lon});way["amenity"="toilets"](around:${r},${lat},${lon}););out center 200;`
   });
 
-  setupNearbyOverpassFeature({
-    btn: drinkingWaterBtn,
-    statusEl: drinkingWaterStatusEl,
-    tableBody: drinkingWaterTableBody,
-    map: drinkingWaterMap,
-    badgeEl: drinkingWaterSourceBadge,
-    color: '#2AABE2',
-    radiusM: 2000,
-    maxResults: 20,
-    defaultName: 'Eau potable',
-    emptyLabel: "Aucun point d'eau potable trouvé",
-    buildQuery: (lat, lon, r) =>
-      `[out:json][timeout:20];node["amenity"="drinking_water"](around:${r},${lat},${lon});out body 200;`
+  // --- Eau potable (jeu de données téléchargeable, hors ligne, sur demande) ---
+  // Même schéma que les antennes ANFR : hors ligne si téléchargé, repli sur Overpass en direct sinon.
+  const DRINKING_WATER_URL = 'data/drinking-water.min.csv';
+  const DRINKING_WATER_RAW_BYTES = 747017;
+  const DRINKING_WATER_DOWNLOADED_STORAGE_KEY = 'ousuisje_drinking_water_downloaded';
+  const DRINKING_WATER_RADIUS_M = 2000;
+  const DRINKING_WATER_MAX_RESULTS = 20;
+  const DRINKING_WATER_COLOR = '#2AABE2';
+
+  let drinkingWaterSites = null;
+  let drinkingWaterLoading = false;
+
+  function parseDrinkingWaterCsv(text) {
+    const out = [];
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      const parts = line.split(';');
+      const lat = parseFloat(parts[1]);
+      const lon = parseFloat(parts[2]);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
+      out.push({ id: parts[0], lat: lat, lon: lon });
+    }
+    return out;
+  }
+
+  function findNearbyDrinkingWaterOffline(lat, lon, radiusM, maxResults) {
+    if (!drinkingWaterSites) return [];
+    const coslat = Math.cos(lat * Math.PI / 180);
+    const results = [];
+    for (const s of drinkingWaterSites) {
+      const dLat = s.lat - lat;
+      const dLon = (s.lon - lon) * coslat;
+      const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
+      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, distM: distM, bearing: bearingTo(lat, lon, s.lat, s.lon) });
+    }
+    results.sort((a, b) => a.distM - b.distM);
+    return results.slice(0, maxResults);
+  }
+
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let drinkingWaterGpsMarker = null;
+  let drinkingWaterClickMarker = null;
+  let drinkingWaterMarkers = [];
+
+  function clearDrinkingWaterMarkers() {
+    drinkingWaterMarkers.forEach((m) => drinkingWaterMap.removeLayer(m));
+    drinkingWaterMarkers = [];
+  }
+
+  function renderDrinkingWaterResults(lat, lon, source, items) {
+    clearDrinkingWaterMarkers();
+    const bounds = [[lat, lon]];
+    if (items.length === 0) {
+      drinkingWaterTableBody.className = '';
+      drinkingWaterTableBody.innerHTML = `<tr><td colspan="3" class="dim">Aucun point d'eau potable dans un rayon de ${DRINKING_WATER_RADIUS_M / 1000} km</td></tr>`;
+    } else {
+      drinkingWaterTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
+      drinkingWaterTableBody.innerHTML = items.map((it) => `
+        <tr>
+          <td class="copyable">${it.name || 'Eau potable'}</td>
+          <td class="copyable">${fmtDistanceM(it.distM)}</td>
+          <td class="copyable">${it.bearing}</td>
+        </tr>
+      `).join('');
+      for (const it of items) {
+        const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: DRINKING_WATER_COLOR, weight: 2, fillColor: DRINKING_WATER_COLOR, fillOpacity: 0.6 })
+          .bindPopup(`<strong>${it.name || 'Eau potable'}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+          .addTo(drinkingWaterMap);
+        drinkingWaterMarkers.push(marker);
+        bounds.push([it.lat, it.lon]);
+      }
+    }
+    drinkingWaterStatusEl.textContent = `${items.length} résultat(s) · rayon ${DRINKING_WATER_RADIUS_M / 1000} km`;
+    drinkingWaterMap._homeView = { bounds: bounds };
+    drinkingWaterMap.fitBounds(bounds, { padding: [24, 24] });
+  }
+
+  async function updateDrinkingWaterNearby(lat, lon, source) {
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
+    drinkingWaterBtn.disabled = true;
+    updateMiniSourceBadge(drinkingWaterSourceBadge, source);
+
+    if (source === 'carte') {
+      if (drinkingWaterClickMarker) { drinkingWaterMap.removeLayer(drinkingWaterClickMarker); }
+      drinkingWaterClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(drinkingWaterMap);
+    } else {
+      if (drinkingWaterGpsMarker) { drinkingWaterMap.removeLayer(drinkingWaterGpsMarker); }
+      drinkingWaterGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(drinkingWaterMap);
+    }
+
+    if (drinkingWaterSites) {
+      const results = findNearbyDrinkingWaterOffline(lat, lon, DRINKING_WATER_RADIUS_M, DRINKING_WATER_MAX_RESULTS);
+      renderDrinkingWaterResults(lat, lon, source, results);
+      drinkingWaterBtn.disabled = false;
+      return;
+    }
+
+    drinkingWaterStatusEl.textContent = 'Recherche…';
+    try {
+      const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+      const data = await res.json();
+      const items = (data.elements || [])
+        .map((el) => {
+          if (el.lat == null || el.lon == null) return null;
+          return { name: (el.tags && el.tags.name) || 'Eau potable', lat: el.lat, lon: el.lon, distM: distanceMetersApprox(lat, lon, el.lat, el.lon), bearing: bearingTo(lat, lon, el.lat, el.lon) };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.distM - b.distM)
+        .slice(0, DRINKING_WATER_MAX_RESULTS);
+      renderDrinkingWaterResults(lat, lon, source, items);
+    } catch (e) {
+      drinkingWaterStatusEl.textContent = 'Service Overpass indisponible';
+      drinkingWaterTableBody.className = '';
+      drinkingWaterTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
+    } finally {
+      drinkingWaterBtn.disabled = false;
+    }
+  }
+
+  drinkingWaterBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      drinkingWaterStatusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    updateDrinkingWaterNearby(point.lat, point.lon);
   });
+
+  // La carte de cette section est elle-même cliquable : ça relance la recherche
+  // centrée sur le point cliqué, indépendamment de la position de référence globale.
+  drinkingWaterMap.on('click', (e) => {
+    updateDrinkingWaterNearby(e.latlng.lat, e.latlng.lng, 'carte');
+  });
+
+  async function downloadDrinkingWater() {
+    if (drinkingWaterLoading) return;
+    const alreadyDownloaded = localStorage.getItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY) === '1';
+    drinkingWaterLoading = true;
+    downloadDrinkingWaterBtn.disabled = true;
+    drinkingWaterRowStatusEl.classList.remove('dim');
+    drinkingWaterRowStatusEl.textContent = alreadyDownloaded ? 'Chargement…' : 'Téléchargement… 0%';
+    try {
+      const text = await fetchTextWithProgress(DRINKING_WATER_URL, DRINKING_WATER_RAW_BYTES, (frac) => {
+        if (alreadyDownloaded) return;
+        const pct = Math.round(frac * 100);
+        drinkingWaterRowStatusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
+      });
+      drinkingWaterRowStatusEl.textContent = 'Analyse du fichier…';
+      drinkingWaterSites = parseDrinkingWaterCsv(text);
+      localStorage.setItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY, '1');
+      downloadDrinkingWaterBtn.textContent = 'Téléchargés';
+      drinkingWaterRowStatusEl.textContent = 'Téléchargés';
+      deleteDrinkingWaterBtn.style.display = '';
+      const point = getReferencePoint();
+      if (point) updateDrinkingWaterNearby(point.lat, point.lon);
+    } catch (e) {
+      drinkingWaterRowStatusEl.textContent = 'Échec du téléchargement';
+    } finally {
+      drinkingWaterLoading = false;
+      downloadDrinkingWaterBtn.disabled = !!drinkingWaterSites;
+    }
+  }
+
+  async function deleteDrinkingWater() {
+    if (drinkingWaterLoading) return;
+    drinkingWaterLoading = true;
+    downloadDrinkingWaterBtn.disabled = true;
+    deleteDrinkingWaterBtn.disabled = true;
+    await deleteCachedUrl(DRINKING_WATER_URL);
+    drinkingWaterSites = null;
+    clearDrinkingWaterMarkers();
+    localStorage.removeItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY);
+    downloadDrinkingWaterBtn.textContent = 'Télécharger';
+    drinkingWaterRowStatusEl.textContent = 'Non téléchargés';
+    drinkingWaterRowStatusEl.classList.add('dim');
+    deleteDrinkingWaterBtn.style.display = 'none';
+    drinkingWaterLoading = false;
+    downloadDrinkingWaterBtn.disabled = false;
+    deleteDrinkingWaterBtn.disabled = false;
+    const point = getReferencePoint();
+    if (point) updateDrinkingWaterNearby(point.lat, point.lon);
+  }
+
+  downloadDrinkingWaterBtn.addEventListener('click', downloadDrinkingWater);
+  deleteDrinkingWaterBtn.addEventListener('click', deleteDrinkingWater);
+  if (localStorage.getItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY) === '1') downloadDrinkingWater();
 
   setupNearbyOverpassFeature({
     btn: foodBtn,

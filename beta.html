@@ -185,6 +185,30 @@
           <span>Comparaison d'altitude — IGN</span>
           <span id="altCompareStatus">—</span>
         </div>
+        <div class="altitude-profile is-hidden" id="altitudeProfile">
+          <div class="altitude-profile-ruler">
+            <div class="altitude-profile-track"></div>
+            <div class="altitude-profile-marker" id="apMarkerGps">
+              <span class="altitude-profile-dot altitude-profile-dot-gps"></span>
+              <b class="altitude-profile-val" id="apValGps">—</b>
+            </div>
+            <div class="altitude-profile-gap" id="apGapGpsIgn">—</div>
+            <div class="altitude-profile-marker" id="apMarkerIgnGps">
+              <span class="altitude-profile-dot altitude-profile-dot-ign-gps"></span>
+              <b class="altitude-profile-val" id="apValIgnGps">—</b>
+            </div>
+            <div class="altitude-profile-gap" id="apGapIgnClick">—</div>
+            <div class="altitude-profile-marker" id="apMarkerIgnClick">
+              <span class="altitude-profile-dot altitude-profile-dot-ign-click"></span>
+              <b class="altitude-profile-val" id="apValIgnClick">—</b>
+            </div>
+          </div>
+          <div class="altitude-profile-legend">
+            <span class="altitude-profile-legend-item"><span class="altitude-profile-dot altitude-profile-dot-gps"></span>GPS</span>
+            <span class="altitude-profile-legend-item"><span class="altitude-profile-dot altitude-profile-dot-ign-gps"></span>IGN (GPS)</span>
+            <span class="altitude-profile-legend-item"><span class="altitude-profile-dot altitude-profile-dot-ign-click"></span>IGN (clic)</span>
+          </div>
+        </div>
         <div class="addr-row"><span class="k">Altitude GPS</span><span id="altGpsVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Altitude IGN au point GPS</span><span id="altIgnVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Écart GPS - IGN(GPS)</span><span id="altDiffVal" class="v dim">—</span></div>
@@ -583,6 +607,7 @@
   const altIgnClickVal = $('altIgnClickVal');
   const altDiffVal = $('altDiffVal');
   const altDiffGpsClickVal = $('altDiffGpsClickVal');
+  const altitudeProfileEl = $('altitudeProfile');
 
   const oeCompareBtn = $('oeCompareBtn');
   const oeCompareStatus = $('oeCompareStatus');
@@ -1285,6 +1310,58 @@
       altDiffGpsClickVal.classList.add('dim');
       altDiffGpsClickVal.classList.remove('copyable');
     }
+
+    updateAltitudeProfile(gpsAlt);
+  }
+
+  // Mini profil altimétrique vertical : les trois valeurs positionnées proportionnellement
+  // à leur altitude sur une règle verticale, avec les deux écarts affichés entre les
+  // marqueurs qu'ils relient. (essai, page bêta uniquement)
+  function updateAltitudeProfile(gpsAlt) {
+    const points = [
+      { id: 'apMarkerGps', valId: 'apValGps', value: gpsAlt },
+      { id: 'apMarkerIgnGps', valId: 'apValIgnGps', value: ignAltAtGps },
+      { id: 'apMarkerIgnClick', valId: 'apValIgnClick', value: ignAltAtClick }
+    ];
+    const known = points.filter((p) => p.value != null);
+    if (known.length === 0) {
+      altitudeProfileEl.classList.add('is-hidden');
+      return;
+    }
+    altitudeProfileEl.classList.remove('is-hidden');
+
+    let min = Math.min(...known.map((p) => p.value));
+    let max = Math.max(...known.map((p) => p.value));
+    if (max - min < 1) { min -= 5; max += 5; } // évite des marqueurs superposés si les altitudes sont quasi identiques
+    const pad = (max - min) * 0.18;
+    min -= pad;
+    max += pad;
+    const topPercentOf = (value) => 100 - ((value - min) / (max - min)) * 100;
+
+    points.forEach((p) => {
+      const markerEl = $(p.id);
+      if (p.value == null) {
+        markerEl.classList.add('is-hidden');
+        return;
+      }
+      markerEl.classList.remove('is-hidden');
+      markerEl.style.top = topPercentOf(p.value) + '%';
+      $(p.valId).textContent = Math.round(p.value) + ' m';
+    });
+
+    function positionGap(gapId, value1, value2, diff) {
+      const gapEl = $(gapId);
+      if (value1 == null || value2 == null) {
+        gapEl.classList.add('is-hidden');
+        return;
+      }
+      gapEl.classList.remove('is-hidden');
+      gapEl.style.top = ((topPercentOf(value1) + topPercentOf(value2)) / 2) + '%';
+      gapEl.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+    }
+
+    positionGap('apGapGpsIgn', gpsAlt, ignAltAtGps, gpsAlt != null && ignAltAtGps != null ? gpsAlt - ignAltAtGps : null);
+    positionGap('apGapIgnClick', ignAltAtGps, ignAltAtClick, ignAltAtGps != null && ignAltAtClick != null ? ignAltAtClick - ignAltAtGps : null);
   }
 
   async function updateIgnAtGpsPoint() {

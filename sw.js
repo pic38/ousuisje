@@ -1,9 +1,8 @@
-const CACHE_NAME = "ousuisje-cache-v87";
+const CACHE_NAME = "ousuisje-cache-v88";
 const ASSETS = [
   "./",
   "./index.html",
   "./about.html",
-  "./beta.html",
   "./confidentialite.html",
   "./mentions-legales.html",
   "./styles.css",

@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         // géolocalisation exige un contexte sécurisé, que file:// ne garantit pas de façon
         // fiable selon les versions de WebView.
         val assetLoader = WebViewAssetLoader.Builder()
-            .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(this))
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
 
         webView = findViewById(R.id.webview)

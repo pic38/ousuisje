@@ -51,6 +51,9 @@
     <input type="text" id="customSectionInput" class="settings-custom-input" placeholder="Ajouter un lieu : pharmacie, boulangerie…" />
     <button type="button" id="customSectionAddBtn" class="settings-bulk-btn">Ajouter</button>
   </div>
+  <div class="settings-bulk">
+    <button type="button" id="settingsCloseBtn" class="settings-bulk-btn">Fermer</button>
+  </div>
 </div>
 
 <div class="wrap">
@@ -853,6 +856,10 @@
   document.addEventListener('click', (e) => {
     if (settingsPanel.classList.contains('is-hidden')) return;
     if (settingsPanel.contains(e.target) || e.target === settingsBtn) return;
+    settingsPanel.classList.add('is-hidden');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  });
+  $('settingsCloseBtn').addEventListener('click', () => {
     settingsPanel.classList.add('is-hidden');
     settingsBtn.setAttribute('aria-expanded', 'false');
   });

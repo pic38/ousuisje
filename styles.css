@@ -184,6 +184,21 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
 }
 .settings-move-btn:hover:not(:disabled) { color: var(--teal); background: var(--surface-2); }
 .settings-move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.settings-drag-handle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: grab;
+  padding: 4px 3px;
+  border-radius: 6px;
+  touch-action: none;
+  user-select: none;
+}
+.settings-drag-handle:hover { color: var(--teal); background: var(--surface-2); }
+.settings-check.is-dragging { opacity: 0.5; background: var(--surface-2); border-radius: 8px; }
+.settings-check.is-dragging .settings-drag-handle { cursor: grabbing; color: var(--teal); }
 .settings-custom-add {
   display: flex;
   gap: 8px;

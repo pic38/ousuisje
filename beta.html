@@ -186,8 +186,10 @@
           <span id="altCompareStatus">—</span>
         </div>
         <div class="addr-row"><span class="k">Altitude GPS</span><span id="altGpsVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Altitude IGN (RGE ALTI)</span><span id="altIgnVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Écart</span><span id="altDiffVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude IGN au point GPS</span><span id="altIgnVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Altitude IGN au point cliqué sur la carte</span><span id="altIgnClickVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart GPS-IGN(gps)</span><span id="altDiffVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Écart IGN(gps)-IGN(Point sélectionné sur la carte)</span><span id="altDiffGpsClickVal" class="v dim">—</span></div>
       </div>
       <p class="osm-credit">Altitude carte : © <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>, service géoplateforme (RGE ALTI)</p>
 
@@ -576,7 +578,9 @@
   const altCompareStatus = $('altCompareStatus');
   const altGpsVal = $('altGpsVal');
   const altIgnVal = $('altIgnVal');
+  const altIgnClickVal = $('altIgnClickVal');
   const altDiffVal = $('altDiffVal');
+  const altDiffGpsClickVal = $('altDiffGpsClickVal');
 
   const oeCompareBtn = $('oeCompareBtn');
   const oeCompareStatus = $('oeCompareStatus');
@@ -1297,10 +1301,105 @@
     updateMiniSourceBadge(altitudeSourceBadge, source);
   }
 
+  // --- IGN : altitude au point GPS ET au point cliqué sur la carte, avec deux écarts ---
+  // (essai, page bêta uniquement) : contrairement à runAltitudeCompare (un seul point à la
+  // fois, réutilisé tel quel pour le bloc Open-Elevation ci-dessous), ce bloc IGN garde en
+  // mémoire les deux valeurs séparément pour les comparer entre elles.
+  let ignAltAtGps = null;
+  let ignAltAtClick = null;
+
+  function refreshAltDiffs() {
+    const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude + altitudeOffsetM : null;
+
+    altDiffVal.classList.remove('v-amber', 'v-teal');
+    if (gpsAlt != null && ignAltAtGps != null) {
+      const diff = gpsAlt - ignAltAtGps;
+      altDiffVal.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+      altDiffVal.classList.remove('dim');
+      altDiffVal.classList.add('copyable', 'v-amber');
+    } else {
+      altDiffVal.textContent = '—';
+      altDiffVal.classList.add('dim');
+      altDiffVal.classList.remove('copyable');
+    }
+
+    altDiffGpsClickVal.classList.remove('v-amber', 'v-teal');
+    if (ignAltAtGps != null && ignAltAtClick != null) {
+      const diff = ignAltAtGps - ignAltAtClick;
+      altDiffGpsClickVal.textContent = (diff >= 0 ? '+' : '') + Math.round(diff) + ' m';
+      altDiffGpsClickVal.classList.remove('dim');
+      altDiffGpsClickVal.classList.add('copyable', 'v-teal');
+    } else {
+      altDiffGpsClickVal.textContent = '—';
+      altDiffGpsClickVal.classList.add('dim');
+      altDiffGpsClickVal.classList.remove('copyable');
+    }
+  }
+
+  async function updateIgnAtGpsPoint() {
+    const point = getReferencePoint();
+    if (!point) {
+      altCompareStatus.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    altCompareStatus.textContent = 'Recherche…';
+
+    const gpsAlt = (lastPos && lastPos.coords.altitude != null) ? lastPos.coords.altitude + altitudeOffsetM : null;
+    altGpsVal.classList.remove('v-amber', 'v-teal');
+    if (gpsAlt != null) {
+      altGpsVal.textContent = Math.round(gpsAlt) + ' m';
+      altGpsVal.classList.remove('dim');
+      altGpsVal.classList.add('copyable', 'v-amber');
+    } else {
+      altGpsVal.textContent = 'Non fournie par le GPS';
+      altGpsVal.classList.add('dim');
+      altGpsVal.classList.remove('copyable');
+    }
+
+    try {
+      ignAltAtGps = await fetchIGNAltitude(point.lat, point.lon);
+      altIgnVal.classList.remove('v-amber', 'v-teal');
+      if (ignAltAtGps != null) {
+        altIgnVal.textContent = Math.round(ignAltAtGps) + ' m';
+        altIgnVal.classList.remove('dim');
+        altIgnVal.classList.add('copyable', 'v-amber');
+      } else {
+        altIgnVal.textContent = 'Indisponible pour ce point';
+        altIgnVal.classList.add('dim');
+        altIgnVal.classList.remove('copyable');
+      }
+      refreshAltDiffs();
+      altCompareStatus.textContent = 'Comparaison effectuée';
+    } catch (e) {
+      altCompareStatus.textContent = 'Service IGN indisponible';
+    }
+  }
+
+  async function updateIgnAtClickPoint(lat, lon) {
+    altCompareStatus.textContent = 'Recherche…';
+    try {
+      ignAltAtClick = await fetchIGNAltitude(lat, lon);
+      altIgnClickVal.classList.remove('v-amber', 'v-teal');
+      if (ignAltAtClick != null) {
+        altIgnClickVal.textContent = Math.round(ignAltAtClick) + ' m';
+        altIgnClickVal.classList.remove('dim');
+        altIgnClickVal.classList.add('copyable', 'v-teal');
+      } else {
+        altIgnClickVal.textContent = 'Indisponible pour ce point';
+        altIgnClickVal.classList.add('dim');
+        altIgnClickVal.classList.remove('copyable');
+      }
+      refreshAltDiffs();
+      altCompareStatus.textContent = 'Comparaison effectuée';
+    } catch (e) {
+      altCompareStatus.textContent = 'Service IGN indisponible';
+    }
+  }
+
   altCompareBtn.addEventListener('click', () => {
     const point = getReferencePoint();
     if (point) placeAltitudeMapMarker(point.lat, point.lon, point.source);
-    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude);
+    updateIgnAtGpsPoint();
   });
   oeCompareBtn.addEventListener('click', () => {
     const point = getReferencePoint();
@@ -1313,7 +1412,7 @@
   altitudeMap.on('click', (e) => {
     const point = { lat: e.latlng.lat, lon: e.latlng.lng, source: 'carte' };
     placeAltitudeMapMarker(point.lat, point.lon, point.source);
-    runAltitudeCompare(altCompareStatus, altGpsVal, altIgnVal, altDiffVal, 'IGN', fetchIGNAltitude, point);
+    updateIgnAtClickPoint(point.lat, point.lon);
     runAltitudeCompare(oeCompareStatus, oeGpsVal, oeVal, oeDiffVal, 'Open-Elevation', fetchOpenElevationAltitude, point);
   });
 

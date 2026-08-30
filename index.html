@@ -2491,7 +2491,8 @@
 
   downloadDrinkingWaterBtn.addEventListener('click', downloadDrinkingWater);
   deleteDrinkingWaterBtn.addEventListener('click', deleteDrinkingWater);
-  if (localStorage.getItem(DRINKING_WATER_DOWNLOADED_STORAGE_KEY) === '1') downloadDrinkingWater();
+  // Téléchargées par défaut (comme les données département/commune), sans attendre un clic.
+  downloadDrinkingWater();
 
   setupNearbyOverpassFeature({
     btn: foodBtn,

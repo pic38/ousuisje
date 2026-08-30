@@ -3131,26 +3131,40 @@
     });
 
     function removeThisSection() {
+      // Persiste la suppression EN PREMIER : si le nettoyage DOM/carte plus bas échoue pour
+      // une raison quelconque (ex. secMap.remove() sur une carte Leaflet dans un état
+      // inattendu), la suppression reste acquise au prochain chargement plutôt que de
+      // silencieusement ne jamais être enregistrée alors que la section a déjà disparu
+      // visuellement de la session en cours.
+      saveCustomSections(loadCustomSections().filter((s) => s.id !== id));
+      const prefs = loadVisibilityPrefs();
+      delete prefs[id];
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+      const storedOrder = loadSectionOrder();
+      if (storedOrder) saveSectionOrder(storedOrder.filter((oid) => oid !== id));
+
       const idx = featureSections.indexOf(details);
       if (idx !== -1) featureSections.splice(idx, 1);
       const cbIdx = sectionCheckboxes.indexOf(cb);
       if (cbIdx !== -1) sectionCheckboxes.splice(cbIdx, 1);
       const mapIdx = allMaps.indexOf(secMap);
       if (mapIdx !== -1) allMaps.splice(mapIdx, 1);
-      if (secMap.remove) secMap.remove();
+      try { if (secMap.remove) secMap.remove(); } catch (e) { /* nettoyage best-effort */ }
       details.remove();
       checkLabel.remove();
-      saveCustomSections(loadCustomSections().filter((s) => s.id !== id));
-      const prefs = loadVisibilityPrefs();
-      delete prefs[id];
-      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
     }
     details.querySelector('.feature-summary-remove').addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       removeThisSection();
     });
-    checkLabel.querySelector('.settings-check-remove').addEventListener('click', removeThisSection);
+    checkLabel.querySelector('.settings-check-remove').addEventListener('click', (e) => {
+      // Empêche le clic sur ce bouton (imbriqué dans le <label>) de déclencher en plus le
+      // comportement natif du label, qui basculerait la case à cocher associée.
+      e.preventDefault();
+      e.stopPropagation();
+      removeThisSection();
+    });
 
     if (!opts.silent) {
       saveCustomSections(loadCustomSections().concat([{ id: id, keyword: keyword, label: label }]));

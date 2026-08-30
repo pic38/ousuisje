@@ -123,12 +123,12 @@
       </label>
       <div id="autoStopCountdown" class="countdown"></div>
       <div class="addr-panel">
-        <div class="addr-row"><span class="k">Position GPS</span><span id="diagPosition" class="v dim placeholder">—</span></div>
+        <div class="addr-row"><span class="k">Coordonnées</span><span id="diagPosition" class="v dim placeholder">—</span></div>
         <div class="addr-row"><span class="k">Vitesse</span><span id="spdVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Cap</span><span id="hdgVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Heure GPS</span><span id="tsVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Précision altitude GPS</span><span id="altAccVal" class="v dim">—</span></div>
-        <div class="addr-row"><span class="k">Décalage altitude GPS</span>
+        <div class="addr-row"><span class="k">Heure</span><span id="tsVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Précision altitude</span><span id="altAccVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Décalage altitude</span>
           <span class="v" style="display:flex; align-items:center; gap:6px;">
             <input type="number" id="altOffsetInput" step="1" placeholder="0" class="altitude-offset-input" /> m
           </span>
@@ -136,7 +136,6 @@
         <div class="addr-row"><span class="k">État du fix</span><span id="diagFixState" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Âge du relevé</span><span id="diagFixAge" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Relevés reçus</span><span id="diagFixCount" class="v dim">0</span></div>
-        <div class="addr-row"><span class="k">Source de la vitesse</span><span id="diagSpeedSource" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Précision brute</span><span id="diagRawAcc" class="v dim">—</span></div>
       </div>
     </div>
@@ -560,7 +559,6 @@
   const diagFixState = $('diagFixState');
   const diagFixAge = $('diagFixAge');
   const diagFixCount = $('diagFixCount');
-  const diagSpeedSource = $('diagSpeedSource');
   const diagRawAcc = $('diagRawAcc');
 
   const addrStatus = $('addrStatus');
@@ -1052,7 +1050,6 @@
   let lastRawPos = null;
   let recentFixes = [];
   let lastKnownSpeedKmh = null;
-  let lastSpeedSource = null;
   let fixCount = 0;
   let lastFixReceivedAt = null;
   let autoStopRemaining = 0;
@@ -1082,7 +1079,6 @@
 
   function computeSpeedKmh(pos) {
     if (pos.coords.speed != null && !Number.isNaN(pos.coords.speed)) {
-      lastSpeedSource = 'device';
       return pos.coords.speed * 3.6;
     }
     recentFixes.push({ lat: pos.coords.latitude, lon: pos.coords.longitude, t: pos.timestamp });
@@ -1092,7 +1088,6 @@
       const dt = (pos.timestamp - first.t) / 1000;
       if (dt >= 0.3) {
         const dist = haversine(first.lat, first.lon, pos.coords.latitude, pos.coords.longitude);
-        lastSpeedSource = 'calculated';
         return (dist / dt) * 3.6;
       }
     }
@@ -1368,8 +1363,6 @@
     diagFixAge.classList.toggle('dim', ageSec == null);
     diagFixCount.textContent = String(fixCount);
     diagFixCount.classList.remove('dim');
-    diagSpeedSource.textContent = lastSpeedSource === 'device' ? 'Capteur de l\'appareil' : (lastSpeedSource === 'calculated' ? 'Calculée, moyennée sur ~1 s' : '—');
-    diagSpeedSource.classList.toggle('dim', !lastSpeedSource);
     diagRawAcc.textContent = accuracy != null ? accuracy.toFixed(1) + ' m' : '—';
     diagRawAcc.classList.toggle('dim', accuracy == null);
 
@@ -1435,7 +1428,6 @@
     fixCount = 0;
     recentFixes = [];
     lastKnownSpeedKmh = null;
-    lastSpeedSource = null;
     diagFixCount.textContent = '0';
 
     beginWatch();

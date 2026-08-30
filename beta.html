@@ -45,7 +45,7 @@
   <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes à proximité (Mode hors ligne)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable à proximité (Mode hors ligne)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="food" checked><span>De quoi manger à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de pluie</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de précipitations</span></label>
   <div id="settingsCustomList"></div>
   <div class="settings-custom-add">
     <input type="text" id="customSectionInput" class="settings-custom-input" placeholder="Ajouter un lieu : pharmacie, boulangerie…" />
@@ -579,18 +579,18 @@
   </details>
 
   <details class="feature" data-section="radar">
-    <summary class="feature-summary"><span>Radar de pluie</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Radar de précipitations</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
       <div class="map-wrap">
         <div id="radarMap"></div>
         <div class="map-footer">
-          <span class="map-hint">Radar de pluie en filigrane sur la carte OpenStreetMap.</span>
+          <span class="map-hint">Radar de précipitations en filigrane sur la carte OpenStreetMap.</span>
         </div>
       </div>
 
       <div class="addr-panel">
         <div class="addr-head">
-          <span>Radar de pluie</span>
+          <span>Radar de précipitations</span>
           <span id="radarTimestamp">Chargement…</span>
         </div>
         <div style="padding: 12px 16px; display:flex; align-items:center; justify-content:center; gap:10px;">
@@ -1502,7 +1502,7 @@
   });
   if (autoLocateCheckbox.checked) startWatch();
 
-  // --- Radar de pluie (RainViewer) ---
+  // --- Radar de précipitations (RainViewer) ---
   // Ici, le recentrage zoome 2 crans de plus que le zoom "maison" (au lieu du comportement
   // générique des autres cartes) : sur le radar on veut resserrer la vue une fois centré,
   // pas juste rester au niveau régional utilisé par défaut.

@@ -1224,10 +1224,18 @@
   }
 
   const altitudeMap = initSecondaryMap('altitudeMap');
-  let altitudeMapMarker = null;
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let altitudeGpsMarker = null;
+  let altitudeClickMarker = null;
   function placeAltitudeMapMarker(lat, lon, source) {
-    if (altitudeMapMarker) { altitudeMap.removeLayer(altitudeMapMarker); }
-    altitudeMapMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(altitudeMap);
+    if (source === 'carte') {
+      if (altitudeClickMarker) { altitudeMap.removeLayer(altitudeClickMarker); }
+      altitudeClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(altitudeMap);
+    } else {
+      if (altitudeGpsMarker) { altitudeMap.removeLayer(altitudeGpsMarker); }
+      altitudeGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(altitudeMap);
+    }
     altitudeMap.setView([lat, lon], 13);
     altitudeMap._homeView = { center: [lat, lon], zoom: 13 };
     updateMiniSourceBadge(altitudeSourceBadge, source);
@@ -1924,7 +1932,10 @@
     return results.slice(0, maxResults);
   }
 
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
   let antennaGpsMarker = null;
+  let antennaClickMarker = null;
   let antennaMarkers = [];
 
   function clearAntennaMarkers() {
@@ -1940,8 +1951,13 @@
       source = (refPoint && refPoint.source) || 'gps';
     }
     updateMiniSourceBadge(antennaSourceBadge, source);
-    if (antennaGpsMarker) { antennaMap.removeLayer(antennaGpsMarker); }
-    antennaGpsMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(antennaMap);
+    if (source === 'carte') {
+      if (antennaClickMarker) { antennaMap.removeLayer(antennaClickMarker); }
+      antennaClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(antennaMap);
+    } else {
+      if (antennaGpsMarker) { antennaMap.removeLayer(antennaGpsMarker); }
+      antennaGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(antennaMap);
+    }
 
     if (!antennaSites) {
       antennasSearchStatusEl.textContent = 'Téléchargez les données ci-dessus';
@@ -2070,7 +2086,10 @@
   function setupNearbyOverpassFeature(config) {
     const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
     let markers = [];
-    let originMarker = null;
+    // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+    // doit pas faire disparaître le point de la position GPS, et inversement.
+    let originGpsMarker = null;
+    let originClickMarker = null;
 
     async function runSearch(lat, lon, source) {
       if (source === undefined) {
@@ -2081,8 +2100,13 @@
       statusEl.textContent = 'Recherche…';
       updateMiniSourceBadge(badgeEl, source);
 
-      if (originMarker) { map.removeLayer(originMarker); }
-      originMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(map);
+      if (source === 'carte') {
+        if (originClickMarker) { map.removeLayer(originClickMarker); }
+        originClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(map);
+      } else {
+        if (originGpsMarker) { map.removeLayer(originGpsMarker); }
+        originGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(map);
+      }
 
       try {
         const query = buildQuery(lat, lon, radiusM);
@@ -2510,7 +2534,10 @@
   const offlineMap = initSecondaryMap('offlineMap');
   let offlineDeptLayer = null;
   let offlineCommuneLayer = null;
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
   let offlineGpsMarker = null;
+  let offlineClickMarker = null;
 
   function drawDeptOnMap(code) {
     if (offlineDeptLayer) { offlineMap.removeLayer(offlineDeptLayer); offlineDeptLayer = null; }
@@ -2591,8 +2618,13 @@
         offlineCPEl.classList.add('dim');
         offlineCPEl.classList.remove('copyable');
       }
-      if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }
-      offlineGpsMarker = L.marker([lat, lon], { icon: source === 'carte' ? clickMarkerIcon : gpsMarkerIcon }).addTo(offlineMap);
+      if (source === 'carte') {
+        if (offlineClickMarker) { offlineMap.removeLayer(offlineClickMarker); }
+        offlineClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(offlineMap);
+      } else {
+        if (offlineGpsMarker) { offlineMap.removeLayer(offlineGpsMarker); }
+        offlineGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(offlineMap);
+      }
 
       const deptLayer = dept ? drawDeptOnMap(dept.code) : null;
       const communeLayer = commune ? (communeExact ? drawCommuneExactOnMap(commune) : drawCommuneCircleOnMap(commune)) : null;

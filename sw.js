@@ -1,4 +1,4 @@
-const CACHE_NAME = "ousuisje-cache-v71";
+const CACHE_NAME = "ousuisje-cache-v72";
 const ASSETS = [
   "./",
   "./index.html",
@@ -12,7 +12,8 @@ const ASSETS = [
   "./icons/icon-512.png",
   "./data/departements.min.json",
   "./data/communes.min.csv",
-  "./data/drinking-water.min.csv"
+  "./data/drinking-water.min.csv",
+  "./data/toilets.min.csv"
 ];
 
 self.addEventListener("install", (event) => {

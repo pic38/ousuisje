@@ -42,7 +42,7 @@
   <label class="settings-check"><input type="checkbox" data-section="pools"><span>Piscines à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-sites"><span>Sites d'escalade à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span>Salles d'escalade à proximité</span></label>
-  <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes à proximité</span></label>
+  <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span>Toilettes à proximité (Mode hors ligne)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span>Eau potable à proximité (Mode hors ligne)</span></label>
   <label class="settings-check"><input type="checkbox" data-section="food" checked><span>De quoi manger à proximité</span></label>
   <label class="settings-check"><input type="checkbox" data-section="radar" checked><span>Radar de pluie</span></label>
@@ -209,6 +209,7 @@
           <span>Département et commune (Mode hors ligne)</span>
         </div>
         <div class="addr-row"><span class="k">Département</span><span id="offlineDept" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k">Région</span><span id="offlineRegion" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Commune</span><span id="offlineCommune" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Code postal</span><span id="offlineCP" class="v dim">—</span></div>
       </div>
@@ -441,8 +442,30 @@
   </details>
 
   <details class="feature" data-section="toilets">
-    <summary class="feature-summary"><span>Toilettes à proximité</span><span class="feature-chevron">▾</span></summary>
+    <summary class="feature-summary"><span>Toilettes à proximité (Mode hors ligne)</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
+      <div class="addr-panel">
+        <div class="addr-head">
+          <span>Toilettes (hors ligne, sur demande)</span>
+        </div>
+        <table class="contours-table">
+          <colgroup>
+            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+          </colgroup>
+          <thead>
+            <tr><th>Jeu de données</th><th>Statut</th><th></th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Toilettes, France entière (330 Ko)</td>
+              <td id="toiletsRowStatus" class="dim">Non téléchargées</td>
+              <td><button type="button" id="downloadToilets" class="btn-secondary">Télécharger</button></td>
+              <td><button type="button" id="deleteToilets" class="btn-delete" style="display:none" title="Supprimer les données téléchargées">🗑</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <button type="button" id="toiletsBtn" class="btn-secondary">Trouver les toilettes à proximité</button>
 
       <div class="source-mini-badge is-hidden" id="toiletsSourceBadge">Source : —</div>
@@ -676,6 +699,7 @@
   const offlineGeoBtn = $('offlineGeoBtn');
   const offlineSourceBadge = $('offlineSourceBadge');
   const offlineDeptEl = $('offlineDept');
+  const offlineRegionEl = $('offlineRegion');
   const offlineCommuneEl = $('offlineCommune');
   const offlineCPEl = $('offlineCP');
   const activateCentroidesBtn = $('activateCentroides');
@@ -715,6 +739,9 @@
   const toiletsStatusEl = $('toiletsStatus');
   const toiletsTableBody = $('toiletsTableBody');
   const toiletsSourceBadge = $('toiletsSourceBadge');
+  const toiletsRowStatusEl = $('toiletsRowStatus');
+  const downloadToiletsBtn = $('downloadToilets');
+  const deleteToiletsBtn = $('deleteToilets');
   const drinkingWaterBtn = $('drinkingWaterBtn');
   const drinkingWaterStatusEl = $('drinkingWaterStatus');
   const drinkingWaterTableBody = $('drinkingWaterTableBody');
@@ -1607,6 +1634,41 @@
     return null;
   }
 
+  // Table de correspondance département → région (13 régions métropolitaines, découpage 2016).
+  // Statique : ne dépend d'aucun fichier téléchargé, coût négligeable.
+  const DEPT_TO_REGION = {
+    '01': 'Auvergne-Rhône-Alpes', '03': 'Auvergne-Rhône-Alpes', '07': 'Auvergne-Rhône-Alpes',
+    '15': 'Auvergne-Rhône-Alpes', '26': 'Auvergne-Rhône-Alpes', '38': 'Auvergne-Rhône-Alpes',
+    '42': 'Auvergne-Rhône-Alpes', '43': 'Auvergne-Rhône-Alpes', '63': 'Auvergne-Rhône-Alpes',
+    '69': 'Auvergne-Rhône-Alpes', '73': 'Auvergne-Rhône-Alpes', '74': 'Auvergne-Rhône-Alpes',
+    '21': 'Bourgogne-Franche-Comté', '25': 'Bourgogne-Franche-Comté', '39': 'Bourgogne-Franche-Comté',
+    '58': 'Bourgogne-Franche-Comté', '70': 'Bourgogne-Franche-Comté', '71': 'Bourgogne-Franche-Comté',
+    '89': 'Bourgogne-Franche-Comté', '90': 'Bourgogne-Franche-Comté',
+    '22': 'Bretagne', '29': 'Bretagne', '35': 'Bretagne', '56': 'Bretagne',
+    '18': 'Centre-Val de Loire', '28': 'Centre-Val de Loire', '36': 'Centre-Val de Loire',
+    '37': 'Centre-Val de Loire', '41': 'Centre-Val de Loire', '45': 'Centre-Val de Loire',
+    '2A': 'Corse', '2B': 'Corse',
+    '08': 'Grand Est', '10': 'Grand Est', '51': 'Grand Est', '52': 'Grand Est',
+    '54': 'Grand Est', '55': 'Grand Est', '57': 'Grand Est', '67': 'Grand Est',
+    '68': 'Grand Est', '88': 'Grand Est',
+    '02': 'Hauts-de-France', '59': 'Hauts-de-France', '60': 'Hauts-de-France',
+    '62': 'Hauts-de-France', '80': 'Hauts-de-France',
+    '75': 'Île-de-France', '77': 'Île-de-France', '78': 'Île-de-France', '91': 'Île-de-France',
+    '92': 'Île-de-France', '93': 'Île-de-France', '94': 'Île-de-France', '95': 'Île-de-France',
+    '14': 'Normandie', '27': 'Normandie', '50': 'Normandie', '61': 'Normandie', '76': 'Normandie',
+    '16': 'Nouvelle-Aquitaine', '17': 'Nouvelle-Aquitaine', '19': 'Nouvelle-Aquitaine',
+    '23': 'Nouvelle-Aquitaine', '24': 'Nouvelle-Aquitaine', '33': 'Nouvelle-Aquitaine',
+    '40': 'Nouvelle-Aquitaine', '47': 'Nouvelle-Aquitaine', '64': 'Nouvelle-Aquitaine',
+    '79': 'Nouvelle-Aquitaine', '86': 'Nouvelle-Aquitaine', '87': 'Nouvelle-Aquitaine',
+    '09': 'Occitanie', '11': 'Occitanie', '12': 'Occitanie', '30': 'Occitanie', '31': 'Occitanie',
+    '32': 'Occitanie', '34': 'Occitanie', '46': 'Occitanie', '48': 'Occitanie', '65': 'Occitanie',
+    '66': 'Occitanie', '81': 'Occitanie', '82': 'Occitanie',
+    '44': 'Pays de la Loire', '49': 'Pays de la Loire', '53': 'Pays de la Loire',
+    '72': 'Pays de la Loire', '85': 'Pays de la Loire',
+    '04': "Provence-Alpes-Côte d'Azur", '05': "Provence-Alpes-Côte d'Azur", '06': "Provence-Alpes-Côte d'Azur",
+    '13': "Provence-Alpes-Côte d'Azur", '83': "Provence-Alpes-Côte d'Azur", '84': "Provence-Alpes-Côte d'Azur"
+  };
+
   function nearestCommuneEntry(lat, lon, excludeCode) {
     if (!offlineCommunes || offlineCommunes.length === 0) return null;
     const coslat = Math.cos(lat * Math.PI / 180);
@@ -2285,20 +2347,202 @@
       `[out:json][timeout:20];(node["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon});way["sport"="climbing"]["leisure"="sports_centre"](around:${r},${lat},${lon}););out center 200;`
   });
 
-  setupNearbyOverpassFeature({
-    btn: toiletsBtn,
-    statusEl: toiletsStatusEl,
-    tableBody: toiletsTableBody,
-    map: toiletsMap,
-    badgeEl: toiletsSourceBadge,
-    color: '#6C7A89',
-    radiusM: 2000,
-    maxResults: 20,
-    defaultName: 'Toilettes',
-    emptyLabel: 'Aucune toilette trouvée',
-    buildQuery: (lat, lon, r) =>
-      `[out:json][timeout:20];(node["amenity"="toilets"](around:${r},${lat},${lon});way["amenity"="toilets"](around:${r},${lat},${lon}););out center 200;`
+  // --- Toilettes (jeu de données téléchargeable, hors ligne, sur demande) ---
+  // Même schéma que l'eau potable / les antennes ANFR : hors ligne si téléchargé,
+  // repli sur Overpass en direct sinon. Téléchargé par défaut (comme l'eau potable).
+  const TOILETS_URL = 'data/toilets.min.csv';
+  const TOILETS_RAW_BYTES = 788726;
+  const TOILETS_DOWNLOADED_STORAGE_KEY = 'ousuisje_toilets_downloaded';
+  const TOILETS_RADIUS_M = 2000;
+  const TOILETS_MAX_RESULTS = 20;
+  const TOILETS_COLOR = '#6C7A89';
+
+  let toiletsSites = null;
+  let toiletsLoading = false;
+
+  function parseToiletsCsv(text) {
+    const out = [];
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      const parts = line.split(';');
+      const lat = parseFloat(parts[1]);
+      const lon = parseFloat(parts[2]);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
+      out.push({ id: parts[0], lat: lat, lon: lon });
+    }
+    return out;
+  }
+
+  function findNearbyToiletsOffline(lat, lon, radiusM, maxResults) {
+    if (!toiletsSites) return [];
+    const coslat = Math.cos(lat * Math.PI / 180);
+    const results = [];
+    for (const s of toiletsSites) {
+      const dLat = s.lat - lat;
+      const dLon = (s.lon - lon) * coslat;
+      const distM = Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
+      if (distM <= radiusM) results.push({ id: s.id, lat: s.lat, lon: s.lon, distM: distM, bearing: bearingTo(lat, lon, s.lat, s.lon) });
+    }
+    results.sort((a, b) => a.distM - b.distM);
+    return results.slice(0, maxResults);
+  }
+
+  // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
+  // doit pas faire disparaître le point de la position GPS, et inversement.
+  let toiletsGpsMarker = null;
+  let toiletsClickMarker = null;
+  let toiletsMarkers = [];
+
+  function clearToiletsMarkers() {
+    toiletsMarkers.forEach((m) => toiletsMap.removeLayer(m));
+    toiletsMarkers = [];
+  }
+
+  function renderToiletsResults(lat, lon, source, items) {
+    clearToiletsMarkers();
+    const bounds = [[lat, lon]];
+    if (items.length === 0) {
+      toiletsTableBody.className = '';
+      toiletsTableBody.innerHTML = `<tr><td colspan="3" class="dim">Aucune toilette dans un rayon de ${TOILETS_RADIUS_M / 1000} km</td></tr>`;
+    } else {
+      toiletsTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
+      toiletsTableBody.innerHTML = items.map((it) => `
+        <tr>
+          <td class="copyable">${it.name || 'Toilettes'}</td>
+          <td class="copyable">${fmtDistanceM(it.distM)}</td>
+          <td class="copyable">${it.bearing}</td>
+        </tr>
+      `).join('');
+      for (const it of items) {
+        const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: TOILETS_COLOR, weight: 2, fillColor: TOILETS_COLOR, fillOpacity: 0.6 })
+          .bindPopup(`<strong>${it.name || 'Toilettes'}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+          .addTo(toiletsMap);
+        toiletsMarkers.push(marker);
+        bounds.push([it.lat, it.lon]);
+      }
+    }
+    toiletsStatusEl.textContent = `${items.length} résultat(s) · rayon ${TOILETS_RADIUS_M / 1000} km`;
+    toiletsMap._homeView = { bounds: bounds };
+    toiletsMap.fitBounds(bounds, { padding: [24, 24] });
+  }
+
+  async function updateToiletsNearby(lat, lon, source) {
+    if (source === undefined) {
+      const refPoint = getReferencePoint();
+      source = (refPoint && refPoint.source) || 'gps';
+    }
+    toiletsBtn.disabled = true;
+    updateMiniSourceBadge(toiletsSourceBadge, source);
+
+    if (source === 'carte') {
+      if (toiletsClickMarker) { toiletsMap.removeLayer(toiletsClickMarker); }
+      toiletsClickMarker = L.marker([lat, lon], { icon: clickMarkerIcon }).addTo(toiletsMap);
+    } else {
+      if (toiletsGpsMarker) { toiletsMap.removeLayer(toiletsGpsMarker); }
+      toiletsGpsMarker = L.marker([lat, lon], { icon: gpsMarkerIcon }).addTo(toiletsMap);
+    }
+
+    if (toiletsSites) {
+      const results = findNearbyToiletsOffline(lat, lon, TOILETS_RADIUS_M, TOILETS_MAX_RESULTS);
+      renderToiletsResults(lat, lon, source, results);
+      toiletsBtn.disabled = false;
+      return;
+    }
+
+    toiletsStatusEl.textContent = 'Recherche…';
+    try {
+      const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+      const data = await res.json();
+      const items = (data.elements || [])
+        .map((el) => {
+          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+          if (elat == null || elon == null) return null;
+          return { name: (el.tags && el.tags.name) || 'Toilettes', lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.distM - b.distM)
+        .slice(0, TOILETS_MAX_RESULTS);
+      renderToiletsResults(lat, lon, source, items);
+    } catch (e) {
+      toiletsStatusEl.textContent = 'Service Overpass indisponible';
+      toiletsTableBody.className = '';
+      toiletsTableBody.innerHTML = '<tr><td colspan="3" class="dim">Recherche impossible pour le moment</td></tr>';
+    } finally {
+      toiletsBtn.disabled = false;
+    }
+  }
+
+  toiletsBtn.addEventListener('click', () => {
+    const point = getReferencePoint();
+    if (!point) {
+      toiletsStatusEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      return;
+    }
+    updateToiletsNearby(point.lat, point.lon);
   });
+
+  // La carte de cette section est elle-même cliquable : ça relance la recherche
+  // centrée sur le point cliqué, indépendamment de la position de référence globale.
+  toiletsMap.on('click', (e) => {
+    updateToiletsNearby(e.latlng.lat, e.latlng.lng, 'carte');
+  });
+
+  async function downloadToilets() {
+    if (toiletsLoading) return;
+    const alreadyDownloaded = localStorage.getItem(TOILETS_DOWNLOADED_STORAGE_KEY) === '1';
+    toiletsLoading = true;
+    downloadToiletsBtn.disabled = true;
+    toiletsRowStatusEl.classList.remove('dim');
+    toiletsRowStatusEl.textContent = alreadyDownloaded ? 'Chargement…' : 'Téléchargement… 0%';
+    try {
+      const text = await fetchTextWithProgress(TOILETS_URL, TOILETS_RAW_BYTES, (frac) => {
+        if (alreadyDownloaded) return;
+        const pct = Math.round(frac * 100);
+        toiletsRowStatusEl.textContent = pct < 100 ? `Téléchargement… ${pct}%` : 'Analyse du fichier…';
+      });
+      toiletsRowStatusEl.textContent = 'Analyse du fichier…';
+      toiletsSites = parseToiletsCsv(text);
+      localStorage.setItem(TOILETS_DOWNLOADED_STORAGE_KEY, '1');
+      downloadToiletsBtn.textContent = 'Téléchargées';
+      toiletsRowStatusEl.textContent = 'Téléchargées';
+      deleteToiletsBtn.style.display = '';
+      const point = getReferencePoint();
+      if (point) updateToiletsNearby(point.lat, point.lon);
+    } catch (e) {
+      toiletsRowStatusEl.textContent = 'Échec du téléchargement';
+    } finally {
+      toiletsLoading = false;
+      downloadToiletsBtn.disabled = !!toiletsSites;
+    }
+  }
+
+  async function deleteToilets() {
+    if (toiletsLoading) return;
+    toiletsLoading = true;
+    downloadToiletsBtn.disabled = true;
+    deleteToiletsBtn.disabled = true;
+    await deleteCachedUrl(TOILETS_URL);
+    toiletsSites = null;
+    clearToiletsMarkers();
+    localStorage.removeItem(TOILETS_DOWNLOADED_STORAGE_KEY);
+    downloadToiletsBtn.textContent = 'Télécharger';
+    toiletsRowStatusEl.textContent = 'Non téléchargées';
+    toiletsRowStatusEl.classList.add('dim');
+    deleteToiletsBtn.style.display = 'none';
+    toiletsLoading = false;
+    downloadToiletsBtn.disabled = false;
+    deleteToiletsBtn.disabled = false;
+    const point = getReferencePoint();
+    if (point) updateToiletsNearby(point.lat, point.lon);
+  }
+
+  downloadToiletsBtn.addEventListener('click', downloadToilets);
+  deleteToiletsBtn.addEventListener('click', deleteToilets);
+  // Téléchargées par défaut (comme l'eau potable et département/commune), sans attendre un clic.
+  downloadToilets();
 
   // --- Eau potable (jeu de données téléchargeable, hors ligne, sur demande) ---
   // Même schéma que les antennes ANFR : hors ligne si téléchargé, repli sur Overpass en direct sinon.
@@ -2799,6 +3043,13 @@
       offlineDeptEl.classList.remove('v-amber', 'v-teal');
       if (dept) offlineDeptEl.classList.add(colorClass);
 
+      const region = dept ? DEPT_TO_REGION[dept.code] : null;
+      offlineRegionEl.textContent = region || 'Introuvable';
+      offlineRegionEl.classList.toggle('dim', !region);
+      offlineRegionEl.classList.toggle('copyable', !!region);
+      offlineRegionEl.classList.remove('v-amber', 'v-teal');
+      if (region) offlineRegionEl.classList.add(colorClass);
+
       let commune = (dept && communeContoursTier !== 'centroides') ? findCommuneExact(lon, lat, dept.code) : null;
       const communeExact = !!commune;
       if (!commune) commune = findCommuneApprox(lat, lon);
@@ -2851,6 +3102,9 @@
       offlineDeptEl.textContent = 'Données indisponibles';
       offlineDeptEl.classList.add('dim');
       offlineDeptEl.classList.remove('copyable', 'v-amber', 'v-teal');
+      offlineRegionEl.textContent = 'Données indisponibles';
+      offlineRegionEl.classList.add('dim');
+      offlineRegionEl.classList.remove('copyable', 'v-amber', 'v-teal');
     }
   }
 
@@ -2860,6 +3114,9 @@
       offlineDeptEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
       offlineDeptEl.classList.add('dim');
       offlineDeptEl.classList.remove('copyable', 'v-amber', 'v-teal');
+      offlineRegionEl.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      offlineRegionEl.classList.add('dim');
+      offlineRegionEl.classList.remove('copyable', 'v-amber', 'v-teal');
       return;
     }
     updateOfflineGeo(point.lat, point.lon);

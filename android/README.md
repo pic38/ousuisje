@@ -12,8 +12,9 @@ publiable sur F-Droid.
   fonctionne de façon fiable) + relais des permissions de géolocalisation vers le système
   Android.
 - Icônes de lancement générées à partir de `icons/icon-512.png` (legacy + adaptive icon).
-- Assets embarqués : `index.html`, `styles.css`, `data/*`, `vendor/leaflet/*`, `vendor/fonts/*`
-  (copie figée au moment du scaffold).
+- Assets embarqués : `index.html`, `about.html`, `confidentialite.html`, `mentions-legales.html`,
+  `styles.css`, `data/*`, `vendor/leaflet/*`, `vendor/fonts/*`, `icons/*` (copie figée au
+  moment du scaffold).
 - Wrapper Gradle (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`) : fichiers
   officiels récupérés depuis le tag `v8.7.0` du dépôt `gradle/gradle`.
 
@@ -43,17 +44,24 @@ façons de compiler un APK :
 `app/src/main/assets/` est une copie figée du site, pas un lien vers `index.html` à la
 racine du repo. Après une modification du site, il faut la refaire :
 ```sh
-cp ../index.html ../styles.css app/src/main/assets/
+cp ../index.html ../about.html ../confidentialite.html ../mentions-legales.html ../styles.css app/src/main/assets/
 cp ../data/*.csv ../data/*.json app/src/main/assets/data/
 cp -r ../vendor/leaflet ../vendor/fonts app/src/main/assets/vendor/
+cp -r ../icons app/src/main/assets/
 ```
-(à terme, un script ou une étape de build pourrait automatiser cette copie).
+(à terme, un script ou une étape de build pourrait automatiser cette copie). **Les trois
+pages `about.html`/`confidentialite.html`/`mentions-legales.html` doivent être copiées elles
+aussi** — sans ça, les liens du pied de page renvoient vers un chemin que
+`WebViewAssetLoader` ne peut pas résoudre (fichier absent des assets), et la WebView tente
+un vrai accès réseau vers `appassets.androidplatform.net` qui échoue en `ERR_INVALID_RESPONSE`
+(même famille de bug que le path-prefix mismatch décrit plus bas).
 
 **Après cette copie, retirer à nouveau le bouton "Ajouter à l'écran d'accueil"** (absent
 du site telle qu'écrite, il n'est retiré que dans cette copie Android — cp écrase donc
 ce retrait à chaque rafraîchissement, il faut le refaire) :
 - HTML : supprimer `<button id="installBtn">…</button>` et `<p id="installNote">…</p>`
-  (dans `.actions`, juste avant le bouton `shareBtn`).
+  (dans `.actions`, juste avant le bouton `shareBtn`), ainsi que la phrase "Ajoutez le site
+  à l'écran d'accueil…" dans le `<footer>` (sans objet une fois l'app installée nativement).
 - JS : supprimer tout le bloc `const installBtn = $('installBtn'); … } else if (isIOS) { … }`
   juste avant `const shareBtn = $('shareBtn');` (déclarations `installBtn`/`installNote`/
   `isIOS`/`isStandalone`/`deferredPrompt`, les listeners `beforeinstallprompt`/`appinstalled`,

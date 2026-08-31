@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>À propos — OuSuisJe</title>
+<meta name="theme-color" content="#0B1220" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Retour à OuSuisJe</a>
+  <h1>À propos</h1>
+  <p class="page-sub">Ce que fait cette application, et ce qu'elle ne fait pas.</p>
+
+  <h2>Le principe</h2>
+  <p>OuSuisJe affiche votre position en direct : latitude, longitude (sous plusieurs écritures : décimale, DMS, DDM), altitude, vitesse, cap et précision, telles que fournies par le GPS ou le système de localisation de votre appareil. L'application traduit également vos coordonnées en adresse lisible (rue, code postal, commune, département, région, pays), et propose une recherche de points d'intérêt à proximité (eau potable, toilettes, escape games, piscines, salles d'escalade, restauration, antennes relais…) ainsi qu'un radar de précipitations.</p>
+  <p>Le menu réglages permet de choisir les sections affichées, de les réorganiser par glisser-déposer, et d'ajouter des sections personnalisées pour n'importe quel type de lieu (mot-clé libre, recherché via OpenStreetMap).</p>
+
+  <h2>Vos données</h2>
+  <p>La position calculée par votre appareil <strong>reste sur votre appareil</strong>. Le détail de ce qui est envoyé, à qui, et dans quel cas, est expliqué sur la page dédiée <a class="inline" href="confidentialite.html">Confidentialité</a>.</p>
+
+  <h2>Fonctionnement hors-ligne</h2>
+  <p>Une fois installée sur votre écran d'accueil, l'application se charge sans connexion grâce à un service worker qui garde ses fichiers en cache. Le département, la commune, les antennes relais ANFR, l'eau potable et les toilettes se calculent aussi entièrement hors ligne, à partir de jeux de données téléchargés une fois pour toutes (automatiquement pour la plupart, à la demande pour les antennes et les contours précis de commune). Seules les fonctions qui interrogent un service tiers en direct (adresse, altitude comparée, autres points d'intérêt, radar) nécessitent une connexion active.</p>
+  <p>OuSuisJe est aussi disponible comme application Android autonome, sans dépendance à Google Play Services — les mêmes données y sont embarquées directement, sans passer par le site.</p>
+
+  <h2>Précision horizontale vs altitude</h2>
+  <p>Le GPS ne mesure pas votre position horizontale et votre altitude avec la même fiabilité. La position horizontale (latitude/longitude) s'appuie sur au moins 3 à 4 satellites bien répartis autour de vous et atteint couramment une précision de quelques mètres une fois le signal stabilisé. L'altitude, elle, dépend en plus de satellites situés au-dessus de vous — une géométrie moins favorable, surtout en vallée ou près de reliefs — et son erreur est généralement 2 à 3 fois plus importante que celle de la position horizontale.</p>
+  <p>Dans la pratique, il n'est pas rare que le GPS d'un smartphone affiche une altitude supérieure d'une cinquantaine de mètres à celle indiquée par l'IGN ou par les panneaux de cols routiers, qui eux s'appuient sur des relevés topographiques de référence. C'est justement pour objectiver cet écart qu'OuSuisJe propose de comparer l'altitude GPS à celle calculée par l'IGN ou Open-Elevation à partir de modèles de terrain.</p>
+
+  <h2>Sources</h2>
+  <p>Les données cartographiques, d'adresse et de points d'intérêt proviennent du projet <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> et de ses contributeurs, sous licence ODbL. Les données d'altitude comparée proviennent de l'IGN (RGE ALTI) et d'Open-Elevation (SRTM). Les contours de département et de commune proviennent de l'IGN (Admin Express), via le projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Les antennes relais proviennent de l'<a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (licence ouverte). Le radar de précipitations provient de <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Voir les <a class="inline" href="mentions-legales.html">mentions légales</a> pour le détail des limites et responsabilités.</p>
+
+  <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
+</div>
+</body>
+</html>

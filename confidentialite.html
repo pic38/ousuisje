@@ -30,13 +30,25 @@
   <p>La comparaison d'altitude envoie, de la même façon, uniquement les coordonnées du point sélectionné — au service géoplateforme de l'<a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> ou à <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> selon le bouton utilisé. Ne fonctionne pas hors ligne.</p>
 
   <h2>Points d'intérêt</h2>
-  <p>La recherche de points d'intérêt à proximité envoie les coordonnées du point actif à l'API <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> d'OpenStreetMap. Ne fonctionne pas hors ligne.</p>
+  <p>La recherche de points d'intérêt à proximité (escape games, piscines, salles d'escalade, restauration, sections personnalisées…) envoie les coordonnées du point actif à l'API <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> d'OpenStreetMap. Ne fonctionne pas hors ligne.</p>
+
+  <h2>Département, commune et antennes relais</h2>
+  <p>Ces fonctions s'appuient sur des jeux de données (IGN Admin Express, ANFR) téléchargés une fois depuis l'hébergement d'OuSuisJe lui-même, puis mémorisés sur votre appareil. Le calcul qui en découle (à quel département/commune vous êtes, quelles antennes sont à proximité) se fait ensuite entièrement en local, sans aucun envoi de vos coordonnées à qui que ce soit. Fonctionne hors ligne une fois le téléchargement effectué.</p>
+
+  <h2>Eau potable et toilettes</h2>
+  <p>Un jeu de données (points d'eau potable et toilettes en France, source OpenStreetMap) est téléchargé automatiquement au premier chargement de la page, toujours depuis l'hébergement d'OuSuisJe. La recherche se fait ensuite en local, sans envoi de coordonnées. Si ce téléchargement échoue ou que vous le supprimez, la recherche retombe automatiquement sur l'API Overpass en direct (mêmes conditions que la section « Points d'intérêt » ci-dessus).</p>
+
+  <h2>Radar de précipitations</h2>
+  <p>L'affichage du radar demande à <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> les images correspondant à la zone actuellement affichée sur la carte (coordonnées et niveau de zoom de la vue, pas votre position GPS). Ne fonctionne pas hors ligne.</p>
 
   <h2>Compteur de visites</h2>
   <p>Un compteur de visites anonyme et agrégé (sans aucune donnée personnelle identifiable) est enregistré auprès d'un service tiers à chaque chargement de la page.</p>
 
   <h2>Partage</h2>
   <p>Le bouton de partage utilise l'outil de partage natif de votre appareil, ou copie simplement le lien du site dans votre presse-papiers. Aucune donnée n'est transmise à OuSuisJe dans ce cadre.</p>
+
+  <h2>Application Android</h2>
+  <p>OuSuisJe existe aussi comme application Android autonome. Les mêmes principes s'y appliquent : aucun serveur applicatif propre à OuSuisJe, et chaque fonction qui quitte l'appareil le fait directement vers le service tiers concerné, selon les mêmes règles que ci-dessus.</p>
 
   <div class="callout">
     En résumé : chaque fonction qui quitte votre appareil le fait directement vers le service tiers concerné, jamais via un serveur d'OuSuisJe — puisqu'il n'y en a pas.

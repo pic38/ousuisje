@@ -62,6 +62,9 @@ ce retrait à chaque rafraîchissement, il faut le refaire) :
 - HTML : supprimer `<button id="installBtn">…</button>` et `<p id="installNote">…</p>`
   (dans `.actions`, juste avant le bouton `shareBtn`), ainsi que la phrase "Ajoutez le site
   à l'écran d'accueil…" dans le `<footer>` (sans objet une fois l'app installée nativement).
+  Retirer aussi le lien `<a href="https://whereami.fun" …>English version</a>` du
+  `footer-nav` : en `target="_blank"` sans `onCreateWindow`/`setSupportMultipleWindows`
+  configuré côté `MainActivity.kt`, ce clic ne fait rien dans la WebView.
 - JS : supprimer tout le bloc `const installBtn = $('installBtn'); … } else if (isIOS) { … }`
   juste avant `const shareBtn = $('shareBtn');` (déclarations `installBtn`/`installNote`/
   `isIOS`/`isStandalone`/`deferredPrompt`, les listeners `beforeinstallprompt`/`appinstalled`,

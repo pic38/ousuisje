@@ -122,9 +122,8 @@
       <div id="autoStopCountdown" class="countdown"></div>
       <div class="addr-panel">
         <div class="addr-row"><span class="k">Coordonnées</span><span id="diagPosition" class="v dim placeholder">—</span></div>
-        <div class="addr-row"><span class="k">Coordonnées (DMS)</span><span id="diagPositionDms" class="v dim placeholder">—</span></div>
-        <div class="addr-row"><span class="k">Coordonnées (DDM)</span><span id="diagPositionDdm" class="v dim placeholder">—</span></div>
         <div class="addr-row"><span class="k">Coordonnées (lat, lon)</span><span id="diagPositionPlain" class="v dim placeholder">—</span></div>
+        <div class="addr-row"><span class="k">Coordonnées (DMS – degré minute seconde)</span><span id="diagPositionDms" class="v dim placeholder">—</span></div>
         <div class="addr-row"><span class="k">Vitesse</span><span id="spdVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Cap</span><span id="hdgVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k">Heure</span><span id="tsVal" class="v dim">—</span></div>
@@ -594,7 +593,6 @@
   const statusText = $('statusText');
   const diagPosition = $('diagPosition');
   const diagPositionDms = $('diagPositionDms');
-  const diagPositionDdm = $('diagPositionDdm');
   const diagPositionPlain = $('diagPositionPlain');
   const accVal = $('accVal');
   const altVal = $('altVal');
@@ -1167,11 +1165,6 @@
     const sec = (minFull - min) * 60;
     return `${deg}°${String(min).padStart(2, '0')}'${sec.toFixed(1).padStart(4, '0')}"`;
   }
-  function fmtDDM(v) {
-    const deg = Math.floor(v);
-    const min = (v - deg) * 60;
-    return `${deg}°${min.toFixed(3)}'`;
-  }
 
   function setAddrField(el, value, colorClass) {
     el.textContent = value || '—';
@@ -1638,17 +1631,13 @@
     diagPosition.classList.remove('dim', 'placeholder');
     diagPosition.classList.add('copyable', 'v-amber');
 
-    diagPositionDms.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtDMS(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtDMS(Math.abs(longitude));
-    diagPositionDms.classList.remove('dim', 'placeholder');
-    diagPositionDms.classList.add('copyable', 'v-amber');
-
-    diagPositionDdm.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtDDM(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtDDM(Math.abs(longitude));
-    diagPositionDdm.classList.remove('dim', 'placeholder');
-    diagPositionDdm.classList.add('copyable', 'v-amber');
-
     diagPositionPlain.textContent = latitude.toFixed(6) + ', ' + longitude.toFixed(6);
     diagPositionPlain.classList.remove('dim', 'placeholder');
     diagPositionPlain.classList.add('copyable', 'v-amber');
+
+    diagPositionDms.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtDMS(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtDMS(Math.abs(longitude));
+    diagPositionDms.classList.remove('dim', 'placeholder');
+    diagPositionDms.classList.add('copyable', 'v-amber');
 
     accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
     accVal.classList.remove('dim');

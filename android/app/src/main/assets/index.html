@@ -3067,7 +3067,11 @@
   function addCustomSection(keyword, opts) {
     opts = opts || {};
     const label = opts.label || (keyword.charAt(0).toUpperCase() + keyword.slice(1));
-    const id = 'custom-' + (customSectionSeq++);
+    // Réutilise l'id d'origine lors d'une recréation au chargement (opts.id) : en générer un
+    // nouveau à chaque fois désynchronisait l'id réellement utilisé (DOM, fermetures) de
+    // celui stocké dans ousuisje_alpha_custom_sections, ce qui rendait la suppression (et la
+    // persistance de la visibilité/de l'ordre) silencieusement inopérante après un rechargement.
+    const id = opts.id || ('custom-' + (customSectionSeq++));
     const mapId = 'customMap' + id;
     const color = CUSTOM_SECTION_COLORS[customSectionSeq % CUSTOM_SECTION_COLORS.length];
 
@@ -3179,7 +3183,7 @@
   loadCustomSections().forEach((s) => {
     customSectionSeq = Math.max(customSectionSeq, parseInt((s.id || '').replace('custom-', ''), 10) + 1 || 0);
   });
-  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { label: s.label, silent: true }));
+  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { id: s.id, label: s.label, silent: true }));
   applySectionVisibility();
 
   // Toutes les sections (natives + personnalisées recréées) sont maintenant en place :

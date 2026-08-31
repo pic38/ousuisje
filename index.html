@@ -1627,19 +1627,19 @@
 
     diagPosition.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtCoord(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtCoord(Math.abs(longitude));
     diagPosition.classList.remove('dim', 'placeholder');
-    diagPosition.classList.add('copyable');
+    diagPosition.classList.add('copyable', 'v-amber');
 
     diagPositionDms.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtDMS(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtDMS(Math.abs(longitude));
     diagPositionDms.classList.remove('dim', 'placeholder');
-    diagPositionDms.classList.add('copyable');
+    diagPositionDms.classList.add('copyable', 'v-amber');
 
     diagPositionDdm.textContent = (latitude >= 0 ? 'N ' : 'S ') + fmtDDM(Math.abs(latitude)) + ' · ' + (longitude >= 0 ? 'E ' : 'O ') + fmtDDM(Math.abs(longitude));
     diagPositionDdm.classList.remove('dim', 'placeholder');
-    diagPositionDdm.classList.add('copyable');
+    diagPositionDdm.classList.add('copyable', 'v-amber');
 
     diagPositionPlain.textContent = latitude.toFixed(6) + ', ' + longitude.toFixed(6);
     diagPositionPlain.classList.remove('dim', 'placeholder');
-    diagPositionPlain.classList.add('copyable');
+    diagPositionPlain.classList.add('copyable', 'v-amber');
 
     accVal.textContent = accuracy != null ? Math.round(accuracy) + ' m' : '—';
     accVal.classList.remove('dim');
@@ -1656,30 +1656,35 @@
     spdVal.textContent = isMoving ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : '—';
     spdVal.classList.toggle('dim', !isMoving);
     spdVal.classList.toggle('copyable', isMoving);
+    spdVal.classList.add('v-amber');
     hdgVal.textContent = (isMoving && heading != null && !Number.isNaN(heading)) ? Math.round(heading) + '°' : '—';
     const hasHeading = isMoving && heading != null && !Number.isNaN(heading);
     hdgVal.classList.toggle('dim', !hasHeading);
     hdgVal.classList.toggle('copyable', hasHeading);
+    hdgVal.classList.add('v-amber');
     tsVal.textContent = new Date(pos.timestamp).toLocaleTimeString('fr-FR');
     tsVal.classList.remove('dim');
-    tsVal.classList.add('copyable');
+    tsVal.classList.add('copyable', 'v-amber');
     altAccVal.textContent = altitudeAccuracy != null ? '± ' + Math.round(altitudeAccuracy) + ' m' : '—';
     altAccVal.classList.toggle('dim', altitudeAccuracy == null);
     altAccVal.classList.toggle('copyable', altitudeAccuracy != null);
+    altAccVal.classList.add('v-amber');
 
     diagFixState.textContent = 'Fix valide';
     diagFixState.classList.remove('dim');
-    diagFixState.classList.add('copyable');
+    diagFixState.classList.add('copyable', 'v-amber');
     const ageSec = lastFixReceivedAt != null ? Math.max(0, Math.round((Date.now() - lastFixReceivedAt) / 1000)) : null;
     diagFixAge.textContent = ageSec != null ? ageSec + ' s' : '—';
     diagFixAge.classList.toggle('dim', ageSec == null);
     diagFixAge.classList.toggle('copyable', ageSec != null);
+    diagFixAge.classList.add('v-amber');
     diagFixCount.textContent = String(fixCount);
     diagFixCount.classList.remove('dim');
-    diagFixCount.classList.add('copyable');
+    diagFixCount.classList.add('copyable', 'v-amber');
     diagRawAcc.textContent = accuracy != null ? accuracy.toFixed(1) + ' m' : '—';
     diagRawAcc.classList.toggle('dim', accuracy == null);
     diagRawAcc.classList.toggle('copyable', accuracy != null);
+    diagRawAcc.classList.add('v-amber');
 
     placeGpsMarker(latitude, longitude, accuracy);
     setStatus('live', 'Localisation GPS active');
@@ -2597,7 +2602,7 @@
     badgeEl: poiSourceBadge,
     color: '#4FD1C5',
     radiusM: 1500,
-    maxResults: 20,
+    maxResults: 10,
     defaultName: "Point d'intérêt",
     emptyLabel: "Aucun point d'intérêt trouvé",
     buildQuery: (lat, lon, r) =>
@@ -2612,7 +2617,7 @@
     badgeEl: escapeGamesSourceBadge,
     color: '#8B5CF6',
     radiusM: 20000,
-    maxResults: 20,
+    maxResults: 10,
     defaultName: 'Escape game',
     emptyLabel: 'Aucun escape game trouvé',
     buildQuery: (lat, lon, r) =>
@@ -2627,7 +2632,7 @@
     badgeEl: climbingGymsSourceBadge,
     color: '#F2994A',
     radiusM: 20000,
-    maxResults: 20,
+    maxResults: 10,
     defaultName: "Salle d'escalade",
     emptyLabel: "Aucune salle d'escalade trouvée",
     buildQuery: (lat, lon, r) =>
@@ -2641,7 +2646,7 @@
   const TOILETS_RAW_BYTES = 788726;
   const TOILETS_DOWNLOADED_STORAGE_KEY = 'ousuisje_toilets_downloaded';
   const TOILETS_RADIUS_M = 2000;
-  const TOILETS_MAX_RESULTS = 20;
+  const TOILETS_MAX_RESULTS = 10;
   const TOILETS_COLOR = '#6C7A89';
 
   let toiletsSites = null;
@@ -2804,7 +2809,7 @@
   const DRINKING_WATER_RAW_BYTES = 747017;
   const DRINKING_WATER_DOWNLOADED_STORAGE_KEY = 'ousuisje_drinking_water_downloaded';
   const DRINKING_WATER_RADIUS_M = 2000;
-  const DRINKING_WATER_MAX_RESULTS = 20;
+  const DRINKING_WATER_MAX_RESULTS = 10;
   const DRINKING_WATER_COLOR = '#2AABE2';
 
   let drinkingWaterSites = null;
@@ -2967,7 +2972,7 @@
     badgeEl: foodSourceBadge,
     color: '#E24A4A',
     radiusM: 2000,
-    maxResults: 20,
+    maxResults: 10,
     defaultName: 'Restauration',
     emptyLabel: 'Aucun endroit pour manger trouvé',
     buildQuery: (lat, lon, r) =>
@@ -3130,7 +3135,7 @@
       badgeEl: badgeEl,
       color: color,
       radiusM: 5000,
-      maxResults: 20,
+      maxResults: 10,
       defaultName: label,
       emptyLabel: `Aucun résultat pour « ${label} »`,
       buildQuery: buildQueryForKeyword(keyword)

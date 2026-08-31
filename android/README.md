@@ -12,7 +12,8 @@ publiable sur F-Droid.
   fonctionne de façon fiable) + relais des permissions de géolocalisation vers le système
   Android.
 - Icônes de lancement générées à partir de `icons/icon-512.png` (legacy + adaptive icon).
-- Assets embarqués : `index.html`, `styles.css`, `data/*` (copie figée au moment du scaffold).
+- Assets embarqués : `index.html`, `styles.css`, `data/*`, `vendor/leaflet/*`, `vendor/fonts/*`
+  (copie figée au moment du scaffold).
 - Wrapper Gradle (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`) : fichiers
   officiels récupérés depuis le tag `v8.7.0` du dépôt `gradle/gradle`.
 
@@ -44,6 +45,7 @@ racine du repo. Après une modification du site, il faut la refaire :
 ```sh
 cp ../index.html ../styles.css app/src/main/assets/
 cp ../data/*.csv ../data/*.json app/src/main/assets/data/
+cp -r ../vendor/leaflet ../vendor/fonts app/src/main/assets/vendor/
 ```
 (à terme, un script ou une étape de build pourrait automatiser cette copie).
 
@@ -70,9 +72,6 @@ du site appelle déjà `navigator.serviceWorker.register(...).catch(() => {})`, 
 - Icônes adaptatives : celles générées ici sont un premier jet (recadrage automatique
   à 60 % du canevas) — à refaire proprement avec l'outil "Image Asset" d'Android Studio
   si le rendu ne convient pas.
-- Bundler Leaflet (JS/CSS) et les polices Google Fonts en local plutôt que de les charger
-  depuis unpkg.com / fonts.googleapis.com au premier lancement (le reste de l'appli
-  fonctionne déjà hors ligne une fois ces deux-là chargés une première fois).
 - Fiche de build F-Droid (`fdroiddata`) : une fois le projet buildable de façon
   reproductible (`./gradlew assembleRelease` sans réseau au-delà de la résolution des
   dépendances Gradle), rédiger le recipe YAML pointant vers ce sous-dossier `android/`

@@ -39,6 +39,10 @@ ousuisje/
 ├── styles.css              # Feuille de style partagée
 ├── manifest.json           # Manifeste PWA (nom, icônes, mode standalone)
 ├── sw.js                   # Service worker (cache hors-ligne, versionné)
+├── LICENSE                 # GNU GPL v3
+├── vendor/                 # Leaflet et polices Inter/Space Mono, embarqués localement
+│   ├── leaflet/
+│   └── fonts/
 └── icons/
     ├── icon-192.png
     ├── icon-512.png
@@ -61,5 +65,7 @@ Nom de domaine `ousuisje.fun` enregistré chez OVH et pointé vers Vercel.
 
 ## Licences et attribution
 
+- **Code source de ce projet** : [GNU GPL v3](LICENSE).
 - Données cartographiques, d'adresse et de points d'intérêt : © contributeurs [OpenStreetMap](https://www.openstreetmap.org/copyright), sous licence ODbL.
 - Données d'altitude : [IGN](https://www.ign.fr) (RGE ALTI) et [Open-Elevation](https://www.open-elevation.com) (SRTM).
+- [Leaflet](https://leafletjs.com) (licence BSD-2-Clause) et les polices [Inter](https://rsms.me/inter/)/[Space Mono](https://fonts.google.com/specimen/Space+Mono) (licence SIL Open Font License 1.1) sont embarquées localement dans `vendor/` plutôt que chargées depuis un CDN, pour permettre une publication F-Droid (l'app ne doit pas charger de code non revu à l'exécution).

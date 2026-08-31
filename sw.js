@@ -1,4 +1,4 @@
-const CACHE_NAME = "ousuisje-cache-v95";
+const CACHE_NAME = "ousuisje-cache-v96";
 const ASSETS = [
   "./",
   "./index.html",
@@ -12,7 +12,21 @@ const ASSETS = [
   "./data/departements.min.json",
   "./data/communes.min.csv",
   "./data/drinking-water.min.csv",
-  "./data/toilets.min.csv"
+  "./data/toilets.min.csv",
+  "./vendor/leaflet/leaflet.js",
+  "./vendor/leaflet/leaflet.css",
+  "./vendor/leaflet/images/marker-icon.png",
+  "./vendor/leaflet/images/marker-icon-2x.png",
+  "./vendor/leaflet/images/marker-shadow.png",
+  "./vendor/leaflet/images/layers.png",
+  "./vendor/leaflet/images/layers-2x.png",
+  "./vendor/fonts/fonts.css",
+  "./vendor/fonts/inter-latin.woff2",
+  "./vendor/fonts/inter-latin-ext.woff2",
+  "./vendor/fonts/space-mono-latin.woff2",
+  "./vendor/fonts/space-mono-latin-ext.woff2",
+  "./vendor/fonts/space-mono-700-latin.woff2",
+  "./vendor/fonts/space-mono-700-latin-ext.woff2"
 ];
 
 self.addEventListener("install", (event) => {
@@ -39,7 +53,6 @@ self.addEventListener("fetch", (event) => {
   if (
     url.includes("nominatim.openstreetmap.org") ||
     url.includes("tile.openstreetmap.org") ||
-    url.includes("unpkg.com") ||
     url.includes("countapi.mileshilliard.com") ||
     url.includes("data.geopf.fr") ||
     url.includes("overpass-api.de") ||

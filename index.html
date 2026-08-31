@@ -535,12 +535,14 @@
       <div class="radar-legend">
         <div class="radar-legend-bar"></div>
         <div class="radar-legend-labels">
-          <span>Faible</span>
-          <span>Modérée</span>
-          <span>Forte</span>
-          <span>Très forte</span>
+          <span>Faible<br><small>&lt; 2,5 mm/h</small></span>
+          <span>Modérée<br><small>2,5–10 mm/h</small></span>
+          <span>Forte<br><small>10–50 mm/h</small></span>
+          <span>Très forte<br><small>&gt; 50 mm/h</small></span>
         </div>
       </div>
+
+      <button type="button" id="radarIntensityBtn" class="btn-secondary">Intensité actuelle (mm/h)</button>
 
       <div class="addr-panel">
         <div class="addr-head">
@@ -557,8 +559,11 @@
             <input type="range" id="radarOpacity" min="20" max="100" value="75" style="accent-color: var(--teal);" />
           </span>
         </div>
+        <div class="addr-row"><span class="k">Intensité estimée</span>
+          <span class="v dim" id="radarIntensityVal">—</span>
+        </div>
       </div>
-      <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+      <p class="osm-credit">Radar : © <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Intensité (mm/h) : © <a class="inline" href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> · Carte : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
     </div>
   </details>
 
@@ -657,6 +662,8 @@
   const radarPlay = $('radarPlay');
   const radarNext = $('radarNext');
   const radarOpacity = $('radarOpacity');
+  const radarIntensityBtn = $('radarIntensityBtn');
+  const radarIntensityVal = $('radarIntensityVal');
 
   const offlineGeoBtn = $('offlineGeoBtn');
   const offlineSourceBadge = $('offlineSourceBadge');
@@ -1913,6 +1920,54 @@
   }
 
   loadRadar();
+
+  // Intensité de précipitation chiffrée (mm/h) au point de référence, via Open-Meteo (gratuit,
+  // sans clé). RainViewer ne fournit qu'une image de radar, pas de valeur numérique par point ;
+  // on estime donc le mm/h à partir de la prévision "minutely_15" (précipitations sur 15 min,
+  // multipliées par 4). Appel réseau déclenché uniquement au clic, jamais automatiquement.
+  async function fetchRadarIntensityMmH(lat, lon) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&minutely_15=precipitation&forecast_minutely_15=4&timezone=auto`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const times = data.minutely_15 && data.minutely_15.time;
+    const values = data.minutely_15 && data.minutely_15.precipitation;
+    if (!times || !values || times.length === 0) return null;
+    const now = Date.now();
+    let idx = 0;
+    for (let i = 0; i < times.length; i++) {
+      if (new Date(times[i]).getTime() <= now) idx = i;
+    }
+    const v = values[idx];
+    return v == null ? null : v * 4;
+  }
+
+  radarIntensityBtn.addEventListener('click', async () => {
+    const point = getReferencePoint();
+    if (!point) {
+      radarIntensityVal.textContent = "Activez la localisation GPS ou sélectionnez un point sur la carte.";
+      radarIntensityVal.classList.add('dim');
+      radarIntensityVal.classList.remove('copyable');
+      return;
+    }
+    radarIntensityBtn.disabled = true;
+    radarIntensityVal.textContent = 'Recherche…';
+    radarIntensityVal.classList.add('dim');
+    radarIntensityVal.classList.remove('copyable');
+    try {
+      const mmh = await fetchRadarIntensityMmH(point.lat, point.lon);
+      if (mmh == null) {
+        radarIntensityVal.textContent = 'Indisponible pour ce point';
+      } else {
+        radarIntensityVal.textContent = (mmh < 0.05 ? '0' : mmh.toFixed(1)) + ' mm/h';
+        radarIntensityVal.classList.remove('dim');
+        radarIntensityVal.classList.add('copyable');
+      }
+    } catch (e) {
+      radarIntensityVal.textContent = 'Service Open-Meteo indisponible';
+    } finally {
+      radarIntensityBtn.disabled = false;
+    }
+  });
 
   // --- Département et commune (Mode hors ligne) (données pré-téléchargées) ---
   const OFFLINE_DEPT_URL = 'data/departements.min.json';

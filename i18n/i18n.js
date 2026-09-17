@@ -19,11 +19,23 @@
   var readyResolve;
   var ready = new Promise(function (resolve) { readyResolve = resolve; });
 
+  // Domains that pre-date the i18n merge each imply a default language for a first-time
+  // visitor (whereami.fun readers expect English regardless of their browser/OS locale) —
+  // this only sets the DEFAULT, an explicit localStorage choice always wins.
+  var HOSTNAME_DEFAULT_LANG = {
+    'whereami.fun': 'en',
+    'www.whereami.fun': 'en',
+    'ousuisje.fun': 'fr',
+    'www.ousuisje.fun': 'fr'
+  };
+
   function resolveLang() {
     try {
       var stored = localStorage.getItem(STORAGE_KEY);
       if (stored && SUPPORTED_LANGS.indexOf(stored) !== -1) return stored;
     } catch (e) {}
+    var hostLang = HOSTNAME_DEFAULT_LANG[location.hostname];
+    if (hostLang && SUPPORTED_LANGS.indexOf(hostLang) !== -1) return hostLang;
     var candidates = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language];
     for (var i = 0; i < candidates.length; i++) {
       var code = (candidates[i] || '').toLowerCase().split('-')[0];

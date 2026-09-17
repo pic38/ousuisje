@@ -3,6 +3,12 @@
     "title": "OuSuisJe — Retrouvez l'adresse, et plus encore !",
     "description": "Adresses, altitudes et points d'intérêt autour de vous, via GPS ou un clic sur la carte. Installable comme application pour des fonctions hors ligne."
   },
+  "pages": {
+    "backLink": "← Retour à OuSuisJe",
+    "about": { "title": "À propos — OuSuisJe" },
+    "privacy": { "title": "Confidentialité — OuSuisJe" },
+    "legal": { "title": "Mentions légales — OuSuisJe" }
+  },
   "settings": {
     "buttonAriaLabel": "Réglages",
     "title": "Sections affichées",

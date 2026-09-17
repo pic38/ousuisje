@@ -3,6 +3,12 @@
     "title": "WhereAmI — Find your address, and more!",
     "description": "Addresses, altitudes and points of interest around you, via GPS or a click on the map. Installable as an app for offline features."
   },
+  "pages": {
+    "backLink": "← Back to WhereAmI",
+    "about": { "title": "About — WhereAmI" },
+    "privacy": { "title": "Privacy — WhereAmI" },
+    "legal": { "title": "Legal Notice — WhereAmI" }
+  },
   "settings": {
     "buttonAriaLabel": "Settings",
     "title": "Sections shown",
@@ -33,7 +39,7 @@
     }
   },
   "header": {
-    "eyebrow": "OuSuisJe · location tools",
+    "eyebrow": "WhereAmI · location tools",
     "title": "Find your address, and more!"
   },
   "locate": {

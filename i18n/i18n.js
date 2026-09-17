@@ -9,7 +9,38 @@
 // can't safely start before dictionaries are actually loaded. `I18N.t` is still safe to call
 // before that (e.g. from other scripts), it just falls back to the raw key until then.
 (function () {
-  var SUPPORTED_LANGS = ['fr', 'en'];
+  // Native name + BCP47 locale tag (for toLocaleTimeString/toLocaleString) per supported
+  // language. This is also what drives the <select id="languageSelect"> options — see
+  // populateLanguageSelect() — so there is exactly one place to add a new language.
+  var LANG_INFO = {
+    fr: { name: 'Français', locale: 'fr-FR' },
+    en: { name: 'English', locale: 'en-GB' },
+    bg: { name: 'Български', locale: 'bg-BG' },
+    hr: { name: 'Hrvatski', locale: 'hr-HR' },
+    cs: { name: 'Čeština', locale: 'cs-CZ' },
+    da: { name: 'Dansk', locale: 'da-DK' },
+    nl: { name: 'Nederlands', locale: 'nl-NL' },
+    et: { name: 'Eesti', locale: 'et-EE' },
+    fi: { name: 'Suomi', locale: 'fi-FI' },
+    de: { name: 'Deutsch', locale: 'de-DE' },
+    el: { name: 'Ελληνικά', locale: 'el-GR' },
+    hu: { name: 'Magyar', locale: 'hu-HU' },
+    ga: { name: 'Gaeilge', locale: 'ga-IE' },
+    it: { name: 'Italiano', locale: 'it-IT' },
+    lv: { name: 'Latviešu', locale: 'lv-LV' },
+    lt: { name: 'Lietuvių', locale: 'lt-LT' },
+    mt: { name: 'Malti', locale: 'mt-MT' },
+    pl: { name: 'Polski', locale: 'pl-PL' },
+    pt: { name: 'Português', locale: 'pt-PT' },
+    ro: { name: 'Română', locale: 'ro-RO' },
+    sk: { name: 'Slovenčina', locale: 'sk-SK' },
+    sl: { name: 'Slovenščina', locale: 'sl-SI' },
+    es: { name: 'Español', locale: 'es-ES' },
+    sv: { name: 'Svenska', locale: 'sv-SE' },
+    zh: { name: '中文', locale: 'zh-CN' },
+    ar: { name: 'العربية', locale: 'ar-SA' }
+  };
+  var SUPPORTED_LANGS = Object.keys(LANG_INFO);
   var STORAGE_KEY = 'ousuisje_lang';
   var DEFAULT_LANG = 'fr';
   var FALLBACK_LANG = 'en';
@@ -80,8 +111,30 @@
     return val;
   }
 
+  // Populates every <select id="languageSelect"> found in `root` from LANG_INFO, so no page
+  // needs to hardcode <option> tags per language. Safe to call repeatedly (e.g. on every
+  // applyTranslations pass) — it no-ops once options already match.
+  function populateLanguageSelect(root) {
+    root = root || document;
+    var selects = root.querySelectorAll('#languageSelect');
+    for (var s = 0; s < selects.length; s++) {
+      var select = selects[s];
+      if (select.options.length === SUPPORTED_LANGS.length) continue;
+      select.innerHTML = '';
+      for (var i = 0; i < SUPPORTED_LANGS.length; i++) {
+        var code = SUPPORTED_LANGS[i];
+        var opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = LANG_INFO[code].name;
+        select.appendChild(opt);
+      }
+      select.value = activeLang;
+    }
+  }
+
   function applyTranslations(root) {
     root = root || document;
+    populateLanguageSelect(root);
     var nodes = root.querySelectorAll('[data-i18n]');
     for (var i = 0; i < nodes.length; i++) {
       nodes[i].textContent = t(nodes[i].getAttribute('data-i18n'));
@@ -104,9 +157,8 @@
   }
 
   function localeTag(lang) {
-    // Matches the date/number formatting convention already used per-site before the
-    // merge (fr-FR / en-GB) so timestamps keep the same look once dynamic.
-    return lang === 'fr' ? 'fr-FR' : 'en-GB';
+    var info = LANG_INFO[lang];
+    return info ? info.locale : 'en-GB';
   }
 
   function loadDict(lang) {

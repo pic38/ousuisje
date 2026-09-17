@@ -747,6 +747,38 @@ I18N.ready.then(function () {
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
   const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas', 'offline-geo']); // masquées par défaut tant que l'utilisateur ne les active pas
+
+  // Sections qui ne concernent que la France (données ANFR/IGN, sans équivalent ailleurs).
+  // Restent masquées tant que la position de l'utilisateur n'est pas connue ; se révèlent
+  // automatiquement dès qu'un géocodage (GPS ou clic carte) renvoie country_code === 'fr',
+  // mais seulement si l'utilisateur n'a pas déjà réglé la visibilité lui-même (voir
+  // isSectionVisible : un pref explicite prime toujours sur ce défaut). Une fois révélées,
+  // elles ne se remasquent jamais automatiquement — on écrit un pref explicite "visible"
+  // plutôt que de dépendre d'un état transitoire, pour éviter que la section ne disparaisse
+  // si l'utilisateur consulte ensuite une adresse hors de France.
+  const FRANCE_ONLY_SECTIONS = new Set(['antennas', 'offline-geo']);
+  let isInFrance = null; // null = pas encore déterminé (aucun géocodage effectué)
+
+  function markInFrance(value) {
+    if (isInFrance === value) return;
+    isInFrance = value;
+    if (value !== true) return;
+    const prefs = loadVisibilityPrefs();
+    let changed = false;
+    FRANCE_ONLY_SECTIONS.forEach((id) => {
+      if (prefs[id] === undefined) { prefs[id] = true; changed = true; }
+    });
+    if (changed) {
+      localStorage.setItem(SECTION_VISIBILITY_KEY, JSON.stringify(prefs));
+      applySectionVisibility();
+    }
+    // Pré-charge en tâche de fond le jeu de données département/commune (~1,7 Mo) puisque
+    // l'utilisateur est confirmé en France — rend le premier clic sur la section instantané,
+    // comme c'était le cas avant que ce chargement ne soit devenu conditionnel à la position.
+    // Les antennes ANFR (5,8 Mo) restent volontairement en téléchargement manuel uniquement
+    // (bouton dédié), leur poids étant trop important pour un pré-chargement silencieux.
+    loadOfflineGeoData().catch(() => {});
+  }
   const settingsBtn = $('settingsBtn');
   const settingsPanel = $('settingsPanel');
   const sectionCheckboxes = [];
@@ -1230,6 +1262,8 @@ I18N.ready.then(function () {
       const region = addr.state || null;
       const pays = addr.country || null;
       const codePostal = addr.postcode || null;
+
+      markInFrance(addr.country_code === 'fr');
 
       if (departement && addr.country_code === 'fr' && codePostal) {
         const deptNum = (codePostal.startsWith('97') || codePostal.startsWith('98'))
@@ -3349,7 +3383,9 @@ I18N.ready.then(function () {
     updateOfflineGeo(e.latlng.lat, e.latlng.lng, 'carte');
   });
 
-  loadOfflineGeoData().catch(() => {});
+  // Plus de préchargement inconditionnel ici : voir markInFrance(), qui ne déclenche ce
+  // chargement que pour les utilisateurs confirmés en France. Pour les autres, les données
+  // se chargent à la demande au premier clic sur la section (voir updateOfflineGeo ci-dessous).
 
   // --- Service worker, installation, partage ---
   if ('serviceWorker' in navigator) {

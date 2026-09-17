@@ -1,4 +1,4 @@
-const CACHE_NAME = "ousuisje-cache-v99";
+const CACHE_NAME = "ousuisje-cache-v100";
 const ASSETS = [
   "./",
   "./index.html",
@@ -9,8 +9,12 @@ const ASSETS = [
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./data/departements.min.json",
-  "./data/communes.min.csv",
+  // departements.min.json / communes.min.csv retirés du précache : ces données ne concernent
+  // que la France (section "Département et commune") et ne sont désormais chargées qu'à la
+  // demande — soit automatiquement une fois l'utilisateur détecté en France (voir
+  // markInFrance() dans index.html), soit au premier clic sur la section pour les autres.
+  // Elles restent mises en cache au moment où elles sont effectivement récupérées, via le
+  // gestionnaire fetch générique ci-dessous.
   "./data/drinking-water.min.csv",
   "./data/toilets.min.csv",
   "./vendor/leaflet/leaflet.js",

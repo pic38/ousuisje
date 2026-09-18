@@ -11,7 +11,7 @@ android {
         applicationId = "com.ousuisje.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 11
+        versionCode = 12
         versionName = "1.0"
     }
 
@@ -19,6 +19,14 @@ android {
         release {
             isMinifyEnabled = false
         }
+    }
+
+    // AGP embeds a "dependency metadata" signing block by default (for Play Store analytics)
+    // — F-Droid's CI scanner flags that block as an "extra signing block" and fails the build
+    // check for it, since it's irrelevant/undesired outside Play Store distribution.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 
     compileOptions {

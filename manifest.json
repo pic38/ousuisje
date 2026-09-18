@@ -1,7 +1,7 @@
 {
   "name": "OuSuisJe — Trouvez l'adresse et plus encore !",
   "short_name": "OuSuisJe",
-  "description": "Affiche en direct la position, l'adresse, l'altitude, la vitesse et la précision GPS de l'appareil.",
+  "description": "Retrouvez l'adresse postale correspondant à votre position, les points d'eau, toilettes et autres points d'intérêt à proximité.",
   "start_url": ".",
   "scope": "./",
   "display": "standalone",

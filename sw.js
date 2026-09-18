@@ -1,4 +1,4 @@
-const CACHE_NAME = "ousuisje-cache-v101";
+const CACHE_NAME = "ousuisje-cache-v102";
 const ASSETS = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const ASSETS = [
   "./mentions-legales.html",
   "./styles.css",
   "./manifest.json",
+  "./manifest.en.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   // departements.min.json / communes.min.csv retirés du précache : ces données ne concernent

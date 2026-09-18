@@ -1,0 +1,39 @@
+  <h1>Privaatsus</h1>
+  <p class="page-sub">Mida saadetakse, kellele ja millistel juhtudel.</p>
+
+  <h2>Üldpõhimõte</h2>
+  <p>OuSuisJel ei ole oma rakendusserverit: ühtegi asukohaandmet ei koguta, salvestata ega edastata OuSuisJe serverisse. Geolokatsiooniloa küsimist käsitleb otse teie brauser.</p>
+
+  <h2>GPS-asukoht</h2>
+  <p>Teie asukoha (koordinaadid, kõrgus, kiirus, suund, täpsus) töötlemine toimub täielikult kohapeal, teie seadmes. Midagi ei saadeta kuhugi. See funktsioon töötab edasi ka võrguühenduseta, kui olete lisanud saidi avakuvale.</p>
+
+  <h2>Aadress (pöördgeokodeerimine)</h2>
+  <p>Kui palute leida aadressi, saadab teie brauser valitud punkti koordinaadid (GPS-asukoht või kaardil klõpsatud punkt) otse OpenStreetMapi teenusesse <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a>, ilma OuSuisJe serverit läbimata. See funktsioon ei tööta võrguühenduseta.</p>
+
+  <h2>Kõrgus</h2>
+  <p>Kõrguse võrdlemisel saadetakse samamoodi ainult valitud punkti koordinaadid — kas <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> geoplatvormi teenusesse (kui teie asukoht tuvastatakse Prantsusmaal) või teenusesse <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (mujal), olenevalt kasutatud nupust. Ei tööta võrguühenduseta.</p>
+
+  <h2>Huvipunktid</h2>
+  <p>Lähedalasuvate huvipunktide otsing (toitlustus, väljapääsumängud, ujulad, ronimissaalid, kohandatud kategooriad…) saadab aktiivse punkti koordinaadid OpenStreetMapi <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> API-sse. Ei tööta võrguühenduseta.</p>
+
+  <h2>Departemang, omavalitsus ja mobiilimastid</h2>
+  <p>Need funktsioonid ilmuvad ainult siis, kui teie asukoht tuvastatakse Prantsusmaal. Need põhinevad andmestikel (IGN Admin Express, ANFR), mis laaditakse alla üks kord OuSuisJe enda majutusest ja salvestatakse seejärel teie seadmesse. Sellest tulenev arvutus (millises departemangus/omavalitsuses te asute, millised mastid on läheduses) toimub seejärel täielikult kohapeal, ilma et teie koordinaate kellelegi saadetaks. Töötab võrguühenduseta pärast allalaadimist.</p>
+
+  <h2>Joogivesi ja tualetid</h2>
+  <p>Andmestik (Prantsusmaa joogiveepunktid ja tualetid, allikas OpenStreetMap) laaditakse automaatselt alla lehe esimesel avamisel, samuti alati OuSuisJe enda majutusest. Otsing toimub seejärel kohapeal, ilma koordinaate saatmata. Kui allalaadimine ebaõnnestub või kustutate selle, langeb otsing automaatselt tagasi otseühendusega Overpass API-le (samad tingimused nagu eelmises "Huvipunktid" osas).</p>
+
+  <h2>Sademeteradar</h2>
+  <p>Radari kuvamine küsib teenuselt <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> kaardil hetkel kuvatavale alale vastavaid pilte (vaate koordinaadid ja suumitase, mitte teie GPS-asukoht). Ei tööta võrguühenduseta.</p>
+
+  <h2>Külastuste loendur</h2>
+  <p>Iga lehe laadimise korral registreeritakse kolmanda osapoole teenuses anonüümne ja koondatud külastusloendur (ilma isikut tuvastava teabeta).</p>
+
+  <h2>Jagamine</h2>
+  <p>Jagamisnupp kasutab teie seadme sisseehitatud jagamistööriista või kopeerib lihtsalt saidi lingi teie lõikelauale. Selle käigus ei edastata OuSuisJele mingeid andmeid.</p>
+
+  <h2>Androidi rakendus</h2>
+  <p>OuSuisJe on olemas ka iseseisva Androidi rakendusena. Samad põhimõtted kehtivad ka seal: OuSuisJel puudub oma rakendusserver ning iga seadmest väljuv funktsioon läheb otse vastavasse kolmanda osapoole teenusesse, samadel tingimustel nagu eespool.</p>
+
+  <div class="callout">
+    Kokkuvõttes: kõik, mis teie seadmest välja läheb, läheb otse vastavasse kolmanda osapoole teenusesse, mitte kunagi OuSuisJe serveri kaudu.
+  </div>

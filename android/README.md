@@ -65,6 +65,13 @@ dossiers, son contenu peut évoluer par ajout/suppression de fichiers (nouvelles
 fragments renommés), et un `cp -r` seul laisserait d'anciens fichiers orphelins dans les
 assets.
 
+**Ne pas copier les liens de retour `href="/"` des trois sous-pages** : sur le site web,
+`about.html`/`confidentialite.html`/`mentions-legales.html` renvoient vers `/` (pour ne pas
+afficher `index.html` dans la barre d'adresse du navigateur), mais côté Android `/` ne
+résout à rien pour `WebViewAssetLoader` (seul le préfixe `/assets/` est mappé) — ces trois
+fichiers doivent donc garder `href="index.html"` dans `app/src/main/assets/`, à corriger
+manuellement après chaque copie si le fichier source a changé sur ce point.
+
 **Après cette copie, retirer à nouveau le bouton "Ajouter à l'écran d'accueil"** (absent
 du site telle qu'écrite, il n'est retiré que dans cette copie Android — cp écrase donc
 ce retrait à chaque rafraîchissement, il faut le refaire) :

@@ -2,7 +2,7 @@
   "name": "OuSuisJe — Position en direct",
   "short_name": "OuSuisJe",
   "description": "Affiche en direct la position, l'adresse, l'altitude, la vitesse et la précision GPS de l'appareil.",
-  "start_url": "./index.html",
+  "start_url": ".",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",

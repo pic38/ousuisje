@@ -6,13 +6,31 @@
 <title data-i18n="meta.title">OuSuisJe — Retrouvez l'adresse, et plus encore !</title>
 <meta name="description" content="Adresses, altitudes et points d'intérêt autour de vous, via GPS ou un clic sur la carte. Installable comme application pour des fonctions hors ligne." data-i18n-attr="content:meta.description" />
 
-<link rel="manifest" href="manifest.json" />
+<link rel="manifest" href="manifest.json" id="manifestLink" />
 <meta name="theme-color" content="#0B1220" />
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="OuSuisJe" />
+<meta name="apple-mobile-web-app-title" content="OuSuisJe" id="appleWebAppTitle" />
 <link rel="icon" href="icons/icon-192.png" />
+<script>
+// Manifest/iOS install metadata only exist as static files (no per-language runtime
+// system, unlike the rest of the UI) — swap to the English variant before the browser
+// reads it for the "Add to Home Screen" flow, using the same stored-choice > hostname
+// priority as i18n.js's resolveLang() (kept duplicated/minimal here since it must run
+// synchronously, before i18n.js's own async dictionary fetch would resolve).
+(function () {
+  try {
+    var stored = localStorage.getItem('ousuisje_lang');
+    var lang = (stored === 'en') ? 'en'
+      : (stored ? null : (/(^|\.)whereami\.fun$/.test(location.hostname) ? 'en' : null));
+    if (lang === 'en') {
+      document.getElementById('manifestLink').href = 'manifest.en.json';
+      document.getElementById('appleWebAppTitle').content = 'WhereAmI';
+    }
+  } catch (e) {}
+})();
+</script>
 
 <link rel="stylesheet" href="vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="styles.css" />

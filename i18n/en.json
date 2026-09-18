@@ -48,6 +48,10 @@
     "searching": "Searching…",
     "unavailableDevice": "Unavailable on this device"
   },
+  "translation": {
+    "notice": "This translation is machine-generated and hasn't been reviewed by a native speaker yet.",
+    "reportLink": "Report an error on GitHub"
+  },
   "status": {
     "waiting": "Waiting",
     "searchingSignal": "Searching for signal…",

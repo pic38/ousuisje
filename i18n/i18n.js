@@ -135,6 +135,7 @@
   function applyTranslations(root) {
     root = root || document;
     populateLanguageSelect(root);
+    updateTranslationNotice(root);
     var nodes = root.querySelectorAll('[data-i18n]');
     for (var i = 0; i < nodes.length; i++) {
       nodes[i].textContent = t(nodes[i].getAttribute('data-i18n'));
@@ -153,6 +154,33 @@
         var attrKey = pair[1].trim();
         el.setAttribute(attrName, t(attrKey));
       }
+    }
+  }
+
+  // fr/en are the original, human-authored languages; everything else is a first-pass
+  // machine translation (see the plan this shipped under) — show a small notice + GitHub
+  // issues link on any page that has a #translationNotice element, only for those languages.
+  var REVIEWED_LANGS = ['fr', 'en'];
+  var TRANSLATION_ISSUES_URL = 'https://github.com/pic38/ousuisje/issues/new';
+
+  function updateTranslationNotice(root) {
+    root = root || document;
+    var notices = root.querySelectorAll('#translationNotice');
+    for (var i = 0; i < notices.length; i++) {
+      var el = notices[i];
+      if (REVIEWED_LANGS.indexOf(activeLang) !== -1) {
+        el.classList.add('is-hidden');
+        continue;
+      }
+      var link = document.createElement('a');
+      link.className = 'inline';
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.href = TRANSLATION_ISSUES_URL + '?title=' + encodeURIComponent('Translation issue (' + activeLang + ')');
+      link.textContent = t('translation.reportLink');
+      el.textContent = t('translation.notice') + ' ';
+      el.appendChild(link);
+      el.classList.remove('is-hidden');
     }
   }
 

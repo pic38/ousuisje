@@ -743,6 +743,10 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .osm-credit { text-align: center; font-size: 10.5px; color: #5A6B85; }
 .osm-credit a { color: #7C8CAA; }
 
+.translation-notice { text-align: center; font-size: 11px; color: #5A6B85; background: rgba(124,140,170,0.08); border-radius: 8px; padding: 8px 12px; margin: 12px 0; }
+.translation-notice a { color: #7C8CAA; }
+.translation-notice.is-hidden { display: none; }
+
 footer { text-align: center; font-size: 11px; color: #5A6B85; font-family: var(--mono); letter-spacing: 0.04em; padding-top: 4px; }
 .footer-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin-bottom: 8px; font-family: var(--sans); letter-spacing: normal; }
 .footer-nav a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; font-size: 12px; }

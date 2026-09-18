@@ -48,6 +48,10 @@
     "searching": "Recherche en cours…",
     "unavailableDevice": "Indisponible sur cet appareil"
   },
+  "translation": {
+    "notice": "Cette traduction est générée automatiquement et n'a pas encore été relue par un locuteur natif.",
+    "reportLink": "Signaler une erreur sur GitHub"
+  },
   "status": {
     "waiting": "En attente",
     "searchingSignal": "Recherche du signal…",

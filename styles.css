@@ -141,14 +141,55 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
 }
 .settings-bulk-btn:hover { background: var(--bg); }
 
+.page .page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.page .page-header-row .back { margin-bottom: 0; flex: 0 1 auto; }
+
 .page .lang-switcher {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  flex: 0 0 50%;
+  max-width: 50%;
+  margin-bottom: 0;
 }
-.page .lang-switcher select { width: auto; }
+.page .lang-switcher .settings-lang-label { flex: 0 0 auto; white-space: nowrap; }
+
+.page .lang-select-wrap { position: relative; flex: 1; min-width: 0; }
+.page .lang-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--teal);
+  font-size: 10px;
+}
+/* appearance:none removes each browser's own native <select> chrome (arrow, padding,
+   min-height all differ between Firefox/Chrome) so the rectangle renders identically. */
+.page .lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 26px 6px 10px;
+  font-size: 11.5px;
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--teal);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.page .lang-select:hover { background: var(--bg); }
 .settings-check {
   display: flex;
   align-items: center;

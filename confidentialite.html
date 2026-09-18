@@ -12,14 +12,17 @@
 </head>
 <body>
 <div class="page">
-  <a class="back" href="/" data-i18n="pages.backLink">← Retour à OuSuisJe</a>
-
-  <div class="lang-switcher">
-    <label class="settings-lang-label" for="languageSelect" data-i18n="settings.langLabel">Langue</label>
-    <select id="languageSelect" class="settings-bulk-btn">
-      <option value="fr" data-i18n="settings.langFr">Français</option>
-      <option value="en" data-i18n="settings.langEn">English</option>
-    </select>
+  <div class="page-header-row">
+    <a class="back" href="/" data-i18n="pages.backLink">← Retour à OuSuisJe</a>
+    <div class="lang-switcher">
+      <label class="settings-lang-label" for="languageSelect" data-i18n="settings.langLabel">Langue</label>
+      <div class="lang-select-wrap">
+        <select id="languageSelect" class="lang-select">
+          <option value="fr" data-i18n="settings.langFr">Français</option>
+          <option value="en" data-i18n="settings.langEn">English</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <div id="translationNotice" class="translation-notice is-hidden"></div>

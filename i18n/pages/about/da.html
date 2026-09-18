@@ -1,0 +1,21 @@
+  <h1>Om</h1>
+  <p class="page-sub">Hvad denne app gør, og hvad den ikke gør.</p>
+
+  <h2>Princippet</h2>
+  <p>OuSuisJe viser din position live: breddegrad, længdegrad, højde, hastighed og nøjagtighed, som leveret af din enheds GPS. Appen oversætter også dine koordinater til en læsbar adresse (gade, postnummer, kommune, departement, region, land) og tilbyder søgning efter interessepunkter i nærheden (drikkevand, toiletter, spisesteder, sendemaster…) samt en nedbørsradar.</p>
+  <p>Indstillingsmenuen giver dig mulighed for at vælge, hvilke sektioner der vises, omarrangere dem ved at trække, og tilføje tilpassede sektioner for enhver type sted (frit søgeord, søgt via OpenStreetMap).</p>
+  <p>Nogle sektioner — sendemaster, departement/kommune og IGN-højdesammenligning — bygger på data, der kun dækker Frankrig: de vises automatisk, når din position registreres i Frankrig, og forbliver skjult andre steder.</p>
+
+  <h2>Dine data</h2>
+  <p>Positionen, som din enhed beregner, <strong>forbliver på din enhed</strong>. Detaljer om, hvad der sendes, til hvem, og under hvilke omstændigheder, er forklaret på den dedikerede side <a class="inline" href="confidentialite.html">Privatliv</a>.</p>
+
+  <h2>Offlinefunktion</h2>
+  <p>Når appen er installeret på din startskærm, indlæses den uden forbindelse takket være en service worker, der gemmer dens filer i cachen. Departement, kommune, ANFR-sendemaster, drikkevand og toiletter beregnes også helt offline ud fra datasæt, der downloades én gang for alle (automatisk for de fleste, på forespørgsel for sendemaster og præcise kommunegrænser). Kun de funktioner, der forespørger en tredjepartstjeneste live (adresse, sammenlignet højde, andre interessepunkter, radar), kræver en aktiv forbindelse.</p>
+  <p>OuSuisJe er også tilgængelig som en selvstændig Android-app uden afhængighed af Google Play Services — de samme data er indbygget direkte i den, uden at gå via webstedet.</p>
+
+  <h2>Horisontal nøjagtighed kontra højde</h2>
+  <p>GPS måler ikke din horisontale position og din højde med samme pålidelighed. Den horisontale position (breddegrad/længdegrad) bygger på mindst 3-4 velfordelte satellitter omkring dig og opnår typisk en nøjagtighed på nogle få meter, når signalet er stabiliseret. Højden afhænger derimod yderligere af satellitter over dig — en mindre gunstig geometri, især i dale eller nær bjergrige områder — og dens fejlmargin er generelt 2-3 gange større end for den horisontale position.</p>
+  <p>I praksis er det ikke ualmindeligt, at en smartphones GPS viser en højde, der er omkring halvtreds meter højere end den, IGN angiver, eller skilte ved bjergpas, som bygger på referencetopografiske målinger. Netop for at objektivisere denne forskel giver OuSuisJe mulighed for at sammenligne GPS-højden med den, der beregnes af IGN eller Open-Elevation ud fra terrænmodeller.</p>
+
+  <h2>Kilder</h2>
+  <p>Kortdata, adresser og interessepunkter kommer fra projektet <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> og dets bidragydere, under ODbL-licensen. Data om sammenlignet højde kommer fra IGN (RGE ALTI) og Open-Elevation (SRTM). Departement- og kommunegrænser kommer fra IGN (Admin Express), via projektet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Data om sendemaster kommer fra <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (åben licens). Nedbørsradaren kommer fra <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Se <a class="inline" href="mentions-legales.html">den juridiske meddelelse</a> for detaljer om begrænsninger og ansvar.</p>

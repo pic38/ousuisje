@@ -1,0 +1,21 @@
+  <h1>Over</h1>
+  <p class="page-sub">Wat deze app doet, en wat niet.</p>
+
+  <h2>Het principe</h2>
+  <p>OuSuisJe toont uw positie live: breedtegraad, lengtegraad, hoogte, snelheid en nauwkeurigheid, zoals geleverd door de GPS van uw apparaat. De app vertaalt uw coördinaten ook naar een leesbaar adres (straat, postcode, gemeente, departement, regio, land) en biedt een zoekfunctie voor interessante plekken in de buurt (drinkwater, toiletten, eetgelegenheden, zendmasten…), evenals een neerslagradar.</p>
+  <p>Met het instellingenmenu kunt u kiezen welke secties worden weergegeven, ze herschikken door te slepen, en aangepaste secties toevoegen voor elk type plek (vrij zoekwoord, gezocht via OpenStreetMap).</p>
+  <p>Sommige secties — zendmasten, departement/gemeente en IGN-hoogtevergelijking — steunen op gegevens die alleen Frankrijk dekken: ze verschijnen automatisch zodra uw positie in Frankrijk wordt gedetecteerd, en blijven elders verborgen.</p>
+
+  <h2>Uw gegevens</h2>
+  <p>De positie die uw apparaat berekent, <strong>blijft op uw apparaat</strong>. Details over wat er wordt verzonden, naar wie, en in welk geval, worden uitgelegd op de speciale pagina <a class="inline" href="confidentialite.html">Privacy</a>.</p>
+
+  <h2>Offline werking</h2>
+  <p>Eenmaal geïnstalleerd op uw beginscherm, laadt de app zonder verbinding dankzij een service worker die de bestanden in de cache bewaart. Departement, gemeente, ANFR-zendmasten, drinkwater en toiletten worden ook volledig offline berekend, op basis van datasets die eenmalig zijn gedownload (automatisch voor de meeste, op aanvraag voor de zendmasten en de nauwkeurige gemeentegrenzen). Alleen de functies die live een externe dienst raadplegen (adres, vergeleken hoogte, andere interessante plekken, radar) vereisen een actieve verbinding.</p>
+  <p>OuSuisJe is ook beschikbaar als zelfstandige Android-app, zonder afhankelijkheid van Google Play Services — dezelfde gegevens zijn er rechtstreeks in ingebouwd, zonder via de website te gaan.</p>
+
+  <h2>Horizontale nauwkeurigheid versus hoogte</h2>
+  <p>GPS meet uw horizontale positie en uw hoogte niet met dezelfde betrouwbaarheid. De horizontale positie (breedtegraad/lengtegraad) steunt op minstens 3 à 4 goed verdeelde satellieten om u heen en bereikt doorgaans een nauwkeurigheid van enkele meters zodra het signaal stabiel is. De hoogte hangt daarnaast af van satellieten boven u — een minder gunstige geometrie, vooral in valleien of nabij reliëf — en de foutmarge is doorgaans 2 tot 3 keer groter dan die van de horizontale positie.</p>
+  <p>In de praktijk is het niet ongewoon dat de GPS van een smartphone een hoogte toont die zo'n vijftig meter hoger is dan die van het IGN of de borden bij bergpassen, die zich baseren op referentie-topografische metingen. Juist om dit verschil te objectiveren, biedt OuSuisJe de mogelijkheid om de GPS-hoogte te vergelijken met de hoogte berekend door het IGN of Open-Elevation op basis van terreinmodellen.</p>
+
+  <h2>Bronnen</h2>
+  <p>De kaartgegevens, adressen en interessante plekken zijn afkomstig van het project <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> en zijn medewerkers, onder de ODbL-licentie. Gegevens over vergeleken hoogte zijn afkomstig van het IGN (RGE ALTI) en Open-Elevation (SRTM). Departement- en gemeentegrenzen zijn afkomstig van het IGN (Admin Express), via het project <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Gegevens over zendmasten zijn afkomstig van <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (open licentie). De neerslagradar is afkomstig van <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Zie de <a class="inline" href="mentions-legales.html">wettelijke vermeldingen</a> voor details over beperkingen en aansprakelijkheid.</p>

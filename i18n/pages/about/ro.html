@@ -1,0 +1,21 @@
+  <h1>Despre</h1>
+  <p class="page-sub">Ce face această aplicație și ce nu face.</p>
+
+  <h2>Principiul</h2>
+  <p>OuSuisJe îți afișează poziția în timp real: latitudine, longitudine, altitudine, viteză și precizie, așa cum sunt furnizate de GPS-ul dispozitivului tău. Aplicația îți traduce, de asemenea, coordonatele într-o adresă lizibilă (stradă, cod poștal, comună, departament, regiune, țară) și oferă o căutare a punctelor de interes din apropiere (apă potabilă, toalete, restaurație, antene…), precum și un radar de precipitații.</p>
+  <p>Meniul de setări îți permite să alegi secțiunile afișate, să le reorganizezi prin tragere și plasare și să adaugi secțiuni personalizate pentru orice tip de loc (cuvânt-cheie liber, căutat prin OpenStreetMap).</p>
+  <p>Unele secțiuni — antene, departament/comună și comparația de altitudine IGN — se bazează pe date care acoperă doar Franța: acestea apar automat atunci când poziția ta este detectată în Franța și rămân ascunse în altă parte.</p>
+
+  <h2>Datele tale</h2>
+  <p>Poziția calculată de dispozitivul tău <strong>rămâne pe dispozitivul tău</strong>. Detaliile despre ce este trimis, cui și în ce cazuri sunt explicate pe pagina dedicată <a class="inline" href="confidentialite.html">Confidențialitate</a>.</p>
+
+  <h2>Funcționare offline</h2>
+  <p>Odată instalată pe ecranul principal, aplicația se încarcă fără conexiune datorită unui service worker care păstrează fișierele în cache. Departamentul, comuna, antenele ANFR, apa potabilă și toaletele se calculează, de asemenea, complet offline, pornind de la seturi de date descărcate o singură dată (automat în majoritatea cazurilor, la cerere pentru antene și pentru contururile precise ale comunelor). Doar funcțiile care interoghează un serviciu terț în timp real (adresă, altitudine comparată, alte puncte de interes, radar) necesită o conexiune activă.</p>
+  <p>OuSuisJe este disponibilă și ca aplicație Android independentă, fără dependență de Serviciile Google Play — aceleași date sunt incluse direct în aplicație, fără a trece prin site.</p>
+
+  <h2>Precizie orizontală vs altitudine</h2>
+  <p>GPS-ul nu măsoară poziția orizontală și altitudinea cu aceeași fiabilitate. Poziția orizontală (latitudine/longitudine) se bazează pe cel puțin 3-4 sateliți bine distribuiți în jurul tău și atinge de obicei o precizie de câțiva metri odată ce semnalul s-a stabilizat. Altitudinea, în schimb, depinde suplimentar de sateliții aflați deasupra ta — o geometrie mai puțin favorabilă, mai ales în văi sau lângă relief — iar eroarea sa este de obicei de 2 până la 3 ori mai mare decât cea a poziției orizontale.</p>
+  <p>În practică, nu este neobișnuit ca GPS-ul unui smartphone să indice o altitudine cu vreo cincizeci de metri mai mare decât cea indicată de IGN sau de panourile de pe trecătorile montane, care se bazează pe măsurători topografice de referință. Tocmai pentru a obiectiva această diferență, OuSuisJe propune compararea altitudinii GPS cu cea calculată de IGN sau Open-Elevation pe baza modelelor de teren.</p>
+
+  <h2>Surse</h2>
+  <p>Datele cartografice, de adresă și de puncte de interes provin din proiectul <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> și de la colaboratorii săi, sub licență ODbL. Datele de altitudine comparată provin de la IGN (RGE ALTI) și Open-Elevation (SRTM). Contururile de departament și comună provin de la IGN (Admin Express), prin proiectul <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Datele de antene provin de la <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (licență deschisă). Radarul de precipitații provine de la <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Consultă <a class="inline" href="mentions-legales.html">mențiunile legale</a> pentru detalii despre limitări și responsabilități.</p>

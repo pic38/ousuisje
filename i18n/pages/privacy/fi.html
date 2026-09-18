@@ -1,0 +1,39 @@
+  <h1>Tietosuoja</h1>
+  <p class="page-sub">Mitä lähetetään, kenelle, ja missä tapauksessa.</p>
+
+  <h2>Yleisperiaate</h2>
+  <p>OuSuisJe:llä ei ole omaa sovelluspalvelinta: mitään sijaintitietoa ei kerätä, tallenneta tai lähetetä OuSuisJen palvelimelle. Selaimesi hoitaa paikannusluvan pyynnön natiivisti.</p>
+
+  <h2>GPS-paikannus</h2>
+  <p>Sijaintisi käsittely (koordinaatit, korkeus, nopeus, suunta, tarkkuus) tapahtuu kokonaan paikallisesti laitteellasi. Mitään ei lähetetä minnekään. Tämä toiminto toimii edelleen offline-tilassa, kun sivusto on lisätty aloitusnäytölle.</p>
+
+  <h2>Osoite (käänteinen geokoodaus)</h2>
+  <p>Kun pyydät osoitteen hakua, valitun kohdan koordinaatit (GPS-sijainti tai kartalta napautettu kohta) lähetetään suoraan selaimestasi OpenStreetMapin <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a>-palveluun, kulkematta OuSuisJen palvelimen kautta. Tämä toiminto ei toimi offline-tilassa.</p>
+
+  <h2>Korkeus</h2>
+  <p>Korkeusvertailu lähettää samalla tavoin vain valitun kohdan koordinaatit — <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>:n géoplateforme-palveluun (kun sijaintisi havaitaan Ranskassa) tai <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a>iin (kaikkialla muualla) käytetyn painikkeen mukaan. Ei toimi offline-tilassa.</p>
+
+  <h2>Mielenkiintoiset kohteet</h2>
+  <p>Lähistön mielenkiintoisten kohteiden haku (pakohuoneet, kiipeilysalit, ravintolat, mukautetut osiot…) lähettää aktiivisen kohdan koordinaatit OpenStreetMapin <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a>-API:in. Ei toimi offline-tilassa.</p>
+
+  <h2>Departementti, kunta ja tukiasemat</h2>
+  <p>Nämä toiminnot ilmestyvät vain, kun sijaintisi havaitaan Ranskassa. Ne perustuvat aineistoihin (IGN Admin Express, ANFR), jotka ladataan kerran OuSuisJen omasta hostingista ja tallennetaan sitten laitteellesi. Tästä johtuva laskenta (missä departementissa/kunnassa olet, mitkä tukiasemat ovat lähistöllä) tapahtuu sen jälkeen kokonaan paikallisesti, lähettämättä koordinaattejasi kenellekään. Toimii offline-tilassa, kun lataus on tehty.</p>
+
+  <h2>Juomavesi ja käymälät</h2>
+  <p>Aineisto (juomavesipisteet ja käymälät Ranskassa, lähteenä OpenStreetMap) ladataan automaattisesti sivun ensimmäisellä latauskerralla, aina OuSuisJen omasta hostingista. Haku tapahtuu sen jälkeen paikallisesti, lähettämättä koordinaatteja. Jos tämä lataus epäonnistuu tai poistat sen, haku palautuu automaattisesti suoraan Overpass-API:in (samat ehdot kuin yllä olevassa "Mielenkiintoiset kohteet" -osiossa).</p>
+
+  <h2>Sadetutka</h2>
+  <p>Tutkan näyttäminen pyytää <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>iltä kuvat, jotka vastaavat kartalla parhaillaan näkyvää aluetta (näkymän koordinaatit ja zoomaustaso, ei GPS-sijaintiasi). Ei toimi offline-tilassa.</p>
+
+  <h2>Kävijälaskuri</h2>
+  <p>Anonyymi, koottu kävijälaskuri (ilman minkäänlaista henkilötietoa) tallennetaan kolmannen osapuolen palveluun jokaisella sivun latauskerralla.</p>
+
+  <h2>Jakaminen</h2>
+  <p>Jakamispainike käyttää laitteesi natiivia jakamistyökalua tai kopioi yksinkertaisesti sivuston linkin leikepöydällesi. Mitään tietoa ei lähetetä OuSuisJelle tässä yhteydessä.</p>
+
+  <h2>Android-sovellus</h2>
+  <p>OuSuisJe on olemassa myös itsenäisenä Android-sovelluksena. Samat periaatteet pätevät siellä: ei OuSuisJelle kuuluvaa omaa sovelluspalvelinta, ja jokainen toiminto, joka poistuu laitteesta, tekee sen suoraan kyseiselle kolmannen osapuolen palvelulle, samojen sääntöjen mukaisesti kuin yllä.</p>
+
+  <div class="callout">
+    Yhteenvetona: jokainen toiminto, joka poistuu laitteestasi, tekee sen suoraan kyseiselle kolmannen osapuolen palvelulle, ei koskaan OuSuisJen palvelimen kautta.
+  </div>

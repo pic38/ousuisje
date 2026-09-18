@@ -1,0 +1,39 @@
+  <h1>Prywatność</h1>
+  <p class="page-sub">Co jest wysyłane, komu i w jakich przypadkach.</p>
+
+  <h2>Ogólna zasada</h2>
+  <p>OuSuisJe nie posiada własnego serwera aplikacyjnego: żadne dane lokalizacyjne nie są zbierane, przechowywane ani przesyłane do serwera OuSuisJe. Prośba o zezwolenie na geolokalizację jest obsługiwana natywnie przez Twoją przeglądarkę.</p>
+
+  <h2>Lokalizacja GPS</h2>
+  <p>Przetwarzanie Twojej pozycji (współrzędne, wysokość, prędkość, kierunek, dokładność) odbywa się w całości lokalnie, na Twoim urządzeniu. Nic nie jest nigdzie wysyłane. Ta funkcja nadal działa offline po dodaniu strony do ekranu głównego.</p>
+
+  <h2>Adres (geokodowanie odwrotne)</h2>
+  <p>Gdy prosisz o odnalezienie adresu, współrzędne wybranego punktu (pozycja GPS lub punkt kliknięty na mapie) są wysyłane bezpośrednio przez Twoją przeglądarkę do usługi <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> OpenStreetMap, bez pośrednictwa serwera OuSuisJe. Ta funkcja nie działa offline.</p>
+
+  <h2>Wysokość</h2>
+  <p>Porównanie wysokości wysyła w ten sam sposób wyłącznie współrzędne wybranego punktu — do usługi géoplateforme <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> (gdy Twoja pozycja zostanie wykryta we Francji) lub do <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (wszędzie indziej), w zależności od użytego przycisku. Nie działa offline.</p>
+
+  <h2>Punkty zainteresowania</h2>
+  <p>Wyszukiwanie pobliskich punktów zainteresowania (escape roomy, baseny, ścianki wspinaczkowe, gastronomia, sekcje niestandardowe…) wysyła współrzędne aktywnego punktu do API <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> OpenStreetMap. Nie działa offline.</p>
+
+  <h2>Departament, gmina i nadajniki</h2>
+  <p>Te funkcje pojawiają się wyłącznie wtedy, gdy Twoja pozycja zostanie wykryta we Francji. Opierają się na zbiorach danych (IGN Admin Express, ANFR) pobranych raz z hostingu samego OuSuisJe, a następnie zapisanych na Twoim urządzeniu. Wynikające z tego obliczenia (w jakim departamencie/gminie się znajdujesz, jakie nadajniki są w pobliżu) odbywają się następnie całkowicie lokalnie, bez wysyłania Twoich współrzędnych komukolwiek. Działa offline po zakończeniu pobierania.</p>
+
+  <h2>Woda pitna i toalety</h2>
+  <p>Zbiór danych (punkty wody pitnej i toalety we Francji, źródło OpenStreetMap) jest pobierany automatycznie przy pierwszym załadowaniu strony, zawsze z hostingu OuSuisJe. Wyszukiwanie odbywa się następnie lokalnie, bez wysyłania współrzędnych. Jeśli to pobieranie się nie powiedzie lub je usuniesz, wyszukiwanie automatycznie przełącza się na bezpośrednie API Overpass (te same warunki co w sekcji „Punkty zainteresowania” powyżej).</p>
+
+  <h2>Radar opadów</h2>
+  <p>Wyświetlenie radaru wysyła do <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> żądanie obrazów odpowiadających obszarowi aktualnie wyświetlanemu na mapie (współrzędne i poziom powiększenia widoku, nie Twoja pozycja GPS). Nie działa offline.</p>
+
+  <h2>Licznik odwiedzin</h2>
+  <p>Anonimowy i zagregowany licznik odwiedzin (bez jakichkolwiek danych osobowych umożliwiających identyfikację) jest zapisywany u zewnętrznej usługi przy każdym załadowaniu strony.</p>
+
+  <h2>Udostępnianie</h2>
+  <p>Przycisk udostępniania korzysta z natywnego narzędzia udostępniania Twojego urządzenia lub po prostu kopiuje link do strony do schowka. Żadne dane nie są przekazywane do OuSuisJe w ramach tej operacji.</p>
+
+  <h2>Aplikacja na Androida</h2>
+  <p>OuSuisJe istnieje również jako samodzielna aplikacja na Androida. Obowiązują tam te same zasady: brak własnego serwera aplikacyjnego OuSuisJe, a każda funkcja opuszczająca urządzenie robi to bezpośrednio do odpowiedniej usługi zewnętrznej, na tych samych zasadach jak powyżej.</p>
+
+  <div class="callout">
+    Podsumowując: każda funkcja opuszczająca Twoje urządzenie robi to bezpośrednio do odpowiedniej usługi zewnętrznej, nigdy przez serwer OuSuisJe.
+  </div>

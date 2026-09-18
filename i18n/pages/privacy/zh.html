@@ -1,0 +1,39 @@
+  <h1>隐私</h1>
+  <p class="page-sub">发送了什么，发送给谁，以及在何种情况下发送。</p>
+
+  <h2>总体原则</h2>
+  <p>OuSuisJe 没有自己的应用服务器：不会收集、存储或将任何位置数据传输到 OuSuisJe 服务器。地理定位授权请求由您的浏览器原生处理。</p>
+
+  <h2>GPS 定位</h2>
+  <p>您的位置处理过程（坐标、海拔、速度、航向、精度）完全在本地您的设备上进行。任何数据都不会被发送到任何地方。将网站添加到主屏幕后，此功能可继续离线使用。</p>
+
+  <h2>地址（反向地理编码）</h2>
+  <p>当您请求查找地址时，所选点的坐标（GPS 位置或在地图上点击的位置）会由您的浏览器直接发送给 OpenStreetMap 的 <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> 服务，不经过任何 OuSuisJe 服务器。此功能无法离线使用。</p>
+
+  <h2>海拔</h2>
+  <p>海拔对比功能同样只发送所选点的坐标——根据所使用的按钮，发送至 <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> 的 géoplateforme 服务（当检测到您的位置位于法国时）或 <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a>（其他任何地方）。无法离线使用。</p>
+
+  <h2>兴趣点</h2>
+  <p>附近兴趣点搜索（密室逃脱、游泳池、攀岩馆、餐饮、自定义板块……）会将当前活跃点的坐标发送给 OpenStreetMap 的 <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> API。无法离线使用。</p>
+
+  <h2>省、市镇与基站</h2>
+  <p>这些功能仅在检测到您的位置位于法国时才会显示。它们依赖于从 OuSuisJe 自有服务器一次性下载、随后存储在您设备上的数据集（IGN Admin Express、ANFR）。由此产生的计算结果（您所在的省/市镇、附近的基站）随后完全在本地进行，不会将您的坐标发送给任何人。下载完成后即可离线使用。</p>
+
+  <h2>饮用水与公共厕所</h2>
+  <p>页面首次加载时会自动下载一份数据集（法国境内的饮用水点和公共厕所，来自 OpenStreetMap），同样来自 OuSuisJe 自有服务器。之后的搜索在本地进行，不会发送坐标。如果此次下载失败或您将其删除，搜索会自动回退到实时 Overpass API（与上述"兴趣点"板块条件相同）。</p>
+
+  <h2>降水雷达</h2>
+  <p>雷达显示功能会向 <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> 请求与当前地图显示区域对应的图像（视图的坐标和缩放级别，而非您的 GPS 位置）。无法离线使用。</p>
+
+  <h2>访问计数器</h2>
+  <p>每次加载页面时，都会向第三方服务记录一个匿名且汇总的访问计数（不含任何可识别个人身份的信息）。</p>
+
+  <h2>分享</h2>
+  <p>分享按钮使用您设备的原生分享工具，或直接将网站链接复制到您的剪贴板。此过程中不会向 OuSuisJe 传输任何数据。</p>
+
+  <h2>Android 应用</h2>
+  <p>OuSuisJe 也提供独立的 Android 应用版本。相同的原则同样适用：OuSuisJe 没有自己的应用服务器，任何离开设备的数据都会直接发送到相应的外部服务，遵循与上述相同的规则。</p>
+
+  <div class="callout">
+    简而言之：任何离开您设备的数据都会直接发送到相应的外部服务，绝不会经过 OuSuisJe 服务器。
+  </div>

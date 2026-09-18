@@ -1,0 +1,39 @@
+  <h1>Adatvédelem</h1>
+  <p class="page-sub">Mi kerül elküldésre, kinek, és milyen esetben.</p>
+
+  <h2>Az általános elv</h2>
+  <p>Az OuSuisJe-nek nincs saját alkalmazásszervere: semmilyen helyadatot nem gyűjt, tárol vagy továbbít az OuSuisJe szerverére. A helymeghatározási engedély kérését natívan a böngészője kezeli.</p>
+
+  <h2>GPS-helymeghatározás</h2>
+  <p>A pozíciója (koordináták, magasság, sebesség, irány, pontosság) feldolgozása teljes egészében helyben, az eszközén történik. Semmi nem kerül elküldésre sehova. Ez a funkció offline módban is tovább működik, miután a webhelyet hozzáadta a kezdőképernyőhöz.</p>
+
+  <h2>Cím (fordított geokódolás)</h2>
+  <p>Amikor címkeresést kér, a kiválasztott pont koordinátái (GPS-pozíció vagy a térképen kattintott pont) közvetlenül a böngészőjéből kerülnek elküldésre az OpenStreetMap <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> szolgáltatásának, az OuSuisJe szerverének érintése nélkül. Ez a funkció nem működik offline módban.</p>
+
+  <h2>Magasság</h2>
+  <p>A magasságösszehasonlítás hasonlóképpen csak a kiválasztott pont koordinátáit küldi el — az <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> géoplateforme szolgáltatásának (ha a pozícióját Franciaországban észlelik) vagy az <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a>nek (mindenhol máshol), a használt gombtól függően. Nem működik offline módban.</p>
+
+  <h2>Érdekes helyek</h2>
+  <p>A közelben lévő érdekes helyek keresése (szabadulószobák, mászótermek, étkezés, egyéni szakaszok…) elküldi az aktív pont koordinátáit az OpenStreetMap <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> API-jának. Nem működik offline módban.</p>
+
+  <h2>Megye, település és adótornyok</h2>
+  <p>Ezek a funkciók csak akkor jelennek meg, ha a pozícióját Franciaországban észlelik. Adatkészletekre (IGN Admin Express, ANFR) támaszkodnak, amelyeket egyszer letöltenek magának az OuSuisJe hosztingjának szerveréről, majd tárolnak az eszközén. Az ebből eredő számítás (mely megyében/településen tartózkodik, mely adótornyok vannak a közelben) ezután teljes egészében helyben történik, anélkül, hogy a koordinátáit bárkinek elküldenék. Offline módban működik, miután a letöltés megtörtént.</p>
+
+  <h2>Ivóvíz és mosdók</h2>
+  <p>Egy adatkészlet (ivóvízpontok és mosdók Franciaországban, OpenStreetMap forrásból) automatikusan letöltődik az oldal első betöltésekor, mindig az OuSuisJe saját hosztingjáról. A keresés ezután helyben történik, koordináták küldése nélkül. Ha ez a letöltés sikertelen, vagy törli azt, a keresés automatikusan visszaáll az élő Overpass API-ra (ugyanazok a feltételek, mint a fenti "Érdekes helyek" szakaszban).</p>
+
+  <h2>Csapadékradar</h2>
+  <p>A radar megjelenítése lekéri a <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>től a térképen jelenleg megjelenített területnek megfelelő képeket (a nézet koordinátái és nagyítási szintje, nem a GPS-pozíciója). Nem működik offline módban.</p>
+
+  <h2>Látogatásszámláló</h2>
+  <p>Egy névtelen, összesített látogatásszámláló (semmilyen személyazonosításra alkalmas adat nélkül) rögzítésre kerül egy harmadik féltől származó szolgáltatásnál minden oldalbetöltéskor.</p>
+
+  <h2>Megosztás</h2>
+  <p>A megosztás gomb az eszköze natív megosztási eszközét használja, vagy egyszerűen a webhely hivatkozását másolja a vágólapra. Ennek során semmilyen adat nem kerül továbbításra az OuSuisJe felé.</p>
+
+  <h2>Android-alkalmazás</h2>
+  <p>Az OuSuisJe önálló Android-alkalmazásként is létezik. Ugyanezek az elvek érvényesek ott is: nincs az OuSuisJe-hez tartozó saját alkalmazásszerver, és minden funkció, amely elhagyja az eszközt, közvetlenül az érintett harmadik fél szolgáltatásához kerül, a fentiekkel megegyező szabályok szerint.</p>
+
+  <div class="callout">
+    Összefoglalva: minden funkció, amely elhagyja az eszközét, közvetlenül az érintett harmadik fél szolgáltatásához kerül, soha nem az OuSuisJe szerverén keresztül.
+  </div>

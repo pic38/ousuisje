@@ -1,0 +1,39 @@
+  <h1>Privacy</h1>
+  <p class="page-sub">Wat wordt verzonden, naar wie, en in welk geval.</p>
+
+  <h2>Algemeen principe</h2>
+  <p>OuSuisJe heeft geen eigen applicatieserver: er worden geen locatiegegevens verzameld, opgeslagen of verzonden naar een server van OuSuisJe. Het verzoek om toestemming voor geolocatie wordt rechtstreeks door uw browser afgehandeld.</p>
+
+  <h2>GPS-lokalisatie</h2>
+  <p>De verwerking van uw positie (coördinaten, hoogte, snelheid, koers, nauwkeurigheid) gebeurt volledig lokaal, op uw apparaat. Er wordt niets ergens naartoe verzonden. Deze functie blijft offline werken zodra de site aan het beginscherm is toegevoegd.</p>
+
+  <h2>Adres (reverse geocoding)</h2>
+  <p>Wanneer u vraagt om een adres te vinden, worden de coördinaten van het gekozen punt (GPS-positie of punt aangeklikt op de kaart) rechtstreeks door uw browser verzonden naar de <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a>-dienst van OpenStreetMap, zonder via een server van OuSuisJe te gaan. Deze functie werkt niet offline.</p>
+
+  <h2>Hoogte</h2>
+  <p>De hoogtevergelijking verzendt op dezelfde manier alleen de coördinaten van het geselecteerde punt — naar de géoplateforme-dienst van het <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> (wanneer uw positie in Frankrijk wordt gedetecteerd) of naar <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (overal elders), afhankelijk van de gebruikte knop. Werkt niet offline.</p>
+
+  <h2>Interessante plekken</h2>
+  <p>Het zoeken naar interessante plekken in de buurt (eetgelegenheden, aangepaste secties…) verzendt de coördinaten van het actieve punt naar de <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a>-API van OpenStreetMap. Werkt niet offline.</p>
+
+  <h2>Departement, gemeente en zendmasten</h2>
+  <p>Deze functies verschijnen alleen wanneer uw positie in Frankrijk wordt gedetecteerd. Ze steunen op datasets (IGN Admin Express, ANFR) die eenmalig worden gedownload vanaf de eigen hosting van OuSuisJe en vervolgens op uw apparaat worden opgeslagen. De daaruit voortvloeiende berekening (in welk departement/welke gemeente u zich bevindt, welke zendmasten in de buurt zijn) gebeurt vervolgens volledig lokaal, zonder dat uw coördinaten naar wie dan ook worden verzonden. Werkt offline zodra de download is voltooid.</p>
+
+  <h2>Drinkwater en toiletten</h2>
+  <p>Een dataset (drinkwaterpunten en toiletten in Frankrijk, bron OpenStreetMap) wordt automatisch gedownload bij het eerste laden van de pagina, altijd vanaf de hosting van OuSuisJe. De zoekopdracht gebeurt vervolgens lokaal, zonder verzending van coördinaten. Als deze download mislukt of u deze verwijdert, valt de zoekopdracht automatisch terug op de live Overpass-API (dezelfde voorwaarden als de sectie „Interessante plekken” hierboven).</p>
+
+  <h2>Neerslagradar</h2>
+  <p>Het weergeven van de radar vraagt <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> om beelden die overeenkomen met het gebied dat momenteel op de kaart wordt weergegeven (coördinaten en zoomniveau van de weergave, niet uw GPS-positie). Werkt niet offline.</p>
+
+  <h2>Bezoekersteller</h2>
+  <p>Een anonieme en geaggregeerde bezoekersteller (zonder enige persoonlijk identificeerbare gegevens) wordt bij elke paginalading geregistreerd bij een externe dienst.</p>
+
+  <h2>Delen</h2>
+  <p>De deelknop gebruikt de native deeltool van uw apparaat, of kopieert eenvoudigweg de link van de site naar uw klembord. Er worden geen gegevens naar OuSuisJe overgedragen bij dit proces.</p>
+
+  <h2>Android-app</h2>
+  <p>OuSuisJe bestaat ook als zelfstandige Android-app. Dezelfde principes zijn hier van toepassing: geen eigen applicatieserver van OuSuisJe, en elke functie die het apparaat verlaat, doet dit rechtstreeks naar de betreffende externe dienst, volgens dezelfde regels als hierboven.</p>
+
+  <div class="callout">
+    Kortom: elke functie die uw apparaat verlaat, doet dit rechtstreeks naar de betreffende externe dienst, nooit via een server van OuSuisJe.
+  </div>

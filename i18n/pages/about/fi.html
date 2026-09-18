@@ -1,0 +1,21 @@
+  <h1>Tietoa</h1>
+  <p class="page-sub">Mitä tämä sovellus tekee ja mitä se ei tee.</p>
+
+  <h2>Periaate</h2>
+  <p>OuSuisJe näyttää sijaintisi reaaliajassa: leveysasteen, pituusasteen, korkeuden, nopeuden ja tarkkuuden, sellaisina kuin laitteesi GPS ne ilmoittaa. Sovellus muuntaa koordinaattisi myös luettavaksi osoitteeksi (katu, postinumero, kunta, departementti, alue, maa) ja tarjoaa haun lähistöllä oleville mielenkiintoisille kohteille (juomavesi, käymälät, ravintolat, tukiasemat…) sekä sadetutkan.</p>
+  <p>Asetusvalikossa voit valita näytettävät osiot, järjestää ne uudelleen vetämällä ja lisätä mukautettuja osioita mille tahansa paikkatyypille (vapaa avainsana, haetaan OpenStreetMapista).</p>
+  <p>Jotkin osiot — tukiasemat, departementti/kunta sekä IGN-korkeusvertailu — perustuvat tietoihin, jotka kattavat vain Ranskan: ne ilmestyvät automaattisesti, kun sijaintisi havaitaan Ranskassa, ja pysyvät piilossa muualla.</p>
+
+  <h2>Tietosi</h2>
+  <p>Laitteesi laskema sijainti <strong>pysyy laitteellasi</strong>. Yksityiskohdat siitä, mitä lähetetään, kenelle ja missä tapauksessa, on selitetty erillisellä <a class="inline" href="confidentialite.html">Tietosuoja</a>-sivulla.</p>
+
+  <h2>Offline-toiminta</h2>
+  <p>Kun sovellus on asennettu aloitusnäytölle, se latautuu ilman yhteyttä ansiosta Service Workerin, joka pitää sen tiedostot välimuistissa. Departementti, kunta, ANFR-tukiasemat, juomavesi ja käymälät lasketaan myös kokonaan offline-tilassa kertaalleen ladattujen aineistojen perusteella (automaattisesti suurimmaksi osaksi, pyynnöstä tukiasemien ja tarkkojen kuntarajojen osalta). Vain toiminnot, jotka kysyvät kolmannen osapuolen palvelulta reaaliaikaisesti (osoite, korkeusvertailu, muut mielenkiintoiset kohteet, tutka), tarvitsevat aktiivisen yhteyden.</p>
+  <p>OuSuisJe on saatavilla myös itsenäisenä Android-sovelluksena, ilman riippuvuutta Google Play -palveluista — samat tiedot on sisällytetty suoraan sovellukseen, kulkematta sivuston kautta.</p>
+
+  <h2>Vaakatarkkuus vs. korkeus</h2>
+  <p>GPS ei mittaa vaakasuuntaista sijaintiasi ja korkeuttasi yhtä luotettavasti. Vaakasuuntainen sijainti (leveys-/pituusaste) perustuu vähintään 3–4 hyvin ympärillesi jakautuneeseen satelliittiin ja saavuttaa yleensä muutaman metrin tarkkuuden, kun signaali on vakiintunut. Korkeus puolestaan riippuu lisäksi yläpuolellasi olevista satelliiteista — epäedullisempi geometria, erityisesti laaksoissa tai maaston lähellä — ja sen virhe on tyypillisesti 2–3 kertaa suurempi kuin vaakasuuntaisen sijainnin.</p>
+  <p>Käytännössä ei ole harvinaista, että älypuhelimen GPS ilmoittaa korkeuden, joka on noin viisikymmentä metriä korkeampi kuin IGN:n tai vuoristosolien kylttien ilmoittama, jotka puolestaan perustuvat topografisiin vertailumittauksiin. Juuri tämän eron objektiivistamiseksi OuSuisJe tarjoaa mahdollisuuden verrata GPS-korkeutta IGN:n tai Open-Elevationin maastomalleista laskemaan korkeuteen.</p>
+
+  <h2>Lähteet</h2>
+  <p>Kartta-, osoite- ja mielenkiintoisten kohteiden tiedot ovat peräisin <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-projektista ja sen tekijöiltä, ODbL-lisenssillä. Vertaillut korkeustiedot ovat peräisin IGN:ltä (RGE ALTI) ja Open-Elevationilta (SRTM). Departementti- ja kuntarajat ovat peräisin IGN:ltä (Admin Express), <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>-projektin kautta. Tukiasematiedot ovat peräisin <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a>:ltä (avoin lisenssi). Sadetutka on peräisin <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>ilta. Katso <a class="inline" href="mentions-legales.html">oikeudelliset tiedot</a> rajoitusten ja vastuun yksityiskohdista.</p>

@@ -25,8 +25,14 @@ Builds:
     subdir: android/app
     gradle:
       - yes
+  - versionName: '1.0'
+    versionCode: 11
+    commit: '11'
+    subdir: android/app
+    gradle:
+      - yes
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: '1.0'
-CurrentVersionCode: 10
+CurrentVersionCode: 11

@@ -48,6 +48,30 @@
       });
   }
 
+  // Hidden crash-log trigger for the Android app build: long-press the page's <h1>.
+  // Delegated on the stable #pageContent container since its content (including the <h1>)
+  // is fragment-injected per language by loadFragment() above — this way the gesture keeps
+  // working no matter which of the 26 language fragments is currently loaded, with no
+  // per-language wiring needed. window.CrashBridge only exists inside the Android WebView
+  // (see MainActivity.kt), so this is a silent no-op on the plain website.
+  var longPressTimer = null;
+  function startLongPress(e) {
+    if (!e.target.closest('h1')) return;
+    longPressTimer = setTimeout(function () {
+      longPressTimer = null;
+      if (window.CrashBridge && window.CrashBridge.showCrashLog) {
+        window.CrashBridge.showCrashLog();
+      }
+    }, 2000);
+  }
+  function cancelLongPress() {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  }
+  pageContent.addEventListener('pointerdown', startLongPress);
+  pageContent.addEventListener('pointerup', cancelLongPress);
+  pageContent.addEventListener('pointercancel', cancelLongPress);
+  pageContent.addEventListener('pointerleave', cancelLongPress);
+
   I18N.ready.then(function () {
     languageSelect.value = I18N.lang();
     loadFragment(I18N.lang());

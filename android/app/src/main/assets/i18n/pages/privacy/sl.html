@@ -1,0 +1,39 @@
+  <h1>Zasebnost</h1>
+  <p class="page-sub">Kaj se pošilja, komu in v katerem primeru.</p>
+
+  <h2>Splošno načelo</h2>
+  <p>OuSuisJe nima lastnega aplikacijskega strežnika: noben podatek o lokaciji se ne zbira, shranjuje ali pošilja na strežnik OuSuisJe. Zahtevo za dovoljenje za geolokacijo upravlja neposredno vaš brskalnik.</p>
+
+  <h2>GPS lokacija</h2>
+  <p>Obdelava vašega položaja (koordinate, nadmorska višina, hitrost, smer, natančnost) poteka v celoti lokalno, na vaši napravi. Nič se ne pošilja nikamor. Ta funkcija deluje tudi brez povezave, ko je spletno mesto dodano na začetni zaslon.</p>
+
+  <h2>Naslov (obratno geokodiranje)</h2>
+  <p>Ko zahtevate iskanje naslova, se koordinate izbrane točke (GPS položaj ali točka, izbrana na zemljevidu) pošljejo neposredno iz vašega brskalnika storitvi <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> od OpenStreetMap, brez posredovanja strežnika OuSuisJe. Ta funkcija ne deluje brez povezave.</p>
+
+  <h2>Nadmorska višina</h2>
+  <p>Primerjava nadmorske višine podobno pošlje le koordinate izbrane točke — storitvi géoplateforme <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> (ko je vaš položaj zaznan v Franciji) ali <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (povsod drugod), glede na uporabljen gumb. Ne deluje brez povezave.</p>
+
+  <h2>Zanimive točke</h2>
+  <p>Iskanje zanimivih točk v bližini (igre pobega, bazeni, plezalni centri, gostinstvo, razdelki po meri…) pošlje koordinate aktivne točke API-ju <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> od OpenStreetMap. Ne deluje brez povezave.</p>
+
+  <h2>Departma, občina in bazne postaje</h2>
+  <p>Te funkcije se prikažejo le, ko je vaš položaj zaznan v Franciji. Temeljijo na naborih podatkov (IGN Admin Express, ANFR), prenesenih enkrat z lastnega gostovanja OuSuisJe, nato pa shranjenih na vaši napravi. Izračun, ki iz tega izhaja (v katerem departmaju/občini se nahajate, katere bazne postaje so v bližini), nato poteka v celoti lokalno, brez kakršnega koli pošiljanja vaših koordinat komur koli. Deluje brez povezave, ko je prenos zaključen.</p>
+
+  <h2>Pitna voda in stranišča</h2>
+  <p>Nabor podatkov (točke s pitno vodo in stranišči v Franciji, vir OpenStreetMap) se samodejno prenese ob prvem nalaganju strani, vedno z lastnega gostovanja OuSuisJe. Iskanje nato poteka lokalno, brez pošiljanja koordinat. Če ta prenos ne uspe ali ga izbrišete, se iskanje samodejno vrne na neposredni API Overpass (enaki pogoji kot pri zgornjem razdelku »Zanimive točke«).</p>
+
+  <h2>Radar padavin</h2>
+  <p>Prikaz radarja zahteva od <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> slike, ki ustrezajo območju, trenutno prikazanem na zemljevidu (koordinate in stopnja povečave pogleda, ne vaš GPS položaj). Ne deluje brez povezave.</p>
+
+  <h2>Števec obiskov</h2>
+  <p>Anonimni in agregirani števec obiskov (brez kakršnih koli osebno prepoznavnih podatkov) se zabeleži pri zunanji storitvi ob vsakem nalaganju strani.</p>
+
+  <h2>Deljenje</h2>
+  <p>Gumb za deljenje uporablja izvorno orodje za deljenje vaše naprave ali preprosto kopira povezavo spletnega mesta v odložišče. Pri tem postopku se OuSuisJe ne pošlje noben podatek.</p>
+
+  <h2>Aplikacija Android</h2>
+  <p>OuSuisJe obstaja tudi kot samostojna aplikacija Android. Tam veljajo enaka načela: brez lastnega aplikacijskega strežnika OuSuisJe, vsaka funkcija, ki zapusti napravo, pa to stori neposredno k ustrezni zunanji storitvi, po enakih pravilih kot zgoraj.</p>
+
+  <div class="callout">
+    Skratka: vse, kar zapusti vašo napravo, gre neposredno k ustrezni zunanji storitvi, nikoli prek strežnika OuSuisJe.
+  </div>

@@ -3,60 +3,62 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Mentions légales — OuSuisJe</title>
+<title data-i18n="pages.legal.title">Mentions légales — OuSuisJe</title>
 <meta name="theme-color" content="#0B1220" />
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="stylesheet" href="vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="styles.css" />
+<script src="i18n/i18n.js"></script>
 </head>
 <body>
 <div class="page">
-  <a class="back" href="index.html">← Retour à OuSuisJe</a>
-  <h1>Mentions légales</h1>
-  <p class="page-sub">Éditeur, hébergement et limites de responsabilité.</p>
+  <a class="back" href="index.html" data-i18n="pages.backLink">← Retour à OuSuisJe</a>
 
-  <h2>Éditeur du site</h2>
-  <p>
-    Site édité par : Pierrick GOT<br>
-    Adresse : <span class="fill">[Votre adresse]</span><br>
-    E-mail de contact : <a class="inline" href="mailto:buildingtheopenwebtogether@proton.me">buildingtheopenwebtogether@proton.me</a><br>
-    <span class="fill">[Si applicable : SIRET, forme juridique]</span>
-  </p>
-  <div class="callout">
-    Ces champs sont des exemples à compléter avec vos informations réelles : la loi française (LCEN) exige l'identification de l'éditeur d'un site, même à titre non professionnel.
+  <label class="settings-lang-label" for="languageSelect" data-i18n="settings.langLabel">Langue</label>
+  <select id="languageSelect" class="settings-bulk-btn">
+    <option value="fr" data-i18n="settings.langFr">Français</option>
+    <option value="en" data-i18n="settings.langEn">English</option>
+  </select>
+
+  <div id="translationNotice" class="translation-notice is-hidden"></div>
+
+  <div id="pageContent">
+    <h1>Mentions légales</h1>
+    <p class="page-sub">Éditeur, hébergement et limites de responsabilité.</p>
   </div>
 
-  <h2>Directeur de la publication</h2>
-  <p>Pierrick GOT</p>
-
-  <h2>Hébergement</h2>
-  <p>
-    Application hébergée par : Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis — <a class="inline" href="https://vercel.com" target="_blank" rel="noopener">vercel.com</a><br>
-    Nom de domaine enregistré auprès de : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — <a class="inline" href="https://www.ovhcloud.com" target="_blank" rel="noopener">ovhcloud.com</a>
-  </p>
-
-  <h2>Nature du service</h2>
-  <p>OuSuisJe est un outil gratuit qui affiche des données de localisation calculées par le navigateur ou le système d'exploitation de l'appareil de l'utilisateur. Il propose également, à la demande de l'utilisateur : une conversion en adresse par géocodage inversé (OpenStreetMap Nominatim), une comparaison d'altitude (IGN Géoplateforme et Open-Elevation), une recherche de points d'intérêt à proximité — y compris eau potable, toilettes et antennes relais, calculables hors ligne à partir de jeux de données téléchargés (API Overpass d'OpenStreetMap, ANFR) — un radar de précipitations (RainViewer), ainsi qu'une identification du département et de la commune à partir de contours IGN téléchargés. OuSuisJe est également distribué comme application Android autonome, aux mêmes conditions.</p>
-
-  <h2>Limitation de responsabilité</h2>
-  <p>Les informations affichées (coordonnées, altitude, vitesse, cap, précision, adresse, code postal, commune, département, région, pays, altitude comparée, points d'intérêt) sont fournies <strong>à titre purement indicatif</strong>, sans garantie d'exactitude, de complétude ou d'actualité.</p>
-  <ul>
-    <li>La précision de la position dépend des capteurs de l'appareil, de la couverture réseau, du navigateur utilisé et des conditions environnementales, et peut varier de quelques mètres à plusieurs centaines de mètres.</li>
-    <li>Les données d'adresse et de points d'intérêt proviennent d'OpenStreetMap et de ses contributeurs bénévoles ; elles peuvent être incomplètes, erronées ou obsolètes selon les zones.</li>
-    <li>Les altitudes comparées proviennent de modèles numériques de terrain tiers (IGN RGE ALTI, Open-Elevation/SRTM) dont la résolution et la précision varient selon la zone géographique ; elles peuvent différer de l'altitude réelle.</li>
-    <li>Les jeux de données téléchargés pour un usage hors ligne (contours de département/commune, antennes relais ANFR, eau potable, toilettes) sont des instantanés figés au moment de leur mise à disposition ; ils ne reflètent pas nécessairement les mises à jour ultérieures des sources d'origine.</li>
-    <li>Le radar de précipitations (RainViewer) est une prévision à court terme, fournie à titre indicatif ; il ne remplace pas les bulletins météo officiels.</li>
-    <li>OuSuisJe ne doit pas être utilisé comme seule source pour des décisions à caractère médical, sécuritaire, juridique ou d'urgence (par exemple pour contacter les secours, qui disposent de leurs propres moyens de localisation).</li>
-  </ul>
-  <p>En conséquence, l'éditeur du site décline toute responsabilité en cas d'imprécision, d'erreur, d'interruption de service, ou de dommage direct ou indirect résultant de l'utilisation ou de l'impossibilité d'utiliser ces informations. L'utilisateur reste seul responsable de la vérification des données avant toute décision qui en découle.</p>
-
-  <h2>Propriété intellectuelle</h2>
-  <p>Les données cartographiques, d'adresse et de points d'intérêt sont © les contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, disponibles sous licence ODbL. Les données d'altitude proviennent de l'IGN (service géoplateforme, RGE ALTI) et d'Open-Elevation (données SRTM). Les contours de département et de commune proviennent de l'IGN (Admin Express), via le projet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Les données d'antennes relais proviennent de l'<a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a>, sous licence ouverte. Les images du radar de précipitations proviennent de <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Le code de l'application est fourni par son éditeur ; toute réutilisation reste soumise à son accord.</p>
-
-  <h2>Données personnelles</h2>
-  <p>Aucune donnée de localisation n'est collectée, stockée ou transmise à un serveur propre à OuSuisJe. Le détail de ce qui est envoyé, à qui, et dans quel cas, est expliqué sur la page dédiée <a class="inline" href="confidentialite.html">Confidentialité</a>.</p>
-
-  <p style="margin-top:32px;"><a class="back" href="index.html">← Retour à OuSuisJe</a></p>
+  <p style="margin-top:32px;"><a class="back" href="index.html" data-i18n="pages.backLink">← Retour à OuSuisJe</a></p>
 </div>
+
+<script>
+(function () {
+  var pageContent = document.getElementById('pageContent');
+  var languageSelect = document.getElementById('languageSelect');
+
+  function loadFragment(lang) {
+    return fetch('i18n/pages/legal/' + lang + '.html')
+      .then(function (res) { if (!res.ok) throw new Error('missing fragment'); return res.text(); })
+      .then(function (html) { pageContent.innerHTML = html; })
+      .catch(function () {
+        if (lang !== 'en') {
+          return fetch('i18n/pages/legal/en.html')
+            .then(function (res) { return res.text(); })
+            .then(function (html) { pageContent.innerHTML = html; });
+        }
+      });
+  }
+
+  I18N.ready.then(function () {
+    languageSelect.value = I18N.lang();
+    loadFragment(I18N.lang());
+  });
+
+  languageSelect.addEventListener('change', function () { I18N.setLang(languageSelect.value); });
+  window.addEventListener('i18n:changed', function (e) {
+    languageSelect.value = e.detail.lang;
+    loadFragment(e.detail.lang);
+  });
+})();
+</script>
 </body>
 </html>

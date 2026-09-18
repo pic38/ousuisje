@@ -1,0 +1,21 @@
+  <h1>Informazioni</h1>
+  <p class="page-sub">Cosa fa questa applicazione, e cosa non fa.</p>
+
+  <h2>Il principio</h2>
+  <p>OuSuisJe mostra la tua posizione in tempo reale: latitudine, longitudine, altitudine, velocità e precisione, come fornite dal GPS del tuo dispositivo. L'applicazione traduce inoltre le tue coordinate in un indirizzo leggibile (via, CAP, comune, dipartimento, regione, paese) e propone una ricerca di punti di interesse nelle vicinanze (acqua potabile, bagni pubblici, ristorazione, antenne…) oltre a un radar delle precipitazioni.</p>
+  <p>Il menu impostazioni permette di scegliere le sezioni visualizzate, riordinarle trascinandole e aggiungere sezioni personalizzate per qualsiasi tipo di luogo (parola chiave libera, cercata tramite OpenStreetMap).</p>
+  <p>Alcune sezioni — antenne, dipartimento/comune e confronto di altitudine IGN — si basano su dati che coprono solo la Francia: appaiono automaticamente quando la tua posizione viene rilevata in Francia, e restano nascoste altrove.</p>
+
+  <h2>I tuoi dati</h2>
+  <p>La posizione calcolata dal tuo dispositivo <strong>resta sul tuo dispositivo</strong>. Il dettaglio di ciò che viene inviato, a chi e in quali casi, è spiegato nella pagina dedicata <a class="inline" href="confidentialite.html">Privacy</a>.</p>
+
+  <h2>Funzionamento offline</h2>
+  <p>Una volta installata sulla schermata home, l'applicazione si carica senza connessione grazie a un service worker che mantiene i suoi file in cache. Il dipartimento, il comune, le antenne ANFR, l'acqua potabile e i bagni pubblici vengono calcolati anch'essi interamente offline, a partire da set di dati scaricati una volta per tutte (automaticamente per la maggior parte, su richiesta per le antenne e i confini precisi dei comuni). Solo le funzioni che interrogano un servizio terzo in tempo reale (indirizzo, altitudine comparata, altri punti di interesse, radar) richiedono una connessione attiva.</p>
+  <p>OuSuisJe è disponibile anche come applicazione Android autonoma, senza dipendenza da Google Play Services — gli stessi dati sono integrati direttamente nell'app, senza passare dal sito.</p>
+
+  <h2>Precisione orizzontale vs altitudine</h2>
+  <p>Il GPS non misura la posizione orizzontale e l'altitudine con la stessa affidabilità. La posizione orizzontale (latitudine/longitudine) si basa su almeno 3-4 satelliti ben distribuiti intorno a te e raggiunge comunemente una precisione di pochi metri una volta stabilizzato il segnale. L'altitudine, invece, dipende inoltre da satelliti posizionati sopra di te — una geometria meno favorevole, soprattutto in valle o vicino a rilievi — e il suo errore è generalmente 2-3 volte maggiore di quello della posizione orizzontale.</p>
+  <p>In pratica, non è raro che il GPS di uno smartphone indichi un'altitudine superiore di una cinquantina di metri rispetto a quella indicata dall'IGN o dai cartelli dei valichi stradali, che si basano su rilievi topografici di riferimento. È proprio per oggettivare questo scarto che OuSuisJe propone di confrontare l'altitudine GPS con quella calcolata dall'IGN o da Open-Elevation a partire da modelli del terreno.</p>
+
+  <h2>Fonti</h2>
+  <p>I dati cartografici, di indirizzo e dei punti di interesse provengono dal progetto <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> e dai suoi contributori, sotto licenza ODbL. I dati di altitudine comparata provengono dall'IGN (RGE ALTI) e da Open-Elevation (SRTM). I confini di dipartimento e comune provengono dall'IGN (Admin Express), tramite il progetto <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. I dati delle antenne provengono dall'<a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (licenza aperta). Il radar delle precipitazioni proviene da <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Consulta le <a class="inline" href="mentions-legales.html">note legali</a> per i dettagli su limiti e responsabilità.</p>

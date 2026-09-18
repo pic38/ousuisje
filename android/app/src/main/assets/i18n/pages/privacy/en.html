@@ -1,0 +1,39 @@
+  <h1>Privacy</h1>
+  <p class="page-sub">What gets sent, to whom, and when.</p>
+
+  <h2>The general principle</h2>
+  <p>WhereAmI has no application server of its own: no location data is collected, stored, or transmitted to a WhereAmI server. The geolocation permission prompt is handled natively by your browser.</p>
+
+  <h2>GPS location</h2>
+  <p>Processing of your position (coordinates, altitude, speed, heading, accuracy) happens entirely on your device. Nothing is sent anywhere. This feature keeps working offline once the site is added to your home screen.</p>
+
+  <h2>Address (reverse geocoding)</h2>
+  <p>When you ask to find an address, the coordinates of the chosen point (GPS position or a point clicked on the map) are sent directly by your browser to <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a>, an OpenStreetMap service, without going through a WhereAmI server. This feature doesn't work offline.</p>
+
+  <h2>Altitude</h2>
+  <p>Altitude comparison likewise only sends the coordinates of the selected point — to <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a>'s géoplateforme service (when your position is detected in France) or to <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (everywhere else), depending on the button used. Doesn't work offline.</p>
+
+  <h2>Points of interest</h2>
+  <p>The nearby points-of-interest search (toilets, drinking water, escape games, climbing gyms, food, custom sections…) sends the coordinates of the active point to OpenStreetMap's <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> API. Doesn't work offline.</p>
+
+  <h2>Department, commune and cell towers</h2>
+  <p>These features only appear when your position is detected in France. They rely on datasets (IGN Admin Express, ANFR) downloaded once from WhereAmI's own hosting, then stored on your device. The resulting calculation (which department/commune you're in, which cell towers are nearby) then happens entirely locally, with no sending of your coordinates to anyone. Works offline once the download is done.</p>
+
+  <h2>Drinking water and toilets</h2>
+  <p>A dataset (drinking-water points and toilets in France, sourced from OpenStreetMap) is downloaded automatically the first time the page loads, always from WhereAmI's own hosting. The search then happens locally, with no coordinates sent. If this download fails or you delete it, the search automatically falls back to the live Overpass API (same conditions as the "Points of interest" section above).</p>
+
+  <h2>Precipitation radar</h2>
+  <p>Displaying the radar asks <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> for the images matching the area currently shown on the map (the view's coordinates and zoom level, not your GPS position). Doesn't work offline.</p>
+
+  <h2>Visit counter</h2>
+  <p>An anonymous, aggregated visit counter (with no personally identifiable data) is recorded with a third-party service on each page load.</p>
+
+  <h2>Sharing</h2>
+  <p>The share button uses your device's native share tool, or simply copies the site's link to your clipboard. No data is sent to WhereAmI in this process.</p>
+
+  <h2>Android app</h2>
+  <p>WhereAmI is also available as a standalone Android app. The same principles apply there: no application server of its own, and every feature that leaves the device goes directly to the relevant third-party service, under the same rules as above.</p>
+
+  <div class="callout">
+    In short: anything that leaves your device goes straight to the relevant third-party service, never through a WhereAmI server.
+  </div>

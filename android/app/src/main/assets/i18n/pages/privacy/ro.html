@@ -1,0 +1,39 @@
+  <h1>Confidențialitate</h1>
+  <p class="page-sub">Ce este trimis, cui și în ce cazuri.</p>
+
+  <h2>Principiul general</h2>
+  <p>OuSuisJe nu are propriul server de aplicație: nicio dată de localizare nu este colectată, stocată sau transmisă către un server OuSuisJe. Cererea de autorizare a geolocalizării este gestionată nativ de browserul tău.</p>
+
+  <h2>Localizare GPS</h2>
+  <p>Procesarea poziției tale (coordonate, altitudine, viteză, direcție, precizie) se face în întregime local, pe dispozitivul tău. Nimic nu este trimis nicăieri. Această funcție continuă să funcționeze offline, odată ce site-ul este adăugat pe ecranul principal.</p>
+
+  <h2>Adresă (geocodare inversă)</h2>
+  <p>Când soliciți găsirea unei adrese, coordonatele punctului ales (poziție GPS sau punct selectat pe hartă) sunt trimise direct de browserul tău către serviciul <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> al OpenStreetMap, fără a trece printr-un server OuSuisJe. Această funcție nu funcționează offline.</p>
+
+  <h2>Altitudine</h2>
+  <p>Comparația de altitudine trimite, în același mod, doar coordonatele punctului selectat — către serviciul géoplateforme al <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> (când poziția ta este detectată în Franța) sau către <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (oriunde altundeva), în funcție de butonul folosit. Nu funcționează offline.</p>
+
+  <h2>Puncte de interes</h2>
+  <p>Căutarea punctelor de interes din apropiere (escape rooms, piscine, săli de cățărare, restaurație, secțiuni personalizate…) trimite coordonatele punctului activ către API-ul <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> al OpenStreetMap. Nu funcționează offline.</p>
+
+  <h2>Departament, comună și antene</h2>
+  <p>Aceste funcții apar doar atunci când poziția ta este detectată în Franța. Se bazează pe seturi de date (IGN Admin Express, ANFR) descărcate o singură dată de pe propria găzduire a OuSuisJe, apoi stocate pe dispozitivul tău. Calculul rezultat (în ce departament/comună te afli, ce antene sunt în apropiere) se face apoi în întregime local, fără nicio trimitere a coordonatelor tale către cineva. Funcționează offline odată ce descărcarea este finalizată.</p>
+
+  <h2>Apă potabilă și toalete</h2>
+  <p>Un set de date (puncte de apă potabilă și toalete în Franța, sursă OpenStreetMap) este descărcat automat la prima încărcare a paginii, întotdeauna de pe găzduirea OuSuisJe. Căutarea se face apoi local, fără trimiterea coordonatelor. Dacă această descărcare eșuează sau o ștergi, căutarea revine automat la API-ul Overpass în direct (aceleași condiții ca secțiunea „Puncte de interes” de mai sus).</p>
+
+  <h2>Radar de precipitații</h2>
+  <p>Afișarea radarului solicită de la <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> imaginile corespunzătoare zonei afișate în prezent pe hartă (coordonatele și nivelul de zoom al vizualizării, nu poziția ta GPS). Nu funcționează offline.</p>
+
+  <h2>Contor de vizite</h2>
+  <p>Un contor de vizite anonim și agregat (fără nicio dată personală identificabilă) este înregistrat la un serviciu terț la fiecare încărcare a paginii.</p>
+
+  <h2>Distribuire</h2>
+  <p>Butonul de distribuire folosește instrumentul nativ de distribuire al dispozitivului tău sau pur și simplu copiază link-ul site-ului în clipboard. Nicio dată nu este transmisă către OuSuisJe în acest proces.</p>
+
+  <h2>Aplicație Android</h2>
+  <p>OuSuisJe există și ca aplicație Android independentă. Aceleași principii se aplică și acolo: niciun server de aplicație propriu OuSuisJe, iar fiecare funcție care părăsește dispozitivul o face direct către serviciul terț respectiv, conform acelorași reguli de mai sus.</p>
+
+  <div class="callout">
+    Pe scurt: fiecare funcție care părăsește dispozitivul tău o face direct către serviciul terț respectiv, niciodată printr-un server OuSuisJe.
+  </div>

@@ -1,0 +1,39 @@
+  <h1>Konfidencialitāte</h1>
+  <p class="page-sub">Kas tiek sūtīts, kam un kādos gadījumos.</p>
+
+  <h2>Vispārējais princips</h2>
+  <p>OuSuisJe nav sava lietojumprogrammas servera: nekādi atrašanās vietas dati netiek vākti, glabāti vai sūtīti uz OuSuisJe serveri. Ģeolokācijas atļaujas pieprasījumu apstrādā natīvi jūsu pārlūkprogramma.</p>
+
+  <h2>GPS atrašanās vieta</h2>
+  <p>Jūsu pozīcijas (koordinātas, augstums, ātrums, virziens, precizitāte) apstrāde notiek pilnībā lokāli, jūsu ierīcē. Nekas nekur netiek sūtīts. Šī funkcija turpina darboties bezsaistē pēc tam, kad vietne pievienota sākuma ekrānam.</p>
+
+  <h2>Adrese (apgrieztā ģeokodēšana)</h2>
+  <p>Kad pieprasāt atrast adresi, izvēlētā punkta koordinātas (GPS pozīcija vai kartē atzīmēts punkts) tiek sūtītas tieši no jūsu pārlūkprogrammas uz OpenStreetMap pakalpojumu <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a>, neizmantojot OuSuisJe serveri. Šī funkcija nedarbojas bezsaistē.</p>
+
+  <h2>Augstums</h2>
+  <p>Augstuma salīdzinājums tāpat sūta tikai izvēlētā punkta koordinātas — <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> géoplateforme pakalpojumam (kad jūsu pozīcija tiek noteikta Francijā) vai <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (visur citur), atkarībā no izmantotās pogas. Nedarbojas bezsaistē.</p>
+
+  <h2>Apskates objekti</h2>
+  <p>Tuvumā esošo apskates objektu meklēšana (izbēgšanas istabas, baseini, kāpšanas zāles, ēdināšana, pielāgotas sadaļas…) sūta aktīvā punkta koordinātas uz OpenStreetMap <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> API. Nedarbojas bezsaistē.</p>
+
+  <h2>Departaments, pašvaldība un torņi</h2>
+  <p>Šīs funkcijas parādās tikai tad, kad jūsu pozīcija tiek noteikta Francijā. Tās balstās uz datu kopām (IGN Admin Express, ANFR), kas vienreiz lejupielādētas no paša OuSuisJe mitināšanas pakalpojuma un pēc tam saglabātas jūsu ierīcē. Turpmākais aprēķins (kurā departamentā/pašvaldībā jūs atrodaties, kādi torņi ir tuvumā) pēc tam notiek pilnībā lokāli, nesūtot jūsu koordinātas nevienam. Darbojas bezsaistē pēc lejupielādes pabeigšanas.</p>
+
+  <h2>Dzeramais ūdens un tualetes</h2>
+  <p>Datu kopa (dzeramā ūdens punkti un tualetes Francijā, avots — OpenStreetMap) tiek automātiski lejupielādēta, pirmo reizi ielādējot lapu, vienmēr no OuSuisJe mitināšanas pakalpojuma. Meklēšana pēc tam notiek lokāli, nesūtot koordinātas. Ja šī lejupielāde neizdodas vai jūs to izdzēšat, meklēšana automātiski pāriet uz tiešo Overpass API (tādi paši nosacījumi kā iepriekš minētajā sadaļā „Apskates objekti”).</p>
+
+  <h2>Nokrišņu radars</h2>
+  <p>Radara attēlošana pieprasa no <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> attēlus, kas atbilst kartē pašlaik redzamajai zonai (skata koordinātas un tālummaiņas līmenis, nevis jūsu GPS pozīcija). Nedarbojas bezsaistē.</p>
+
+  <h2>Apmeklējumu skaitītājs</h2>
+  <p>Anonīms un apkopots apmeklējumu skaitītājs (bez jebkādiem identificējamiem personas datiem) tiek reģistrēts pie trešās puses pakalpojuma katru reizi, kad tiek ielādēta lapa.</p>
+
+  <h2>Kopīgošana</h2>
+  <p>Kopīgošanas poga izmanto jūsu ierīces natīvo kopīgošanas rīku vai vienkārši nokopē vietnes saiti jūsu starpliktuvē. Šajā procesā nekādi dati netiek nosūtīti uz OuSuisJe.</p>
+
+  <h2>Android lietotne</h2>
+  <p>OuSuisJe pastāv arī kā patstāvīga Android lietotne. Tur ir spēkā tie paši principi: nav sava OuSuisJe lietojumprogrammas servera, un katra funkcija, kas atstāj ierīci, to dara tieši uz attiecīgo trešās puses pakalpojumu, saskaņā ar tiem pašiem noteikumiem kā iepriekš.</p>
+
+  <div class="callout">
+    Īsumā: katra funkcija, kas atstāj jūsu ierīci, to dara tieši uz attiecīgo trešās puses pakalpojumu, nekad caur OuSuisJe serveri.
+  </div>

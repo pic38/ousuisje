@@ -1,0 +1,21 @@
+  <h1>Apie</h1>
+  <p class="page-sub">Ką ši programėlė daro ir ko nedaro.</p>
+
+  <h2>Principas</h2>
+  <p>OuSuisJe rodo jūsų padėtį realiuoju laiku: platumą, ilgumą, aukštį, greitį ir tikslumą — tokius, kokius pateikia jūsų įrenginio GPS. Programėlė taip pat paverčia jūsų koordinates skaitomu adresu (gatvė, pašto kodas, savivaldybė, departamentas, regionas, šalis) ir siūlo netoliese esančių lankytinų objektų paiešką (geriamas vanduo, tualetai, maitinimas, bokštai…), taip pat kritulių radarą.</p>
+  <p>Nustatymų meniu leidžia pasirinkti rodomas skiltis, jas pertvarkyti vilkimo būdu ir pridėti pasirinktines skiltis bet kokiam vietos tipui (laisvas raktažodis, ieškomas per OpenStreetMap).</p>
+  <p>Kai kurios skiltys — bokštai, departamentas / savivaldybė ir IGN aukščio palyginimas — remiasi duomenimis, kurie apima tik Prancūziją: jos automatiškai atsiranda, kai jūsų padėtis nustatoma Prancūzijoje, ir lieka paslėptos kitur.</p>
+
+  <h2>Jūsų duomenys</h2>
+  <p>Jūsų įrenginio apskaičiuota padėtis <strong>lieka jūsų įrenginyje</strong>. Išsami informacija apie tai, kas siunčiama, kam ir kokiais atvejais, paaiškinta specialiame puslapyje <a class="inline" href="confidentialite.html">Privatumas</a>.</p>
+
+  <h2>Veikimas neprisijungus</h2>
+  <p>Įdiegus pagrindiniame ekrane, programėlė įkeliama be interneto ryšio, nes service worker išsaugo jos failus talpykloje. Departamentas, savivaldybė, ANFR bokštai, geriamas vanduo ir tualetai taip pat apskaičiuojami visiškai neprisijungus, naudojant vieną kartą atsisiųstus duomenų rinkinius (automatiškai daugumai atvejų, pagal poreikį — bokštams ir tiksliomis savivaldybių riboms). Tik funkcijos, kurios realiuoju laiku kreipiasi į trečiosios šalies paslaugą (adresas, palygintas aukštis, kiti lankytini objektai, radaras), reikalauja aktyvaus interneto ryšio.</p>
+  <p>OuSuisJe taip pat pasiekiama kaip savarankiška „Android“ programėlė, be priklausomybės nuo „Google Play“ paslaugų — tie patys duomenys į ją įtraukti tiesiogiai, neinant per svetainę.</p>
+
+  <h2>Horizontalus tikslumas vs aukštis</h2>
+  <p>GPS nematuoja jūsų horizontalios padėties ir aukščio vienodai patikimai. Horizontali padėtis (platuma/ilguma) remiasi bent 3–4 palydovais, gerai pasiskirsčiusiais aplink jus, ir paprastai pasiekia kelių metrų tikslumą, kai signalas stabilizuojasi. Aukštis, savo ruožtu, papildomai priklauso nuo palydovų, esančių virš jūsų — mažiau palanki geometrija, ypač slėniuose ar netoli reljefo — ir jo paklaida paprastai yra 2–3 kartus didesnė nei horizontalios padėties.</p>
+  <p>Praktikoje neretai išmaniojo telefono GPS rodo aukštį, kuris yra maždaug penkiasdešimčia metrų didesnis nei nurodytas IGN arba kalnų perėjų ženkluose, kurie remiasi etaloninėmis topografinėmis nuotraukomis. Būtent siekiant objektyviai įvertinti šį skirtumą, OuSuisJe siūlo palyginti GPS aukštį su IGN arba Open-Elevation apskaičiuotu aukščiu pagal reljefo modelius.</p>
+
+  <h2>Šaltiniai</h2>
+  <p>Kartografiniai, adreso ir lankytinų objektų duomenys gaunami iš <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> projekto ir jo bendraautorių pagal ODbL licenciją. Palyginto aukščio duomenys gaunami iš IGN (RGE ALTI) ir Open-Elevation (SRTM). Departamentų ir savivaldybių ribos gaunamos iš IGN (Admin Express) per projektą <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Bokštų duomenys gaunami iš <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (atvira licencija). Kritulių radaras gaunamas iš <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Norėdami sužinoti apie apribojimus ir atsakomybę, žr. <a class="inline" href="mentions-legales.html">teisinę informaciją</a>.</p>

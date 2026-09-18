@@ -1,0 +1,21 @@
+  <h1>Über uns</h1>
+  <p class="page-sub">Was diese App kann, und was nicht.</p>
+
+  <h2>Das Prinzip</h2>
+  <p>OuSuisJe zeigt Ihre Position live an: Breitengrad, Längengrad, Höhe, Geschwindigkeit und Genauigkeit, so wie sie vom GPS Ihres Geräts geliefert werden. Die App übersetzt Ihre Koordinaten außerdem in eine lesbare Adresse (Straße, Postleitzahl, Gemeinde, Département, Region, Land) und bietet eine Suche nach Sehenswürdigkeiten in der Nähe (Trinkwasser, Toiletten, Gastronomie, Mobilfunkmasten…) sowie ein Niederschlagsradar.</p>
+  <p>Im Einstellungsmenü können Sie auswählen, welche Abschnitte angezeigt werden, sie per Drag-and-Drop neu anordnen und eigene Abschnitte für beliebige Ortsarten hinzufügen (Freitext-Stichwort, gesucht über OpenStreetMap).</p>
+  <p>Einige Abschnitte — Mobilfunkmasten, Département/Gemeinde sowie der IGN-Höhenvergleich — beruhen auf Daten, die nur Frankreich abdecken: Sie erscheinen automatisch, sobald Ihre Position in Frankreich erkannt wird, und bleiben andernorts ausgeblendet.</p>
+
+  <h2>Ihre Daten</h2>
+  <p>Die von Ihrem Gerät berechnete Position <strong>verbleibt auf Ihrem Gerät</strong>. Details dazu, was gesendet wird, an wen und in welchem Fall, finden Sie auf der eigenen Seite <a class="inline" href="confidentialite.html">Datenschutz</a>.</p>
+
+  <h2>Offline-Nutzung</h2>
+  <p>Einmal auf Ihrem Startbildschirm installiert, lädt die App dank eines Service Workers, der ihre Dateien im Cache hält, auch ohne Verbindung. Département, Gemeinde, ANFR-Mobilfunkmasten, Trinkwasser und Toiletten werden ebenfalls vollständig offline berechnet, auf Basis einmal heruntergeladener Datensätze (größtenteils automatisch, für Masten und präzise Gemeindegrenzen auf Anfrage). Nur Funktionen, die einen Drittanbieterdienst in Echtzeit abfragen (Adresse, Höhenvergleich, andere Sehenswürdigkeiten, Radar), benötigen eine aktive Verbindung.</p>
+  <p>OuSuisJe ist auch als eigenständige Android-App verfügbar, ohne Abhängigkeit von Google Play Services — dieselben Daten sind direkt in der App enthalten, ohne über die Website zu laufen.</p>
+
+  <h2>Horizontale Genauigkeit vs. Höhe</h2>
+  <p>GPS misst Ihre horizontale Position und Ihre Höhe nicht mit derselben Zuverlässigkeit. Die horizontale Position (Breiten-/Längengrad) stützt sich auf mindestens 3 bis 4 gut um Sie herum verteilte Satelliten und erreicht bei stabilisiertem Signal üblicherweise eine Genauigkeit von wenigen Metern. Die Höhe hängt zusätzlich von Satelliten oberhalb von Ihnen ab — eine ungünstigere Geometrie, besonders in Tälern oder in der Nähe von Geländeerhebungen — und ihr Fehler ist in der Regel 2- bis 3-mal größer als der der horizontalen Position.</p>
+  <p>In der Praxis kommt es nicht selten vor, dass das GPS eines Smartphones eine Höhe anzeigt, die rund fünfzig Meter über der vom IGN oder von Passschildern angegebenen liegt, die sich auf topografische Referenzmessungen stützen. Genau um diese Abweichung zu objektivieren, bietet OuSuisJe den Vergleich der GPS-Höhe mit der vom IGN oder Open-Elevation aus Geländemodellen berechneten Höhe an.</p>
+
+  <h2>Quellen</h2>
+  <p>Die Karten-, Adress- und Sehenswürdigkeitendaten stammen vom Projekt <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> und seinen Mitwirkenden, unter der ODbL-Lizenz. Die Höhenvergleichsdaten stammen vom IGN (RGE ALTI) und von Open-Elevation (SRTM). Die Département- und Gemeindegrenzen stammen vom IGN (Admin Express), über das Projekt <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Die Mobilfunkmasten-Daten stammen von der <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (offene Lizenz). Das Niederschlagsradar stammt von <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Details zu Einschränkungen und Haftung finden Sie im <a class="inline" href="mentions-legales.html">Impressum</a>.</p>

@@ -1,0 +1,21 @@
+  <h1>Om</h1>
+  <p class="page-sub">Vad den här appen gör, och vad den inte gör.</p>
+
+  <h2>Principen</h2>
+  <p>OuSuisJe visar din position i realtid: latitud, longitud, höjd, hastighet och noggrannhet, så som de rapporteras av enhetens GPS. Appen översätter också dina koordinater till en läsbar adress (gata, postnummer, kommun, departement, region, land), och erbjuder en sökning efter sevärdheter i närheten (dricksvatten, toaletter, mat, mobilmaster…) samt en nederbördsradar.</p>
+  <p>Inställningsmenyn låter dig välja vilka avsnitt som visas, ändra deras ordning genom att dra och släppa, och lägga till anpassade avsnitt för vilken typ av plats som helst (fritt sökord, sökt via OpenStreetMap).</p>
+  <p>Vissa avsnitt — mobilmaster, departement/kommun och IGN-höjdjämförelse — bygger på datakällor som endast täcker Frankrike: de visas automatiskt när din position upptäcks i Frankrike, och förblir dolda på andra platser.</p>
+
+  <h2>Dina data</h2>
+  <p>Positionen som beräknas av din enhet <strong>stannar kvar på din enhet</strong>. Detaljerna om vad som skickas, till vem och i vilket fall förklaras på den särskilda sidan <a class="inline" href="confidentialite.html">Integritet</a>.</p>
+
+  <h2>Offlinefunktion</h2>
+  <p>När appen väl är installerad på hemskärmen laddas den utan anslutning tack vare en service worker som sparar dess filer i cacheminnet. Departement, kommun, ANFR-mobilmaster, dricksvatten och toaletter beräknas också helt offline, från datamängder som laddas ner en gång för alla (automatiskt för det mesta, på begäran för mobilmaster och exakta kommungränser). Endast funktioner som frågar en extern tjänst i realtid (adress, höjdjämförelse, andra sevärdheter, radar) kräver en aktiv anslutning.</p>
+  <p>OuSuisJe finns också som en fristående Android-app, utan beroende av Google Play Services — samma data ingår direkt i appen, utan att gå via webbplatsen.</p>
+
+  <h2>Horisontell noggrannhet jämfört med höjd</h2>
+  <p>GPS mäter inte din horisontella position och din höjd med samma tillförlitlighet. Den horisontella positionen (latitud/longitud) bygger på minst 3–4 väl utspridda satelliter runt dig och når vanligtvis en noggrannhet på några meter när signalen har stabiliserats. Höjden beror dessutom på satelliter ovanför dig — en mindre gynnsam geometri, särskilt i dalar eller nära bergsterräng — och dess fel är vanligtvis 2–3 gånger större än för den horisontella positionen.</p>
+  <p>I praktiken är det inte ovanligt att en smartphones GPS visar en höjd som är cirka femtio meter högre än den som anges av IGN eller av skyltar vid bergspass, som i sin tur bygger på topografiska referensmätningar. Det är just för att objektivt visa denna skillnad som OuSuisJe låter dig jämföra GPS-höjden med den som beräknas av IGN eller Open-Elevation utifrån terrängmodeller.</p>
+
+  <h2>Källor</h2>
+  <p>Karta-, adress- och sevärdhetsdata kommer från projektet <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> och dess bidragsgivare, under licensen ODbL. Jämförd höjddata kommer från IGN (RGE ALTI) och Open-Elevation (SRTM). Departement- och kommungränser kommer från IGN (Admin Express), via projektet <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Mobilmastdata kommer från <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (öppen licens). Nederbördsradarn kommer från <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Se den <a class="inline" href="mentions-legales.html">juridiska informationen</a> för detaljer om begränsningar och ansvar.</p>

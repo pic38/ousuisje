@@ -1,0 +1,21 @@
+  <h1>O aplikaciji</h1>
+  <p class="page-sub">Kaj ta aplikacija počne in česa ne.</p>
+
+  <h2>Načelo</h2>
+  <p>OuSuisJe v realnem času prikazuje vaš položaj: zemljepisno širino, dolžino, nadmorsko višino, hitrost in natančnost, kot jih zagotavlja GPS vaše naprave. Aplikacija tudi pretvori vaše koordinate v berljiv naslov (ulica, poštna številka, občina, departma, regija, država) ter ponuja iskanje zanimivih točk v bližini (pitna voda, stranišča, gostinstvo, bazne postaje…) in radar padavin.</p>
+  <p>Meni z nastavitvami omogoča izbiro prikazanih razdelkov, spreminjanje njihovega vrstnega reda z vlečenjem in dodajanje razdelkov po meri za kateri koli tip kraja (prosta ključna beseda, iskana prek OpenStreetMap).</p>
+  <p>Nekateri razdelki — bazne postaje, departma/občina in primerjava nadmorske višine IGN — temeljijo na podatkih, ki pokrivajo samo Francijo: samodejno se prikažejo, ko je vaš položaj zaznan v Franciji, drugod pa ostanejo skriti.</p>
+
+  <h2>Vaši podatki</h2>
+  <p>Položaj, ki ga izračuna vaša naprava, <strong>ostane na vaši napravi</strong>. Podrobnosti o tem, kaj se pošilja, komu in v katerem primeru, so pojasnjene na namenski strani <a class="inline" href="confidentialite.html">Zasebnost</a>.</p>
+
+  <h2>Delovanje brez povezave</h2>
+  <p>Ko je aplikacija nameščena na začetnem zaslonu, se nalaga brez povezave zahvaljujoč service workerju, ki hrani njene datoteke v predpomnilniku. Departma, občina, bazne postaje ANFR, pitna voda in stranišča se prav tako v celoti izračunajo brez povezave, na podlagi naborov podatkov, prenesenih enkrat za vselej (večinoma samodejno, na zahtevo za bazne postaje in natančne meje občin). Le funkcije, ki v živo poizvedujejo pri zunanji storitvi (naslov, primerjana nadmorska višina, druge zanimive točke, radar), potrebujejo aktivno povezavo.</p>
+  <p>OuSuisJe je na voljo tudi kot samostojna aplikacija Android, brez odvisnosti od storitev Google Play — isti podatki so vgrajeni neposredno v aplikacijo, brez potrebe po spletnem mestu.</p>
+
+  <h2>Vodoravna natančnost proti nadmorski višini</h2>
+  <p>GPS ne meri vašega vodoravnega položaja in nadmorske višine z enako zanesljivostjo. Vodoravni položaj (zemljepisna širina/dolžina) temelji na vsaj 3 do 4 dobro razporejenih satelitih okoli vas in običajno doseže natančnost nekaj metrov, ko se signal ustali. Nadmorska višina pa je poleg tega odvisna tudi od satelitov nad vami — manj ugodna geometrija, zlasti v dolinah ali blizu reliefa — in njena napaka je običajno 2- do 3-krat večja kot pri vodoravnem položaju.</p>
+  <p>V praksi ni redko, da GPS pametnega telefona prikaže nadmorsko višino, ki je za približno petdeset metrov višja od tiste, ki jo navaja IGN ali table na gorskih prelazih, ki temeljijo na referenčnih topografskih meritvah. Prav zato, da bi to razliko objektivizirali, OuSuisJe omogoča primerjavo GPS nadmorske višine s tisto, ki jo izračuna IGN ali Open-Elevation na podlagi modelov terena.</p>
+
+  <h2>Viri</h2>
+  <p>Podatki o zemljevidu, naslovih in zanimivih točkah izvirajo iz projekta <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> in njegovih sodelavcev, pod licenco ODbL. Primerjani podatki o nadmorski višini izvirajo iz IGN (RGE ALTI) in Open-Elevation (SRTM). Meje departmajev in občin izvirajo iz IGN (Admin Express), prek projekta <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Podatki o baznih postajah izvirajo iz <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (odprta licenca). Radar padavin izvira iz <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Za podrobnosti o omejitvah in odgovornosti glejte <a class="inline" href="mentions-legales.html">pravno obvestilo</a>.</p>

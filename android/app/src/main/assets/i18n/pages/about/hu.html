@@ -1,0 +1,21 @@
+  <h1>Rólunk</h1>
+  <p class="page-sub">Mit tud ez az alkalmazás, és mit nem.</p>
+
+  <h2>Az alapelv</h2>
+  <p>Az OuSuisJe élőben megjeleníti a pozícióját: szélességi és hosszúsági fok, magasság, sebesség és pontosság, ahogyan azt az eszköze GPS-e szolgáltatja. Az alkalmazás a koordinátáit olvasható címmé is alakítja (utca, irányítószám, település, megye, régió, ország), és lehetőséget kínál a közelben lévő érdekes helyek keresésére (ivóvíz, mosdók, étkezés, adótornyok…), valamint csapadékradart is nyújt.</p>
+  <p>A beállítások menüben kiválaszthatja a megjelenített szakaszokat, húzással átrendezheti őket, és egyéni szakaszokat adhat hozzá bármilyen típusú helyhez (szabad kulcsszó, OpenStreetMapen keresve).</p>
+  <p>Néhány szakasz — adótornyok, megye/település, valamint az IGN-magasságösszehasonlítás — kizárólag Franciaországot lefedő adatokra épül: automatikusan megjelennek, amint az Ön pozícióját Franciaországban észlelik, máshol pedig rejtve maradnak.</p>
+
+  <h2>Az Ön adatai</h2>
+  <p>Az eszköze által kiszámított pozíció <strong>az eszközén marad</strong>. A továbbított adatok, azok címzettje és az esetek részletei a külön <a class="inline" href="confidentialite.html">Adatvédelem</a> oldalon találhatók.</p>
+
+  <h2>Offline használat</h2>
+  <p>Miután telepítette a kezdőképernyőre, az alkalmazás kapcsolat nélkül is betöltődik egy service worker segítségével, amely gyorsítótárban tartja a fájljait. A megye, a település, az ANFR-adótornyok, az ivóvíz és a mosdók is teljesen offline módon számítódnak ki, egyszer letöltött adatkészletek alapján (a legtöbb esetben automatikusan, az adótornyok és a pontos településhatárok esetében igény szerint). Csak azok a funkciók igényelnek aktív kapcsolatot, amelyek valós időben kérdeznek le egy harmadik féltől szolgáltatást (cím, magasságösszehasonlítás, egyéb érdekes helyek, radar).</p>
+  <p>Az OuSuisJe önálló Android-alkalmazásként is elérhető, a Google Play Szolgáltatásoktól függetlenül — ugyanezek az adatok közvetlenül be vannak építve az alkalmazásba, a weboldal érintése nélkül.</p>
+
+  <h2>Vízszintes pontosság vs. magasság</h2>
+  <p>A GPS nem méri egyforma megbízhatósággal a vízszintes pozícióját és a magasságát. A vízszintes pozíció (szélesség/hosszúság) legalább 3–4, Ön körül jól elosztott műholdra támaszkodik, és a jel stabilizálódása után jellemzően néhány méteres pontosságot ér el. A magasság ezzel szemben az Ön felett elhelyezkedő műholdaktól is függ — kevésbé kedvező geometria, különösen völgyekben vagy domborzat közelében —, és a hibája jellemzően 2–3-szor nagyobb, mint a vízszintes pozícióé.</p>
+  <p>A gyakorlatban nem ritka, hogy egy okostelefon GPS-e mintegy ötven méterrel magasabb magasságot jelez, mint amit az IGN vagy a hágótáblák jeleznek, amelyek referencia topográfiai mérésekre támaszkodnak. Éppen ennek az eltérésnek az objektivizálása érdekében kínálja az OuSuisJe a GPS-magasság összehasonlítását az IGN vagy az Open-Elevation által terepmodellekből számított magassággal.</p>
+
+  <h2>Források</h2>
+  <p>A térkép-, cím- és érdekeshely-adatok az <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> projekttől és annak közreműködőitől származnak, ODbL licenc alatt. Az összehasonlított magassági adatok az IGN-től (RGE ALTI) és az Open-Elevationtől (SRTM) származnak. A megye- és településhatárok az IGN-től (Admin Express) származnak, a <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a> projekten keresztül. Az adótorony-adatok az <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a>-től származnak (nyílt licenc). A csapadékradar a <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>től származik. A korlátozások és felelősség részleteiért lásd a <a class="inline" href="mentions-legales.html">jogi nyilatkozatot</a>.</p>

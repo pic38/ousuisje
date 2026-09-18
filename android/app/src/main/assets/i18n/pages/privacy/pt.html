@@ -1,0 +1,39 @@
+  <h1>Privacidade</h1>
+  <p class="page-sub">O que é enviado, a quem e em que casos.</p>
+
+  <h2>O princípio geral</h2>
+  <p>A OuSuisJe não tem servidor de aplicação próprio: nenhum dado de localização é recolhido, armazenado ou transmitido a um servidor da OuSuisJe. O pedido de autorização de geolocalização é gerido nativamente pelo seu navegador.</p>
+
+  <h2>Localização GPS</h2>
+  <p>O processamento da sua posição (coordenadas, altitude, velocidade, rumo, precisão) é feito inteiramente localmente, no seu dispositivo. Nada é enviado para lado nenhum. Esta funcionalidade continua a funcionar offline depois de o site ser adicionado ao ecrã principal.</p>
+
+  <h2>Endereço (geocodificação inversa)</h2>
+  <p>Quando pede para encontrar um endereço, as coordenadas do ponto escolhido (posição GPS ou ponto clicado no mapa) são enviadas diretamente pelo seu navegador para o serviço <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> do OpenStreetMap, sem passar por um servidor da OuSuisJe. Esta funcionalidade não funciona offline.</p>
+
+  <h2>Altitude</h2>
+  <p>A comparação de altitude envia, da mesma forma, apenas as coordenadas do ponto selecionado — para o serviço géoplateforme do <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> (quando a sua posição é detetada em França) ou para o <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (em qualquer outro lugar), consoante o botão utilizado. Não funciona offline.</p>
+
+  <h2>Pontos de interesse</h2>
+  <p>A pesquisa de pontos de interesse nas proximidades (escape rooms, piscinas, ginásios de escalada, restauração, secções personalizadas…) envia as coordenadas do ponto ativo para a API <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> do OpenStreetMap. Não funciona offline.</p>
+
+  <h2>Departamento, município e antenas</h2>
+  <p>Estas funcionalidades só aparecem quando a sua posição é detetada em França. Baseiam-se em conjuntos de dados (IGN Admin Express, ANFR) transferidos uma vez a partir do próprio alojamento da OuSuisJe, e depois guardados no seu dispositivo. O cálculo daí resultante (em que departamento/município se encontra, que antenas estão nas proximidades) é feito depois inteiramente localmente, sem qualquer envio das suas coordenadas a quem quer que seja. Funciona offline uma vez concluída a transferência.</p>
+
+  <h2>Água potável e casas de banho</h2>
+  <p>Um conjunto de dados (pontos de água potável e casas de banho em França, fonte OpenStreetMap) é transferido automaticamente no primeiro carregamento da página, sempre a partir do alojamento da OuSuisJe. A pesquisa é depois feita localmente, sem envio de coordenadas. Se esta transferência falhar ou a eliminar, a pesquisa recorre automaticamente à API Overpass em direto (mesmas condições que a secção «Pontos de interesse» acima).</p>
+
+  <h2>Radar de precipitação</h2>
+  <p>A apresentação do radar pede ao <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> as imagens correspondentes à zona atualmente exibida no mapa (coordenadas e nível de zoom da vista, não a sua posição GPS). Não funciona offline.</p>
+
+  <h2>Contador de visitas</h2>
+  <p>Um contador de visitas anónimo e agregado (sem qualquer dado pessoal identificável) é registado junto de um serviço terceiro a cada carregamento da página.</p>
+
+  <h2>Partilha</h2>
+  <p>O botão de partilha utiliza a ferramenta de partilha nativa do seu dispositivo, ou simplesmente copia o link do site para a sua área de transferência. Nenhum dado é transmitido à OuSuisJe neste processo.</p>
+
+  <h2>Aplicação Android</h2>
+  <p>A OuSuisJe também existe como aplicação Android autónoma. Os mesmos princípios aplicam-se aí: nenhum servidor de aplicação próprio da OuSuisJe, e cada funcionalidade que sai do dispositivo fá-lo diretamente para o serviço terceiro em causa, segundo as mesmas regras acima indicadas.</p>
+
+  <div class="callout">
+    Em resumo: cada funcionalidade que sai do seu dispositivo fá-lo diretamente para o serviço terceiro em causa, nunca através de um servidor da OuSuisJe.
+  </div>

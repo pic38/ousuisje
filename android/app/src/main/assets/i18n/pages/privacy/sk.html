@@ -1,0 +1,39 @@
+  <h1>Ochrana súkromia</h1>
+  <p class="page-sub">Čo sa odosiela, komu a v akom prípade.</p>
+
+  <h2>Všeobecný princíp</h2>
+  <p>OuSuisJe nemá vlastný aplikačný server: žiadne údaje o polohe sa nezhromažďujú, neukladajú ani neprenášajú na server OuSuisJe. Žiadosť o povolenie geolokácie spravuje priamo váš prehliadač.</p>
+
+  <h2>GPS lokalizácia</h2>
+  <p>Spracovanie vašej polohy (súradnice, nadmorská výška, rýchlosť, smer, presnosť) prebieha úplne lokálne, na vašom zariadení. Nič sa nikam neodosiela. Táto funkcia funguje aj offline, po pridaní stránky na domovskú obrazovku.</p>
+
+  <h2>Adresa (reverzné geokódovanie)</h2>
+  <p>Keď požiadate o vyhľadanie adresy, súradnice zvoleného bodu (poloha GPS alebo bod zvolený na mape) sa odošlú priamo z vášho prehliadača službe <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> od OpenStreetMap, bez prechodu cez server OuSuisJe. Táto funkcia nefunguje offline.</p>
+
+  <h2>Nadmorská výška</h2>
+  <p>Porovnanie nadmorskej výšky podobne odosiela iba súradnice zvoleného bodu — službe géoplateforme <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> (keď sa vaša poloha zistí vo Francúzsku) alebo <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (kdekoľvek inde), podľa použitého tlačidla. Nefunguje offline.</p>
+
+  <h2>Body záujmu</h2>
+  <p>Vyhľadávanie bodov záujmu v okolí (únikové hry, bazény, lezecké centrá, stravovanie, vlastné sekcie…) odosiela súradnice aktívneho bodu API <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> od OpenStreetMap. Nefunguje offline.</p>
+
+  <h2>Departement, obec a vysielače</h2>
+  <p>Tieto funkcie sa zobrazujú iba vtedy, keď sa vaša poloha zistí vo Francúzsku. Opierajú sa o dátové sady (IGN Admin Express, ANFR) stiahnuté raz z vlastného hostingu OuSuisJe a následne uložené na vašom zariadení. Výsledný výpočet (v ktorom departemente/obci sa nachádzate, ktoré vysielače sú v okolí) prebieha potom úplne lokálne, bez akéhokoľvek odosielania vašich súradníc komukoľvek. Po dokončení sťahovania funguje offline.</p>
+
+  <h2>Pitná voda a toalety</h2>
+  <p>Dátová sada (body s pitnou vodou a toaletami vo Francúzsku, zo zdroja OpenStreetMap) sa automaticky stiahne pri prvom načítaní stránky, vždy z vlastného hostingu OuSuisJe. Vyhľadávanie potom prebieha lokálne, bez odosielania súradníc. Ak toto sťahovanie zlyhá alebo ho odstránite, vyhľadávanie sa automaticky vráti na priame API Overpass (rovnaké podmienky ako sekcia „Body záujmu“ vyššie).</p>
+
+  <h2>Zrážkový radar</h2>
+  <p>Zobrazenie radaru žiada od <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> obrázky zodpovedajúce oblasti aktuálne zobrazenej na mape (súradnice a úroveň priblíženia pohľadu, nie vašu GPS polohu). Nefunguje offline.</p>
+
+  <h2>Počítadlo návštev</h2>
+  <p>Anonymné a agregované počítadlo návštev (bez akýchkoľvek osobných identifikovateľných údajov) sa zaznamenáva u externej služby pri každom načítaní stránky.</p>
+
+  <h2>Zdieľanie</h2>
+  <p>Tlačidlo zdieľania používa natívny nástroj zdieľania vášho zariadenia, alebo jednoducho skopíruje odkaz na stránku do schránky. Pri tomto procese sa žiadne dáta neprenášajú do OuSuisJe.</p>
+
+  <h2>Android aplikácia</h2>
+  <p>OuSuisJe existuje aj ako samostatná Android aplikácia. Platia tam rovnaké princípy: žiadny vlastný aplikačný server OuSuisJe a každá funkcia, ktorá opúšťa zariadenie, tak robí priamo k príslušnej externej službe, podľa rovnakých pravidiel ako vyššie.</p>
+
+  <div class="callout">
+    Zhrnutie: všetko, čo opúšťa vaše zariadenie, ide priamo k príslušnej externej službe, nikdy cez server OuSuisJe.
+  </div>

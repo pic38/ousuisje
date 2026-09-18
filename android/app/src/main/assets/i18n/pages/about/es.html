@@ -1,0 +1,21 @@
+  <h1>Acerca de</h1>
+  <p class="page-sub">Qué hace esta aplicación, y qué no hace.</p>
+
+  <h2>El principio</h2>
+  <p>OuSuisJe muestra tu posición en tiempo real: latitud, longitud, altitud, velocidad y precisión, tal como las proporciona el GPS de tu dispositivo. La aplicación también traduce tus coordenadas a una dirección legible (calle, código postal, municipio, departamento, región, país), y ofrece una búsqueda de puntos de interés cercanos (agua potable, aseos, restauración, antenas de telefonía…) además de un radar de precipitaciones.</p>
+  <p>El menú de ajustes permite elegir las secciones mostradas, reordenarlas arrastrándolas, y añadir secciones personalizadas para cualquier tipo de lugar (palabra clave libre, buscada mediante OpenStreetMap).</p>
+  <p>Algunas secciones —antenas de telefonía, departamento/municipio y comparación de altitud IGN— se basan en datos que solo cubren Francia: aparecen automáticamente cuando tu posición se detecta en Francia, y permanecen ocultas en cualquier otro lugar.</p>
+
+  <h2>Tus datos</h2>
+  <p>La posición calculada por tu dispositivo <strong>permanece en tu dispositivo</strong>. El detalle de qué se envía, a quién y en qué caso se explica en la página dedicada <a class="inline" href="confidentialite.html">Privacidad</a>.</p>
+
+  <h2>Funcionamiento sin conexión</h2>
+  <p>Una vez instalada en tu pantalla de inicio, la aplicación se carga sin conexión gracias a un service worker que guarda sus archivos en caché. El departamento, el municipio, las antenas ANFR, el agua potable y los aseos también se calculan totalmente sin conexión, a partir de conjuntos de datos descargados una sola vez (automáticamente en la mayoría de los casos, bajo demanda para las antenas y los contornos precisos de municipio). Solo las funciones que consultan un servicio externo en directo (dirección, altitud comparada, otros puntos de interés, radar) necesitan una conexión activa.</p>
+  <p>OuSuisJe también está disponible como aplicación Android independiente, sin dependencia de Google Play Services: los mismos datos se incluyen directamente en la aplicación, sin pasar por el sitio web.</p>
+
+  <h2>Precisión horizontal frente a altitud</h2>
+  <p>El GPS no mide tu posición horizontal y tu altitud con la misma fiabilidad. La posición horizontal (latitud/longitud) se apoya en al menos 3 o 4 satélites bien distribuidos a tu alrededor y suele alcanzar una precisión de unos pocos metros una vez estabilizada la señal. La altitud, en cambio, depende además de satélites situados por encima de ti —una geometría menos favorable, sobre todo en valles o cerca de relieves— y su error suele ser de 2 a 3 veces mayor que el de la posición horizontal.</p>
+  <p>En la práctica, no es raro que el GPS de un smartphone muestre una altitud unos cincuenta metros superior a la indicada por el IGN o por los paneles de los puertos de montaña, que se basan en mediciones topográficas de referencia. Precisamente para objetivar esta diferencia, OuSuisJe permite comparar la altitud GPS con la calculada por el IGN u Open-Elevation a partir de modelos de terreno.</p>
+
+  <h2>Fuentes</h2>
+  <p>Los datos cartográficos, de direcciones y de puntos de interés proceden del proyecto <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> y sus colaboradores, bajo licencia ODbL. Los datos de altitud comparada proceden del IGN (RGE ALTI) y de Open-Elevation (SRTM). Los contornos de departamento y municipio proceden del IGN (Admin Express), vía el proyecto <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Los datos de antenas proceden de la <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (licencia abierta). El radar de precipitaciones procede de <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Consulta el <a class="inline" href="mentions-legales.html">aviso legal</a> para conocer los límites y responsabilidades en detalle.</p>

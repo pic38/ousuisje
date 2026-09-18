@@ -1,0 +1,39 @@
+  <h1>Integritet</h1>
+  <p class="page-sub">Vad som skickas, till vem, och i vilket fall.</p>
+
+  <h2>Den allmänna principen</h2>
+  <p>OuSuisJe har ingen egen applikationsserver: ingen positionsdata samlas in, lagras eller skickas till en OuSuisJe-server. Begäran om tillstånd för geolokalisering hanteras direkt av din webbläsare.</p>
+
+  <h2>GPS-positionering</h2>
+  <p>Behandlingen av din position (koordinater, höjd, hastighet, kurs, noggrannhet) sker helt lokalt, på din enhet. Ingenting skickas någonstans. Denna funktion fortsätter att fungera offline när webbplatsen har lagts till på hemskärmen.</p>
+
+  <h2>Adress (omvänd geokodning)</h2>
+  <p>När du ber om att hitta en adress skickas koordinaterna för den valda punkten (GPS-position eller punkt vald på kartan) direkt från din webbläsare till OpenStreetMaps tjänst <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a>, utan att gå via någon OuSuisJe-server. Denna funktion fungerar inte offline.</p>
+
+  <h2>Höjd</h2>
+  <p>Höjdjämförelsen skickar på samma sätt endast koordinaterna för den valda punkten — till IGN:s <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">géoplateforme</a>-tjänst (när din position upptäcks i Frankrike) eller till <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (på alla andra platser), beroende på vilken knapp som används. Fungerar inte offline.</p>
+
+  <h2>Sevärdheter</h2>
+  <p>Sökningen efter sevärdheter i närheten (escape rooms, simbassänger, klättercenter, mat, anpassade avsnitt…) skickar koordinaterna för den aktiva punkten till OpenStreetMaps <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a>-API. Fungerar inte offline.</p>
+
+  <h2>Departement, kommun och mobilmaster</h2>
+  <p>Dessa funktioner visas endast när din position upptäcks i Frankrike. De bygger på datamängder (IGN Admin Express, ANFR) som laddas ner en gång från OuSuisJes eget webbhotell, och sedan sparas på din enhet. Den beräkning som följer (vilket departement/vilken kommun du befinner dig i, vilka mobilmaster som finns i närheten) sker därefter helt lokalt, utan att dina koordinater skickas till någon. Fungerar offline när nedladdningen är klar.</p>
+
+  <h2>Dricksvatten och toaletter</h2>
+  <p>En datamängd (punkter med dricksvatten och toaletter i Frankrike, från OpenStreetMap) laddas ner automatiskt vid den första sidladdningen, alltid från OuSuisJes eget webbhotell. Sökningen sker därefter lokalt, utan att koordinater skickas. Om nedladdningen misslyckas eller du tar bort den, växlar sökningen automatiskt tillbaka till den direkta Overpass-API:et (samma villkor som avsnittet ”Sevärdheter” ovan).</p>
+
+  <h2>Nederbördsradar</h2>
+  <p>Visningen av radarn ber <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> om bilderna som motsvarar det område som för närvarande visas på kartan (vyns koordinater och zoomnivå, inte din GPS-position). Fungerar inte offline.</p>
+
+  <h2>Besöksräknare</h2>
+  <p>En anonym och sammanställd besöksräknare (utan några personligt identifierbara uppgifter) registreras hos en extern tjänst vid varje sidladdning.</p>
+
+  <h2>Delning</h2>
+  <p>Delningsknappen använder din enhets inbyggda delningsverktyg, eller kopierar helt enkelt webbplatsens länk till ditt urklipp. Ingen data skickas till OuSuisJe i denna process.</p>
+
+  <h2>Android-app</h2>
+  <p>OuSuisJe finns också som fristående Android-app. Samma principer gäller där: ingen egen applikationsserver för OuSuisJe, och varje funktion som lämnar enheten gör det direkt till relevant extern tjänst, enligt samma regler som ovan.</p>
+
+  <div class="callout">
+    Sammanfattningsvis: allt som lämnar din enhet går direkt till relevant extern tjänst, aldrig via en OuSuisJe-server.
+  </div>

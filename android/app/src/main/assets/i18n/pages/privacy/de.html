@@ -1,0 +1,39 @@
+  <h1>Datenschutz</h1>
+  <p class="page-sub">Was gesendet wird, an wen, und in welchem Fall.</p>
+
+  <h2>Das allgemeine Prinzip</h2>
+  <p>OuSuisJe hat keinen eigenen Anwendungsserver: Es werden keine Standortdaten gesammelt, gespeichert oder an einen Server von OuSuisJe übertragen. Die Anfrage zur Standortberechtigung wird nativ von Ihrem Browser verwaltet.</p>
+
+  <h2>GPS-Ortung</h2>
+  <p>Die Verarbeitung Ihrer Position (Koordinaten, Höhe, Geschwindigkeit, Richtung, Genauigkeit) erfolgt vollständig lokal auf Ihrem Gerät. Es wird nichts irgendwohin gesendet. Diese Funktion funktioniert weiterhin offline, sobald die Website zum Startbildschirm hinzugefügt wurde.</p>
+
+  <h2>Adresse (umgekehrte Geokodierung)</h2>
+  <p>Wenn Sie eine Adresse suchen, werden die Koordinaten des gewählten Punkts (GPS-Position oder auf der Karte angeklickter Punkt) direkt von Ihrem Browser an den <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a>-Dienst von OpenStreetMap gesendet, ohne über einen Server von OuSuisJe zu laufen. Diese Funktion funktioniert nicht offline.</p>
+
+  <h2>Höhe</h2>
+  <p>Der Höhenvergleich sendet auf dieselbe Weise nur die Koordinaten des ausgewählten Punkts — an den Géoplateforme-Dienst des <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> (wenn Ihre Position in Frankreich erkannt wird) oder an <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (überall sonst), je nach verwendeter Schaltfläche. Funktioniert nicht offline.</p>
+
+  <h2>Sehenswürdigkeiten</h2>
+  <p>Die Suche nach Sehenswürdigkeiten in der Nähe (Escape Rooms, Kletterhallen, Gastronomie, benutzerdefinierte Abschnitte…) sendet die Koordinaten des aktiven Punkts an die <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a>-API von OpenStreetMap. Funktioniert nicht offline.</p>
+
+  <h2>Département, Gemeinde und Mobilfunkmasten</h2>
+  <p>Diese Funktionen erscheinen nur, wenn Ihre Position in Frankreich erkannt wird. Sie stützen sich auf Datensätze (IGN Admin Express, ANFR), die einmal von der Hosting-Infrastruktur von OuSuisJe selbst heruntergeladen und dann auf Ihrem Gerät gespeichert werden. Die daraus resultierende Berechnung (in welchem Département/welcher Gemeinde Sie sich befinden, welche Masten in der Nähe sind) erfolgt danach vollständig lokal, ohne dass Ihre Koordinaten an irgendjemanden gesendet werden. Funktioniert offline, sobald der Download abgeschlossen ist.</p>
+
+  <h2>Trinkwasser und Toiletten</h2>
+  <p>Ein Datensatz (Trinkwasserstellen und Toiletten in Frankreich, Quelle OpenStreetMap) wird beim ersten Laden der Seite automatisch heruntergeladen, immer von der Hosting-Infrastruktur von OuSuisJe. Die Suche erfolgt anschließend lokal, ohne Übertragung von Koordinaten. Schlägt dieser Download fehl oder löschen Sie ihn, greift die Suche automatisch auf die Live-Overpass-API zurück (gleiche Bedingungen wie im Abschnitt „Sehenswürdigkeiten“ oben).</p>
+
+  <h2>Niederschlagsradar</h2>
+  <p>Die Anzeige des Radars fragt bei <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> die Bilder an, die dem aktuell auf der Karte angezeigten Bereich entsprechen (Koordinaten und Zoomstufe der Ansicht, nicht Ihre GPS-Position). Funktioniert nicht offline.</p>
+
+  <h2>Besucherzähler</h2>
+  <p>Ein anonymer, aggregierter Besucherzähler (ohne personenbezogene Daten) wird bei jedem Laden der Seite bei einem Drittanbieterdienst registriert.</p>
+
+  <h2>Teilen</h2>
+  <p>Die Teilen-Schaltfläche verwendet das native Teilen-Werkzeug Ihres Geräts oder kopiert einfach den Link der Website in Ihre Zwischenablage. Dabei werden keine Daten an OuSuisJe übertragen.</p>
+
+  <h2>Android-App</h2>
+  <p>OuSuisJe existiert auch als eigenständige Android-App. Dort gelten dieselben Prinzipien: kein eigener Anwendungsserver von OuSuisJe, und jede Funktion, die das Gerät verlässt, geht direkt an den betreffenden Drittanbieterdienst, nach denselben Regeln wie oben.</p>
+
+  <div class="callout">
+    Kurz gesagt: Jede Funktion, die Ihr Gerät verlässt, geht direkt an den betreffenden Drittanbieterdienst, niemals über einen Server von OuSuisJe.
+  </div>

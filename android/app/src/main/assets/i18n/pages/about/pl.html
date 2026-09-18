@@ -1,0 +1,21 @@
+  <h1>O aplikacji</h1>
+  <p class="page-sub">Co robi ta aplikacja, a czego nie robi.</p>
+
+  <h2>Zasada działania</h2>
+  <p>OuSuisJe pokazuje Twoją pozycję na żywo: szerokość i długość geograficzną, wysokość, prędkość oraz dokładność, zgodnie z danymi z GPS Twojego urządzenia. Aplikacja tłumaczy również Twoje współrzędne na czytelny adres (ulica, kod pocztowy, gmina, departament, region, kraj) i oferuje wyszukiwanie pobliskich punktów zainteresowania (woda pitna, toalety, gastronomia, nadajniki…) oraz radar opadów.</p>
+  <p>Menu ustawień pozwala wybrać wyświetlane sekcje, zmienić ich kolejność metodą przeciągnij i upuść oraz dodać niestandardowe sekcje dla dowolnego typu miejsca (dowolne słowo kluczowe, wyszukiwane przez OpenStreetMap).</p>
+  <p>Niektóre sekcje — nadajniki, departament/gmina oraz porównanie wysokości IGN — opierają się na danych obejmujących wyłącznie Francję: pojawiają się automatycznie, gdy Twoja pozycja zostanie wykryta we Francji, a poza nią pozostają ukryte.</p>
+
+  <h2>Twoje dane</h2>
+  <p>Pozycja obliczona przez Twoje urządzenie <strong>pozostaje na Twoim urządzeniu</strong>. Szczegóły dotyczące tego, co jest wysyłane, komu i w jakich przypadkach, znajdziesz na dedykowanej stronie <a class="inline" href="confidentialite.html">Prywatność</a>.</p>
+
+  <h2>Działanie offline</h2>
+  <p>Po zainstalowaniu na ekranie głównym aplikacja ładuje się bez połączenia dzięki service workerowi, który przechowuje jej pliki w pamięci podręcznej. Departament, gmina, nadajniki ANFR, woda pitna i toalety również są obliczane całkowicie offline, na podstawie zbiorów danych pobranych raz na zawsze (automatycznie w większości przypadków, na żądanie dla nadajników i precyzyjnych granic gmin). Tylko funkcje odpytujące usługę zewnętrzną na żywo (adres, porównana wysokość, inne punkty zainteresowania, radar) wymagają aktywnego połączenia.</p>
+  <p>OuSuisJe jest dostępna również jako samodzielna aplikacja na Androida, bez zależności od Usług Google Play — te same dane są w niej wbudowane bezpośrednio, bez pośrednictwa strony internetowej.</p>
+
+  <h2>Dokładność pozioma a wysokość</h2>
+  <p>GPS nie mierzy pozycji poziomej i wysokości z taką samą niezawodnością. Pozycja pozioma (szerokość/długość geograficzna) opiera się na co najmniej 3–4 satelitach rozmieszczonych wokół Ciebie i zazwyczaj osiąga dokładność kilku metrów po ustabilizowaniu sygnału. Wysokość natomiast zależy dodatkowo od satelitów znajdujących się nad Tobą — mniej korzystna geometria, zwłaszcza w dolinach lub w pobliżu terenów górzystych — a jej błąd jest zazwyczaj 2 do 3 razy większy niż błąd pozycji poziomej.</p>
+  <p>W praktyce nierzadko zdarza się, że GPS smartfona wskazuje wysokość o kilkadziesiąt metrów większą niż ta podana przez IGN lub tablice na przełęczach drogowych, które opierają się na referencyjnych pomiarach topograficznych. Właśnie po to, aby zobiektywizować tę różnicę, OuSuisJe umożliwia porównanie wysokości GPS z wysokością obliczoną przez IGN lub Open-Elevation na podstawie modeli terenu.</p>
+
+  <h2>Źródła</h2>
+  <p>Dane kartograficzne, adresowe i dotyczące punktów zainteresowania pochodzą z projektu <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> i jego współtwórców, na licencji ODbL. Dane porównanej wysokości pochodzą z IGN (RGE ALTI) i Open-Elevation (SRTM). Granice departamentów i gmin pochodzą z IGN (Admin Express), poprzez projekt <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Dane nadajników pochodzą z <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (licencja otwarta). Radar opadów pochodzi z <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Zobacz <a class="inline" href="mentions-legales.html">notę prawną</a>, aby poznać szczegóły ograniczeń i odpowiedzialności.</p>

@@ -1,0 +1,21 @@
+  <h1>Sobre</h1>
+  <p class="page-sub">O que esta aplicação faz, e o que não faz.</p>
+
+  <h2>O princípio</h2>
+  <p>OuSuisJe mostra a sua posição em direto: latitude, longitude, altitude, velocidade e precisão, tal como fornecidas pelo GPS do seu dispositivo. A aplicação também traduz as suas coordenadas num endereço legível (rua, código postal, município, departamento, região, país), e oferece uma pesquisa de pontos de interesse nas proximidades (água potável, casas de banho, restauração, antenas…) bem como um radar de precipitação.</p>
+  <p>O menu de definições permite escolher as secções apresentadas, reorganizá-las por arrastar e largar, e adicionar secções personalizadas para qualquer tipo de local (palavra-chave livre, pesquisada através do OpenStreetMap).</p>
+  <p>Algumas secções — antenas, departamento/município e comparação de altitude IGN — baseiam-se em dados que apenas cobrem a França: aparecem automaticamente quando a sua posição é detetada em França, e permanecem ocultas noutros locais.</p>
+
+  <h2>Os seus dados</h2>
+  <p>A posição calculada pelo seu dispositivo <strong>permanece no seu dispositivo</strong>. Os detalhes sobre o que é enviado, a quem e em que casos, são explicados na página dedicada <a class="inline" href="confidentialite.html">Privacidade</a>.</p>
+
+  <h2>Funcionamento offline</h2>
+  <p>Depois de instalada no ecrã principal, a aplicação carrega sem ligação graças a um service worker que mantém os seus ficheiros em cache. O departamento, o município, as antenas ANFR, a água potável e as casas de banho também são calculados totalmente offline, a partir de conjuntos de dados transferidos uma vez por todas (automaticamente na maioria dos casos, a pedido para as antenas e os limites precisos dos municípios). Apenas as funcionalidades que consultam um serviço terceiro em direto (endereço, altitude comparada, outros pontos de interesse, radar) necessitam de uma ligação ativa.</p>
+  <p>OuSuisJe também está disponível como aplicação Android autónoma, sem dependência dos Serviços Google Play — os mesmos dados são incluídos diretamente na aplicação, sem passar pelo site.</p>
+
+  <h2>Precisão horizontal vs altitude</h2>
+  <p>O GPS não mede a sua posição horizontal e a sua altitude com a mesma fiabilidade. A posição horizontal (latitude/longitude) apoia-se em pelo menos 3 a 4 satélites bem distribuídos à sua volta e atinge normalmente uma precisão de alguns metros assim que o sinal estabiliza. A altitude, por sua vez, depende ainda de satélites situados acima de si — uma geometria menos favorável, sobretudo em vales ou perto de relevos — e o seu erro é geralmente 2 a 3 vezes maior do que o da posição horizontal.</p>
+  <p>Na prática, não é raro que o GPS de um smartphone indique uma altitude cerca de cinquenta metros superior à indicada pelo IGN ou pelos painéis de portos de montanha, que se baseiam em levantamentos topográficos de referência. É precisamente para objetivar essa diferença que a OuSuisJe propõe comparar a altitude GPS com a calculada pelo IGN ou Open-Elevation a partir de modelos de terreno.</p>
+
+  <h2>Fontes</h2>
+  <p>Os dados cartográficos, de endereço e de pontos de interesse provêm do projeto <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> e dos seus colaboradores, sob licença ODbL. Os dados de altitude comparada provêm do IGN (RGE ALTI) e do Open-Elevation (SRTM). Os limites de departamento e de município provêm do IGN (Admin Express), através do projeto <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Os dados de antenas provêm da <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (licença aberta). O radar de precipitação provém do <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Consulte o <a class="inline" href="mentions-legales.html">aviso legal</a> para os detalhes das limitações e responsabilidades.</p>

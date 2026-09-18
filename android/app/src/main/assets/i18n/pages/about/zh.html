@@ -1,0 +1,21 @@
+  <h1>关于</h1>
+  <p class="page-sub">这个应用能做什么，不能做什么。</p>
+
+  <h2>基本原理</h2>
+  <p>OuSuisJe 实时显示您的位置：纬度、经度、海拔、速度和精度，均由您设备的 GPS 提供。应用还会将您的坐标转换为可读的地址（街道、邮政编码、市镇、省、大区、国家），并提供附近兴趣点搜索（饮用水、公共厕所、餐饮、基站……）以及降水雷达。</p>
+  <p>设置菜单可让您选择显示哪些板块、通过拖拽重新排序，并为任何类型的地点添加自定义板块（自由关键词，通过 OpenStreetMap 搜索）。</p>
+  <p>部分板块——基站、省/市镇以及 IGN 海拔对比——依赖仅覆盖法国的数据：当检测到您的位置位于法国境内时会自动显示，其他地方则保持隐藏。</p>
+
+  <h2>您的数据</h2>
+  <p>由您设备计算出的位置<strong>始终保留在您的设备上</strong>。有关发送了什么、发送给谁、以及在何种情况下发送的详细说明，请见专门的 <a class="inline" href="confidentialite.html">隐私</a> 页面。</p>
+
+  <h2>离线功能</h2>
+  <p>一旦安装到主屏幕，应用会借助将文件缓存的 service worker 实现无需网络加载。省、市镇、ANFR 基站、饮用水和公共厕所也完全依靠一次性下载的数据集实现离线计算（大多数为自动下载，基站和精确市镇边界为按需下载）。只有实时查询外部服务的功能（地址、海拔对比、其他兴趣点、雷达）才需要有效网络连接。</p>
+  <p>OuSuisJe 也提供独立的 Android 应用版本，无需依赖 Google Play 服务——相同的数据直接内置于应用中，无需通过网站。</p>
+
+  <h2>水平精度与海拔精度的差异</h2>
+  <p>GPS 测量水平位置和海拔的可靠性并不相同。水平位置（纬度/经度）依赖至少 3 到 4 颗分布良好的卫星，信号稳定后通常能达到几米的精度。而海拔还额外依赖位于您上方的卫星——这是一种较不利的几何结构，尤其在山谷或地形起伏较大的地区——其误差通常是水平位置误差的 2 到 3 倍。</p>
+  <p>实际情况中，智能手机 GPS 显示的海拔比 IGN 或山口标牌上标注的海拔（基于参考地形测量）高出约五十米的情况并不罕见。正是为了客观呈现这一差异，OuSuisJe 提供了将 GPS 海拔与 IGN 或 Open-Elevation 基于地形模型计算出的海拔进行对比的功能。</p>
+
+  <h2>数据来源</h2>
+  <p>地图、地址及兴趣点数据来自 <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> 项目及其贡献者，采用 ODbL 许可协议。对比海拔数据来自 IGN（RGE ALTI）和 Open-Elevation（SRTM）。省和市镇边界数据来自 IGN（Admin Express），通过 <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a> 项目提供。基站数据来自 <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a>（开放许可）。降水雷达数据来自 <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>。有关限制和责任的详细信息，请参阅<a class="inline" href="mentions-legales.html">法律声明</a>。</p>

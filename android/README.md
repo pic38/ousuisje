@@ -13,8 +13,11 @@ publiable sur F-Droid.
   Android.
 - Icônes de lancement générées à partir de `icons/icon-512.png` (legacy + adaptive icon).
 - Assets embarqués : `index.html`, `about.html`, `confidentialite.html`, `mentions-legales.html`,
-  `styles.css`, `data/*`, `vendor/leaflet/*`, `vendor/fonts/*`, `icons/*` (copie figée au
-  moment du scaffold).
+  `manifest.json`, `styles.css`, `data/*`, `vendor/leaflet/*`, `vendor/fonts/*`, `icons/*`,
+  `i18n/*` (copie figée, resynchronisée manuellement — voir « Garder les assets à jour »).
+- Capture de crash masquée : un appui long (~2 s) sur le titre de la page « À propos »
+  ouvre un journal du dernier crash (log/copier/signaler sur GitHub) — voir
+  « Fonctionnalité de capture de crash » plus bas.
 - Wrapper Gradle (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`) : fichiers
   officiels récupérés depuis le tag `v8.7.0` du dépôt `gradle/gradle`.
 
@@ -44,17 +47,23 @@ façons de compiler un APK :
 `app/src/main/assets/` est une copie figée du site, pas un lien vers `index.html` à la
 racine du repo. Après une modification du site, il faut la refaire :
 ```sh
-cp ../index.html ../about.html ../confidentialite.html ../mentions-legales.html ../styles.css app/src/main/assets/
+cp ../index.html ../about.html ../confidentialite.html ../mentions-legales.html ../styles.css ../manifest.json app/src/main/assets/
 cp ../data/*.csv ../data/*.json app/src/main/assets/data/
-cp -r ../vendor/leaflet ../vendor/fonts app/src/main/assets/vendor/
+rm -rf app/src/main/assets/vendor app/src/main/assets/icons app/src/main/assets/i18n
+cp -r ../vendor app/src/main/assets/
 cp -r ../icons app/src/main/assets/
+cp -r ../i18n app/src/main/assets/
 ```
 (à terme, un script ou une étape de build pourrait automatiser cette copie). **Les trois
 pages `about.html`/`confidentialite.html`/`mentions-legales.html` doivent être copiées elles
 aussi** — sans ça, les liens du pied de page renvoient vers un chemin que
 `WebViewAssetLoader` ne peut pas résoudre (fichier absent des assets), et la WebView tente
 un vrai accès réseau vers `appassets.androidplatform.net` qui échoue en `ERR_INVALID_RESPONSE`
-(même famille de bug que le path-prefix mismatch décrit plus bas).
+(même famille de bug que le path-prefix mismatch décrit plus bas). Le dossier **`i18n/`
+doit être entièrement retiré puis recopié** (pas juste écrasé) : contrairement aux autres
+dossiers, son contenu peut évoluer par ajout/suppression de fichiers (nouvelles langues,
+fragments renommés), et un `cp -r` seul laisserait d'anciens fichiers orphelins dans les
+assets.
 
 **Après cette copie, retirer à nouveau le bouton "Ajouter à l'écran d'accueil"** (absent
 du site telle qu'écrite, il n'est retiré que dans cette copie Android — cp écrase donc
@@ -62,9 +71,9 @@ ce retrait à chaque rafraîchissement, il faut le refaire) :
 - HTML : supprimer `<button id="installBtn">…</button>` et `<p id="installNote">…</p>`
   (dans `.actions`, juste avant le bouton `shareBtn`), ainsi que la phrase "Ajoutez le site
   à l'écran d'accueil…" dans le `<footer>` (sans objet une fois l'app installée nativement).
-  Retirer aussi le lien `<a href="https://whereami.fun" …>English version</a>` du
-  `footer-nav` : en `target="_blank"` sans `onCreateWindow`/`setSupportMultipleWindows`
-  configuré côté `MainActivity.kt`, ce clic ne fait rien dans la WebView.
+  (Le lien croisé vers l'ancien site anglais séparé n'existe plus depuis la fusion
+  OuSuisJe/WhereAmI en une seule app multilingue — rien à retirer sur ce point désormais ;
+  le sélecteur de langue en haut de chaque page fonctionne normalement dans la WebView.)
 - JS : supprimer tout le bloc `const installBtn = $('installBtn'); … } else if (isIOS) { … }`
   juste avant `const shareBtn = $('shareBtn');` (déclarations `installBtn`/`installNote`/
   `isIOS`/`isStandalone`/`deferredPrompt`, les listeners `beforeinstallprompt`/`appinstalled`,
@@ -77,6 +86,24 @@ Partager notamment) n'est pas concerné.
 fichiers sont déjà embarqués dans l'APK au lieu d'être mis en cache après coup. Le code
 du site appelle déjà `navigator.serviceWorker.register(...).catch(() => {})`, donc son
 échec silencieux dans ce contexte ne casse rien.
+
+## Fonctionnalité de capture de crash
+
+- `OuSuisJeApplication.kt` installe un `Thread.setDefaultUncaughtExceptionHandler` qui
+  écrit le dernier crash (horodatage, version de l'app, version Android, modèle
+  d'appareil, trace complète) dans `filesDir/crash_log.txt`, puis délègue au handler
+  précédent (l'app continue de crasher normalement, rien n'est avalé en silence).
+- `MainActivity.kt` expose `window.CrashBridge.showCrashLog()` à la WebView via
+  `addJavascriptInterface`. `about.html` déclenche cet appel sur un appui long (~2 s)
+  sur le titre de la page — l'écoute est déléguée sur `#pageContent`, donc ça fonctionne
+  quelle que soit la langue actuellement chargée (le titre `<h1>` change, le conteneur
+  reste le même).
+- La boîte de dialogue native affiche le log (ou "No crash recorded." s'il n'y en a
+  aucun), avec trois boutons : copier dans le presse-papiers, ouvrir une nouvelle issue
+  GitHub pré-remplie avec le log (`github.com/pic38/ousuisje/issues/new`, tronqué à
+  3000 caractères pour rester dans les limites d'URL), ou fermer.
+- Cette fonctionnalité n'a pas pu être testée avec un vrai build (pas de SDK Android
+  dans cet environnement) — à valider sur une machine avec le SDK avant publication.
 
 ## Pistes pour la suite
 

@@ -1,0 +1,39 @@
+  <h1>Privatumas</h1>
+  <p class="page-sub">Kas siunčiama, kam ir kokiais atvejais.</p>
+
+  <h2>Bendrasis principas</h2>
+  <p>OuSuisJe neturi savo taikomosios programos serverio: jokie lokacijos duomenys nėra renkami, saugomi ar perduodami OuSuisJe serveriui. Geolokacijos leidimo prašymą natūraliai tvarko jūsų naršyklė.</p>
+
+  <h2>GPS lokacija</h2>
+  <p>Jūsų padėties (koordinačių, aukščio, greičio, krypties, tikslumo) apdorojimas vyksta visiškai vietoje, jūsų įrenginyje. Niekas niekur nesiunčiama. Ši funkcija toliau veikia neprisijungus, kai svetainė pridedama prie pagrindinio ekrano.</p>
+
+  <h2>Adresas (atvirkštinis geokodavimas)</h2>
+  <p>Kai prašote rasti adresą, pasirinkto taško koordinatės (GPS padėtis arba žemėlapyje pažymėtas taškas) siunčiamos tiesiai iš jūsų naršyklės į OpenStreetMap <a class="inline" href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a> paslaugą, neinant per OuSuisJe serverį. Ši funkcija neveikia neprisijungus.</p>
+
+  <h2>Aukštis</h2>
+  <p>Aukščio palyginimas taip pat siunčia tik pasirinkto taško koordinates — <a class="inline" href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> géoplateforme paslaugai (kai jūsų padėtis nustatoma Prancūzijoje) arba <a class="inline" href="https://www.open-elevation.com" target="_blank" rel="noopener">Open-Elevation</a> (visur kitur), priklausomai nuo naudojamo mygtuko. Neveikia neprisijungus.</p>
+
+  <h2>Lankytini objektai</h2>
+  <p>Netoliese esančių lankytinų objektų paieška (pabėgimo kambariai, baseinai, laipiojimo sienos, maitinimas, pasirinktinės skiltys…) siunčia aktyvaus taško koordinates į OpenStreetMap <a class="inline" href="https://overpass-api.de" target="_blank" rel="noopener">Overpass</a> API. Neveikia neprisijungus.</p>
+
+  <h2>Departamentas, savivaldybė ir bokštai</h2>
+  <p>Šios funkcijos atsiranda tik tada, kai jūsų padėtis nustatoma Prancūzijoje. Jos remiasi duomenų rinkiniais (IGN Admin Express, ANFR), kurie vieną kartą atsisiunčiami iš pačios OuSuisJe talpinimo paslaugos, o vėliau saugomi jūsų įrenginyje. Vėliau atliekamas skaičiavimas (kuriame departamente / savivaldybėje esate, kokie bokštai yra netoliese) vyksta visiškai vietoje, niekam nesiunčiant jūsų koordinačių. Veikia neprisijungus, kai atsisiuntimas baigtas.</p>
+
+  <h2>Geriamas vanduo ir tualetai</h2>
+  <p>Duomenų rinkinys (geriamo vandens taškai ir tualetai Prancūzijoje, šaltinis — OpenStreetMap) automatiškai atsisiunčiamas pirmą kartą įkeliant puslapį, visada iš OuSuisJe talpinimo paslaugos. Paieška vėliau atliekama vietoje, nesiunčiant koordinačių. Jei šis atsisiuntimas nepavyksta arba jį ištrinate, paieška automatiškai grįžta prie tiesioginio Overpass API (tos pačios sąlygos kaip aukščiau esančioje skiltyje „Lankytini objektai“).</p>
+
+  <h2>Kritulių radaras</h2>
+  <p>Rodydama radarą, programėlė prašo <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> vaizdų, atitinkančių sritį, šiuo metu rodomą žemėlapyje (vaizdo koordinatės ir mastelio lygis, ne jūsų GPS padėtis). Neveikia neprisijungus.</p>
+
+  <h2>Apsilankymų skaitiklis</h2>
+  <p>Anoniminis ir apibendrintas apsilankymų skaitiklis (be jokių identifikuojamų asmens duomenų) registruojamas pas trečiosios šalies paslaugą kiekvieną kartą įkeliant puslapį.</p>
+
+  <h2>Bendrinimas</h2>
+  <p>Bendrinimo mygtukas naudoja natyvų jūsų įrenginio bendrinimo įrankį arba tiesiog nukopijuoja svetainės nuorodą į iškarpinę. Šiuo metu jokie duomenys nėra perduodami OuSuisJe.</p>
+
+  <h2>„Android“ programėlė</h2>
+  <p>OuSuisJe taip pat egzistuoja kaip savarankiška „Android“ programėlė. Ten galioja tie patys principai: joks nuosavas OuSuisJe taikomosios programos serveris, o kiekviena funkcija, kuri palieka įrenginį, tai daro tiesiogiai į atitinkamą trečiosios šalies paslaugą, pagal tas pačias taisykles kaip ir aukščiau.</p>
+
+  <div class="callout">
+    Trumpai tariant: kiekviena funkcija, palikdama jūsų įrenginį, siunčiama tiesiai į atitinkamą trečiosios šalies paslaugą, niekada per OuSuisJe serverį.
+  </div>

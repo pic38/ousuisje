@@ -1,0 +1,21 @@
+  <h1>O aplikaci</h1>
+  <p class="page-sub">Co tato aplikace dělá a co ne.</p>
+
+  <h2>Princip</h2>
+  <p>OuSuisJe zobrazuje vaši polohu naživo: zeměpisnou šířku, délku, nadmořskou výšku, rychlost a přesnost, tak jak je poskytuje GPS vašeho zařízení. Aplikace také převádí vaše souřadnice na čitelnou adresu (ulice, PSČ, obec, departement, region, země) a nabízí vyhledávání zajímavých míst v okolí (pitná voda, toalety, stravovací zařízení, vysílače…), jakož i srážkový radar.</p>
+  <p>Nabídka nastavení umožňuje vybrat zobrazené sekce, přeuspořádat je přetažením a přidávat vlastní sekce pro libovolný typ místa (volné klíčové slovo, vyhledávané přes OpenStreetMap).</p>
+  <p>Některé sekce — vysílače, departement/obec a porovnání nadmořské výšky s IGN — se opírají o data, která pokrývají pouze Francii: automaticky se objeví, jakmile je vaše poloha zjištěna ve Francii, a jinde zůstávají skryté.</p>
+
+  <h2>Vaše data</h2>
+  <p>Poloha vypočtená vaším zařízením <strong>zůstává na vašem zařízení</strong>. Podrobnosti o tom, co se odesílá, komu a v jakém případě, jsou vysvětleny na věnované stránce <a class="inline" href="confidentialite.html">Ochrana soukromí</a>.</p>
+
+  <h2>Offline fungování</h2>
+  <p>Po instalaci na plochu se aplikace načítá bez připojení díky service workeru, který uchovává její soubory v mezipaměti. Departement, obec, vysílače ANFR, pitná voda a toalety se také počítají zcela offline, na základě datových sad stažených jednou provždy (automaticky u většiny, na vyžádání u vysílačů a přesných hranic obcí). Pouze funkce, které naživo dotazují službu třetí strany (adresa, porovnaná nadmořská výška, další zajímavá místa, radar), vyžadují aktivní připojení.</p>
+  <p>OuSuisJe je také dostupný jako samostatná aplikace pro Android, bez závislosti na Google Play Services — stejná data jsou v ní přímo obsažena, bez nutnosti procházet web.</p>
+
+  <h2>Horizontální přesnost oproti nadmořské výšce</h2>
+  <p>GPS neměří vaši horizontální polohu a nadmořskou výšku se stejnou spolehlivostí. Horizontální poloha (zeměpisná šířka/délka) se opírá o alespoň 3 až 4 dobře rozmístěné satelity kolem vás a po stabilizaci signálu běžně dosahuje přesnosti několika metrů. Nadmořská výška naopak dále závisí na satelitech nad vámi — méně příznivá geometrie, zejména v údolích nebo poblíž reliéfu — a její chyba bývá obvykle 2 až 3krát větší než chyba horizontální polohy.</p>
+  <p>V praxi není neobvyklé, že GPS smartphonu zobrazí nadmořskou výšku až o padesát metrů vyšší, než jakou udává IGN nebo cedule na horských průsmycích, které se opírají o referenční topografická měření. Právě kvůli objektivizaci tohoto rozdílu nabízí OuSuisJe porovnání GPS nadmořské výšky s výškou vypočtenou IGN nebo Open-Elevation na základě modelů terénu.</p>
+
+  <h2>Zdroje</h2>
+  <p>Kartografická data, adresy a zajímavá místa pocházejí z projektu <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> a jeho přispěvatelů, pod licencí ODbL. Data porovnané nadmořské výšky pocházejí od IGN (RGE ALTI) a Open-Elevation (SRTM). Hranice departementů a obcí pocházejí od IGN (Admin Express), prostřednictvím projektu <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Data o vysílačích pocházejí od <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (otevřená licence). Srážkový radar poskytuje <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Podrobnosti o omezeních a odpovědnosti najdete v <a class="inline" href="mentions-legales.html">právním upozornění</a>.</p>

@@ -1,0 +1,17 @@
+{
+  "name": "OuSuisJe — Position en direct",
+  "short_name": "OuSuisJe",
+  "description": "Affiche en direct la position, l'adresse, l'altitude, la vitesse et la précision GPS de l'appareil.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B1220",
+  "theme_color": "#0B1220",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

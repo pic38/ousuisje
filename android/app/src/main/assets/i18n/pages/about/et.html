@@ -1,0 +1,21 @@
+  <h1>Rakendusest</h1>
+  <p class="page-sub">Mida see rakendus teeb ja mida mitte.</p>
+
+  <h2>Põhimõte</h2>
+  <p>OuSuisJe näitab teie asukohta reaalajas: laius- ja pikkuskraadi, kõrgust, kiirust ja täpsust, nagu need on esitatud teie seadme GPS-i poolt. Rakendus tõlgib teie koordinaadid ka loetavaks aadressiks (tänav, sihtnumber, kommuun, departemang, piirkond, riik) ning pakub lähedal asuvate huvipunktide otsingut (joogivesi, WC-d, toitlustuskohad, mobiilimastid…), samuti sademete radarit.</p>
+  <p>Seadete menüüs saate valida kuvatavad jaotised, järjestada neid lohistades ning lisada kohandatud jaotisi mis tahes tüüpi koha jaoks (vaba märksõna, otsitud OpenStreetMapi kaudu).</p>
+  <p>Mõned jaotised — mobiilimastid, departemang/kommuun ja IGN-i kõrguse võrdlus — toetuvad andmetele, mis katavad ainult Prantsusmaad: need ilmuvad automaatselt, kui teie asukoht tuvastatakse Prantsusmaal, ja jäävad mujal peidetuks.</p>
+
+  <h2>Teie andmed</h2>
+  <p>Teie seadme poolt arvutatud asukoht <strong>jääb teie seadmesse</strong>. Üksikasjad selle kohta, mida saadetakse, kellele ja millisel juhul, on selgitatud eraldi lehel <a class="inline" href="confidentialite.html">Privaatsus</a>.</p>
+
+  <h2>Toimimine võrguühenduseta</h2>
+  <p>Kui rakendus on paigaldatud avakuvale, laadib see ilma ühenduseta tänu teenustöötlejale (service worker), mis hoiab failid vahemälus. Departemang, kommuun, ANFR mobiilimastid, joogivesi ja WC-d arvutatakse samuti täielikult võrguühenduseta, korra alla laaditud andmestike põhjal (automaatselt enamiku puhul, nõudmisel mastide ja kommuunide täpsete piiride puhul). Ainult funktsioonid, mis pärivad reaalajas kolmanda osapoole teenust (aadress, võrreldud kõrgus, teised huvipunktid, radar), vajavad aktiivset ühendust.</p>
+  <p>OuSuisJe on saadaval ka iseseisva Android-rakendusena, ilma sõltuvuseta Google Play Servicesist — samad andmed on selles otse sisse ehitatud, ilma veebisaidi kaudu käimata.</p>
+
+  <h2>Horisontaalne täpsus versus kõrgus</h2>
+  <p>GPS ei mõõda teie horisontaalset asukohta ja kõrgust sama usaldusväärsusega. Horisontaalne asukoht (laius-/pikkuskraad) toetub vähemalt 3–4 hästi jaotunud satelliidile teie ümber ning saavutab tavaliselt paari meetri täpsuse, kui signaal on stabiliseerunud. Kõrgus omakorda sõltub lisaks satelliitidest teie kohal — ebasoodsam geomeetria, eriti orgudes või reljeefi lähedal — ning selle viga on tavaliselt 2–3 korda suurem kui horisontaalsel asukohal.</p>
+  <p>Praktikas ei ole harvaesinev, et nutitelefoni GPS näitab umbes viiskümmend meetrit kõrgemat kõrgust kui IGN-i või mägiteede kurude siltide oma, mis toetuvad võrdlustopograafilistele mõõtmistele. Just selle erinevuse objektiivistamiseks pakub OuSuisJe võimalust võrrelda GPS-kõrgust IGN-i või Open-Elevationi poolt maastikumudelite põhjal arvutatud kõrgusega.</p>
+
+  <h2>Allikad</h2>
+  <p>Kaardiandmed, aadressid ja huvipunktid pärinevad projektist <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> ja selle kaasautoritelt, ODbL-litsentsi alusel. Võrreldud kõrguse andmed pärinevad IGN-ilt (RGE ALTI) ja Open-Elevationilt (SRTM). Departemangude ja kommuunide piirid pärinevad IGN-ilt (Admin Express), projekti <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a> kaudu. Mobiilimastide andmed pärinevad <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR-ilt</a> (avatud litsents). Sademete radar pärineb <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewerilt</a>. Piirangute ja vastutuse üksikasjade kohta vaadake <a class="inline" href="mentions-legales.html">õigusteavet</a>.</p>

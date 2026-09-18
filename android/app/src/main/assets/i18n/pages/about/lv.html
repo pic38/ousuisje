@@ -1,0 +1,21 @@
+  <h1>Par mums</h1>
+  <p class="page-sub">Ko šī lietotne dara un ko nedara.</p>
+
+  <h2>Princips</h2>
+  <p>OuSuisJe reāllaikā rāda jūsu pozīciju: platumu, garumu, augstumu, ātrumu un precizitāti — tā, kā to sniedz jūsu ierīces GPS. Lietotne arī pārvērš jūsu koordinātas lasāmā adresē (iela, pasta indekss, pašvaldība, departaments, reģions, valsts) un piedāvā tuvumā esošo apskates objektu meklēšanu (dzeramais ūdens, tualetes, ēdināšana, torņi…), kā arī nokrišņu radaru.</p>
+  <p>Iestatījumu izvēlne ļauj izvēlēties rādāmās sadaļas, mainīt to secību, velkot un nometot, un pievienot pielāgotas sadaļas jebkuram vietas veidam (brīvi izvēlēts atslēgvārds, meklējams caur OpenStreetMap).</p>
+  <p>Dažas sadaļas — torņi, departaments/pašvaldība un IGN augstuma salīdzinājums — balstās uz datiem, kas aptver tikai Franciju: tās automātiski parādās, kad jūsu pozīcija tiek noteikta Francijā, un pārējā pasaulē paliek paslēptas.</p>
+
+  <h2>Jūsu dati</h2>
+  <p>Jūsu ierīces aprēķinātā pozīcija <strong>paliek jūsu ierīcē</strong>. Detalizēta informācija par to, kas tiek sūtīts, kam un kādos gadījumos, ir paskaidrota īpašā lapā <a class="inline" href="confidentialite.html">Konfidencialitāte</a>.</p>
+
+  <h2>Darbība bezsaistē</h2>
+  <p>Kad lietotne ir instalēta sākuma ekrānā, tā ielādējas bez savienojuma, pateicoties service worker, kas saglabā tās failus kešatmiņā. Departaments, pašvaldība, ANFR torņi, dzeramais ūdens un tualetes arī tiek aprēķināti pilnībā bezsaistē, izmantojot vienreiz lejupielādētas datu kopas (automātiski lielākajā daļā gadījumu, pēc pieprasījuma — torņiem un precīzām pašvaldību robežām). Tikai funkcijas, kas reāllaikā vēršas pie trešās puses pakalpojuma (adrese, salīdzinātais augstums, citi apskates objekti, radars), prasa aktīvu savienojumu.</p>
+  <p>OuSuisJe ir pieejama arī kā patstāvīga Android lietotne, bez atkarības no Google Play pakalpojumiem — tie paši dati tajā ir tieši iekļauti, neizmantojot vietni.</p>
+
+  <h2>Horizontālā precizitāte pret augstumu</h2>
+  <p>GPS nemēra jūsu horizontālo pozīciju un augstumu ar vienādu uzticamību. Horizontālā pozīcija (platums/garums) balstās vismaz uz 3–4 satelītiem, kas labi izvietoti ap jums, un parasti sasniedz dažu metru precizitāti, kad signāls ir nostabilizējies. Augstums savukārt papildus ir atkarīgs no satelītiem, kas atrodas virs jums — mazāk labvēlīga ģeometrija, īpaši ielejās vai kalnainā apvidū —, un tā kļūda parasti ir 2 līdz 3 reizes lielāka nekā horizontālajai pozīcijai.</p>
+  <p>Praksē nav retums, ka viedtālruņa GPS uzrāda augstumu, kas ir apmēram par piecdesmit metriem lielāks nekā IGN norādītais vai ceļa pārejas zīmēs redzamais, kas balstās uz atsauces topogrāfiskajiem mērījumiem. Tieši lai objektīvi novērtētu šo starpību, OuSuisJe piedāvā salīdzināt GPS augstumu ar IGN vai Open-Elevation aprēķināto augstumu, izmantojot reljefa modeļus.</p>
+
+  <h2>Avoti</h2>
+  <p>Kartogrāfiskie, adrešu un apskates objektu dati nāk no <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> projekta un tā līdzstrādniekiem saskaņā ar ODbL licenci. Salīdzinātā augstuma dati nāk no IGN (RGE ALTI) un Open-Elevation (SRTM). Departamentu un pašvaldību robežas nāk no IGN (Admin Express), izmantojot projektu <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a>. Torņu dati nāk no <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (atvērta licence). Nokrišņu radars nāk no <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. Skatiet <a class="inline" href="mentions-legales.html">juridisko informāciju</a>, lai iepazītos ar ierobežojumu un atbildības detaļām.</p>

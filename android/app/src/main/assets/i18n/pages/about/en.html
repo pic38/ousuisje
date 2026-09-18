@@ -1,0 +1,21 @@
+  <h1>About</h1>
+  <p class="page-sub">What this app does, and what it doesn't.</p>
+
+  <h2>The idea</h2>
+  <p>WhereAmI shows your live position: latitude, longitude, altitude, speed, and accuracy, as reported by your device's GPS. It also translates your coordinates into a readable address (street, postcode, town, county/state, region, country), and offers a search for nearby points of interest (drinking water, toilets, food, cell towers…) as well as a precipitation radar.</p>
+  <p>The settings menu lets you choose which sections are shown, reorder them by drag-and-drop, and add custom sections for any type of place (free-text keyword, searched via OpenStreetMap).</p>
+  <p>A few sections — cell towers, department/commune lookup, and IGN altitude comparison — rely on data sources that only cover France: they appear automatically once your detected location is in France, and stay hidden elsewhere.</p>
+
+  <h2>Your data</h2>
+  <p>The position calculated by your device <strong>stays on your device</strong>. What gets sent, to whom, and when, is explained on the dedicated <a class="inline" href="privacy.html">Privacy</a> page.</p>
+
+  <h2>Offline use</h2>
+  <p>Once installed on your home screen, the app loads without a connection thanks to a service worker that keeps its files cached. GPS location keeps working offline too. When your position is detected in France, the department/commune lookup and the ANFR cell-tower search also work entirely offline, from datasets downloaded once (automatically for the most part, on request for cell towers and for detailed commune boundaries). Only the features that query a third-party service in real time (address, altitude comparison, other points of interest, radar) need an active connection.</p>
+  <p>WhereAmI is also available as a standalone Android app, with no dependency on Google Play Services — the same data is bundled directly into the app, without going through the website.</p>
+
+  <h2>Horizontal accuracy vs altitude</h2>
+  <p>GPS doesn't measure your horizontal position and your altitude with the same reliability. Horizontal position (latitude/longitude) relies on at least 3–4 satellites spread around you, and commonly reaches an accuracy of a few metres once the signal has settled. Altitude, on the other hand, also depends on satellites positioned above you — a less favourable geometry, especially in valleys or near terrain — and its error is typically 2 to 3 times larger than that of horizontal position.</p>
+  <p>In practice, it's not unusual for a smartphone's GPS to report an altitude around fifty metres higher than the one shown on official topographic surveys or elevation markers. That's exactly why WhereAmI lets you compare GPS altitude against the altitude calculated by IGN (in France) or Open-Elevation (worldwide) from terrain models.</p>
+
+  <h2>Sources</h2>
+  <p>Map, address and points-of-interest data come from the <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> project and its contributors, under the ODbL licence. Compared altitude data comes from IGN (RGE ALTI, in France) and Open-Elevation (SRTM, worldwide). Department and commune boundaries come from IGN (Admin Express), via the <a class="inline" href="https://github.com/gregoiredavid/france-geojson" target="_blank" rel="noopener">france-geojson</a> project. Cell-tower data comes from <a class="inline" href="https://data.anfr.fr" target="_blank" rel="noopener">ANFR</a> (open licence). The precipitation radar comes from <a class="inline" href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>. See the <a class="inline" href="mentions-legales.html">legal notice</a> for details on limitations and liability.</p>

@@ -102,15 +102,27 @@ du site appelle déjà `navigator.serviceWorker.register(...).catch(() => {})`, 
   aucun), avec trois boutons : copier dans le presse-papiers, ouvrir une nouvelle issue
   GitHub pré-remplie avec le log (`github.com/pic38/ousuisje/issues/new`, tronqué à
   3000 caractères pour rester dans les limites d'URL), ou fermer.
-- Cette fonctionnalité n'a pas pu être testée avec un vrai build (pas de SDK Android
-  dans cet environnement) — à valider sur une machine avec le SDK avant publication.
+- `./gradlew assembleDebug` a été testé avec succès (SDK Android + build-tools 34
+  installés localement, `BUILD SUCCESSFUL`) — l'appui long sur le titre de la page
+  "À propos" et la boîte de dialogue de log n'ont en revanche pas encore été testés
+  manuellement sur un appareil réel, à faire avant publication.
+
+## F-Droid
+
+- Recette prête : `android/fdroid/com.ousuisje.app.yml`, à copier dans
+  `metadata/com.ousuisje.app.yml` du dépôt `fdroiddata` lors de la soumission.
+- Fiche magasin (titre/résumé/description/changelog) dans les 26 langues :
+  `android/fastlane/metadata/android/<locale>/`, lue automatiquement par
+  `fdroidserver` depuis ce dépôt — pas besoin de la dupliquer dans `fdroiddata`.
+- Tag git `10` créé (correspond à `versionCode`), référencé par la recette
+  (`UpdateCheckMode: Tags`) — à créer un nouveau tag à chaque future release.
+- Icône : icône adaptative (Android 8+) + fallback PNG classique à toutes les
+  densités, nécessaire pour un affichage fiable sur la fiche F-Droid.
 
 ## Pistes pour la suite
 
 - Icônes adaptatives : celles générées ici sont un premier jet (recadrage automatique
   à 60 % du canevas) — à refaire proprement avec l'outil "Image Asset" d'Android Studio
   si le rendu ne convient pas.
-- Fiche de build F-Droid (`fdroiddata`) : une fois le projet buildable de façon
-  reproductible (`./gradlew assembleRelease` sans réseau au-delà de la résolution des
-  dépendances Gradle), rédiger le recipe YAML pointant vers ce sous-dossier `android/`
-  du repo.
+- Tester `./gradlew assembleRelease` (build signé) avant la soumission F-Droid
+  définitive — seul `assembleDebug` a été vérifié jusqu'ici.

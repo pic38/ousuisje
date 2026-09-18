@@ -1,0 +1,32 @@
+# Draft F-Droid recipe for com.ousuisje.app — to be submitted as
+# metadata/com.ousuisje.app.yml in https://gitlab.com/fdroid/fdroiddata
+#
+# The store listing (title/summary/description/changelog, all 26 languages) is NOT
+# duplicated here: it lives in this repo under android/fastlane/metadata/android/,
+# which fdroidserver reads automatically from the app's own source tree. Only the
+# build recipe and app-level metadata belong in this file.
+
+Categories:
+  - Navigation
+License: GPL-3.0-only
+SourceCode: https://github.com/pic38/ousuisje
+IssueTracker: https://github.com/pic38/ousuisje/issues
+Changelog: https://github.com/pic38/ousuisje/commits/main/android
+
+AutoName: OuSuisJe
+
+RepoType: git
+Repo: https://github.com/pic38/ousuisje.git
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 10
+    commit: '10'
+    subdir: android/app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 10

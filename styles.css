@@ -140,6 +140,15 @@ details.feature[open] > .feature-summary .feature-chevron { transform: rotate(18
   cursor: pointer;
 }
 .settings-bulk-btn:hover { background: var(--bg); }
+
+.page .lang-switcher {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.page .lang-switcher select { width: auto; }
 .settings-check {
   display: flex;
   align-items: center;

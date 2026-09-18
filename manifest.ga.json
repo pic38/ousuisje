@@ -1,0 +1,37 @@
+{
+  "name": "CáBhfuilim — Faigh do sheoladh, agus tuilleadh!",
+  "short_name": "CáBhfuilim",
+  "description": "Aimsigh an seoladh poist a fhreagraíonn do do shuíomh, chomh maith le huisce óil, leithris phoiblí agus áiteanna spéisiúla eile in aice láimhe.",
+  "start_url": ".",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B1220",
+  "theme_color": "#0B1220",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

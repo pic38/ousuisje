@@ -14,19 +14,38 @@
 <meta name="apple-mobile-web-app-title" content="OuSuisJe" id="appleWebAppTitle" />
 <link rel="icon" href="icons/icon-192.png" />
 <script>
-// Manifest/iOS install metadata only exist as static files (no per-language runtime
-// system, unlike the rest of the UI) — swap to the English variant before the browser
-// reads it for the "Add to Home Screen" flow, using the same stored-choice > hostname
-// priority as i18n.js's resolveLang() (kept duplicated/minimal here since it must run
-// synchronously, before i18n.js's own async dictionary fetch would resolve).
+// Manifest/iOS install metadata only exist as static per-language files (no runtime
+// system like the rest of the UI) — swap to the right variant before the browser reads
+// it for the "Add to Home Screen" flow. Mirrors i18n.js's resolveLang() priority exactly
+// (stored choice > hostname > navigator.language > 'en' fallback), kept duplicated/
+// minimal here since it must run synchronously, before i18n.js's own async dictionary
+// fetch would resolve. French has no suffix (manifest.json is already French).
 (function () {
+  var BRAND = {
+    en: 'WhereAmI', bg: 'КъдеСъм', hr: 'GdjeSam', cs: 'KdeJsem', da: 'HvorErJeg',
+    nl: 'WaarBenIk', et: 'KusMaOlen', fi: 'MissäOlen', de: 'WoBinIch', el: 'ΠούΕίμαι',
+    hu: 'HolVagyok', ga: 'CáBhfuilim', it: 'DoveSono', lv: 'KurEsmu', lt: 'KurEsu',
+    mt: 'FejnJien', pl: 'GdzieJestem', pt: 'OndeEstou', ro: 'UndeSunt', sk: 'KdeSom',
+    sl: 'KjeSem', es: 'DóndeEstoy', sv: 'VarÄrJag', zh: '我在哪', ar: 'أين أنا'
+  };
+  var HOSTNAME_DEFAULT = {
+    'whereami.fun': 'en', 'www.whereami.fun': 'en',
+    'ousuisje.fun': 'fr', 'www.ousuisje.fun': 'fr'
+  };
   try {
-    var stored = localStorage.getItem('ousuisje_lang');
-    var lang = (stored === 'en') ? 'en'
-      : (stored ? null : (/(^|\.)whereami\.fun$/.test(location.hostname) ? 'en' : null));
-    if (lang === 'en') {
-      document.getElementById('manifestLink').href = 'manifest.en.json';
-      document.getElementById('appleWebAppTitle').content = 'WhereAmI';
+    var lang = localStorage.getItem('ousuisje_lang');
+    if (!lang) lang = HOSTNAME_DEFAULT[location.hostname];
+    if (!lang) {
+      var candidates = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language];
+      for (var i = 0; i < candidates.length; i++) {
+        var code = (candidates[i] || '').toLowerCase().split('-')[0];
+        if (code === 'fr' || BRAND[code]) { lang = code; break; }
+      }
+    }
+    if (!lang) lang = 'en';
+    if (lang !== 'fr' && BRAND[lang]) {
+      document.getElementById('manifestLink').href = 'manifest.' + lang + '.json';
+      document.getElementById('appleWebAppTitle').content = BRAND[lang];
     }
   } catch (e) {}
 })();

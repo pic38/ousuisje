@@ -1,0 +1,11 @@
+OuSuisJe (UndeSunt) îți afișează poziția, altitudinea, viteza și precizia, așa cum sunt furnizate de GPS-ul dispozitivului tău. Aplicația îți traduce coordonatele într-o adresă lizibilă și oferă o căutare de puncte de interes din apropiere (apă potabilă, toalete, unități de alimentație…), precum și un radar de precipitații.
+
+În Franța, funcții suplimentare apar automat în funcție de poziția ta detectată: căutare de antene 2G/3G/4G/5G, identificarea departamentului și a comunei, și compararea altitudinii GPS cu datele de referință ale IGN.
+
+Aplicația poate funcționa offline pentru unele dintre funcțiile sale odată ce datele au fost descărcate (poziție GPS, departament/comună, antene, apă potabilă, toalete). Doar funcțiile care interoghează un serviciu online (adresă, comparație de altitudine, alte puncte de interes, radar) necesită o conexiune activă.
+
+Fără server propriu: nicio dată de localizare nu este colectată, stocată sau transmisă către un server OuSuisJe. Aplicația contactează direct serviciul terț relevant (OpenStreetMap, IGN, ANFR, RainViewer), niciodată printr-un intermediar.
+
+Disponibilă în 26 de limbi (cele 24 de limbi oficiale ale Uniunii Europene, chineza mandarină și araba).
+
+Surse de date: OpenStreetMap și colaboratorii săi (licență ODbL), IGN (RGE ALTI, Admin Express), ANFR (licență deschisă), Open-Elevation, RainViewer.

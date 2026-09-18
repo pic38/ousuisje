@@ -1,0 +1,11 @@
+OuSuisJe (KjeSem) prikazuje vaš položaj, nadmorsko višino, hitrost in natančnost, kot jih sporoča GPS vaše naprave. Aplikacija vaše koordinate prevede v berljiv naslov in ponuja iskanje zanimivosti v bližini (pitna voda, stranišča, prehrana…), pa tudi radar padavin.
+
+V Franciji se samodejno pojavijo dodatne funkcije glede na zaznan položaj: iskanje oddajnikov 2G/3G/4G/5G, prepoznavanje departmaja in občine ter primerjava GPS nadmorske višine s referenčnimi podatki IGN.
+
+Aplikacija lahko za nekatere funkcije deluje brez povezave, ko so podatki preneseni (GPS položaj, departma/občina, oddajniki, pitna voda, stranišča). Samo funkcije, ki poizvedujejo spletno storitev (naslov, primerjava nadmorske višine, druge zanimivosti, radar), potrebujejo aktivno povezavo.
+
+Brez lastnega aplikacijskega strežnika: nobeni podatki o lokaciji se ne zbirajo, shranjujejo ali prenašajo na strežnik OuSuisJe. Aplikacija neposredno vzpostavi stik z ustrezno storitvijo tretje osebe (OpenStreetMap, IGN, ANFR, RainViewer), nikoli prek posrednika.
+
+Na voljo v 26 jezikih (24 uradnih jezikov Evropske unije, mandarinska kitajščina in arabščina).
+
+Viri podatkov: OpenStreetMap in njegovi prispevki (licenca ODbL), IGN (RGE ALTI, Admin Express), ANFR (odprta licenca), Open-Elevation, RainViewer.

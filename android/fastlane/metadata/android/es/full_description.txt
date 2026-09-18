@@ -1,0 +1,11 @@
+OuSuisJe (DóndeEstoy) muestra tu posición, altitud, velocidad y precisión, tal como las proporciona el GPS de tu dispositivo. La aplicación traduce tus coordenadas en una dirección legible y ofrece una búsqueda de puntos de interés cercanos (agua potable, aseos, restauración…), así como un radar de precipitaciones.
+
+En Francia aparecen automáticamente funciones adicionales según tu posición detectada: búsqueda de antenas de telefonía 2G/3G/4G/5G, identificación del departamento y el municipio, y comparación de la altitud GPS con los datos de referencia del IGN.
+
+La aplicación puede funcionar sin conexión para algunas de sus funciones una vez descargados los datos (posición GPS, departamento/municipio, antenas, agua potable, aseos). Solo las funciones que consultan un servicio en línea (dirección, altitud comparada, otros puntos de interés, radar) necesitan una conexión activa.
+
+Sin servidor propio: ningún dato de localización se recopila, almacena o transmite a un servidor de OuSuisJe. La aplicación contacta directamente con el servicio externo correspondiente (OpenStreetMap, IGN, ANFR, RainViewer), nunca a través de un intermediario.
+
+Disponible en 26 idiomas (los 24 idiomas oficiales de la Unión Europea, chino mandarín y árabe).
+
+Fuentes de datos: OpenStreetMap y sus colaboradores (licencia ODbL), IGN (RGE ALTI, Admin Express), ANFR (licencia abierta), Open-Elevation, RainViewer.

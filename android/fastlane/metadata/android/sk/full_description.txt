@@ -1,0 +1,11 @@
+OuSuisJe (KdeSom) zobrazuje vašu polohu, nadmorskú výšku, rýchlosť a presnosť, ako ich hlási GPS vášho zariadenia. Aplikácia prekladá vaše súradnice do čitateľnej adresy a ponúka vyhľadávanie zaujímavých miest v okolí (pitná voda, toalety, stravovanie…), ako aj radar zrážok.
+
+Vo Francúzsku sa automaticky zobrazujú ďalšie funkcie podľa vašej zistenej polohy: vyhľadávanie vysielačov 2G/3G/4G/5G, identifikácia departementu a obce a porovnanie nadmorskej výšky GPS s referenčnými údajmi IGN.
+
+Aplikácia môže fungovať offline pre niektoré svoje funkcie po stiahnutí údajov (poloha GPS, departement/obec, vysielače, pitná voda, toalety). Iba funkcie, ktoré sa dopytujú online služby (adresa, porovnanie nadmorskej výšky, ďalšie zaujímavé miesta, radar), vyžadujú aktívne pripojenie.
+
+Žiadny vlastný aplikačný server: žiadne údaje o polohe sa nezhromažďujú, neukladajú ani neprenášajú na server OuSuisJe. Aplikácia priamo kontaktuje príslušnú službu tretej strany (OpenStreetMap, IGN, ANFR, RainViewer), nikdy prostredníctvom sprostredkovateľa.
+
+Dostupné v 26 jazykoch (24 úradných jazykov Európskej únie, mandarínska čínština a arabčina).
+
+Zdroje údajov: OpenStreetMap a jeho prispievatelia (licencia ODbL), IGN (RGE ALTI, Admin Express), ANFR (otvorená licencia), Open-Elevation, RainViewer.

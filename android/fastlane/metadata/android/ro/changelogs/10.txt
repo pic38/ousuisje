@@ -1,0 +1,1 @@
+Fuziunea versiunilor franceză și engleză într-o singură aplicație, disponibilă acum în 26 de limbi. Funcțiile specifice Franței (antene, departament/comună, altitudine IGN) apar acum automat în funcție de poziția detectată.

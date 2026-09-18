@@ -1,0 +1,1 @@
+Fusion des versions française et anglaise en une seule application, désormais disponible en 26 langues. Les fonctionnalités France uniquement (antennes relais, département/commune, altitude IGN) apparaissent automatiquement selon la position détectée.

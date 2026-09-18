@@ -1,0 +1,1 @@
+Prancūziškos ir angliškos versijos sujungimas į vieną programėlę, dabar prieinamą 26 kalbomis. Tik Prancūzijai galiojančios funkcijos (bokštai, departamentas/savivaldybė, IGN aukštis) dabar rodomos automatiškai pagal nustatytą vietą.

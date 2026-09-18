@@ -1,0 +1,1 @@
+A francia és angol verzió egyesítése egyetlen alkalmazássá, amely mostantól 26 nyelven érhető el. A csak Franciaországra érvényes funkciók (mobiltornyok, megye/település, IGN-magasság) mostantól automatikusan megjelennek az észlelt pozíció alapján.

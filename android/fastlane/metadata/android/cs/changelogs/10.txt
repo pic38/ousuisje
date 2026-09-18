@@ -1,0 +1,1 @@
+Sloučení francouzské a anglické verze do jedné aplikace, nyní dostupné ve 26 jazycích. Funkce platné pouze pro Francii (vysílače, departement/obec, nadmořská výška IGN) se nyní zobrazují automaticky podle zjištěné polohy.

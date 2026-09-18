@@ -1,0 +1,1 @@
+Zlúčenie francúzskej a anglickej verzie do jednej aplikácie, teraz dostupnej v 26 jazykoch. Funkcie platné iba pre Francúzsko (vysielače, departement/obec, nadmorská výška IGN) sa teraz zobrazujú automaticky podľa zistenej polohy.

@@ -1,0 +1,11 @@
+OuSuisJe (GdjeSam) prikazuje vaš položaj, nadmorsku visinu, brzinu i točnost, kako ih prijavljuje GPS vašeg uređaja. Aplikacija prevodi vaše koordinate u čitljivu adresu i nudi pretragu zanimljivosti u blizini (pitka voda, toaleti, hrana…), kao i radar oborina.
+
+U Francuskoj se automatski pojavljuju dodatne značajke ovisno o vašem otkrivenom položaju: pretraga odašiljača 2G/3G/4G/5G, identifikacija departmana i općine te usporedba GPS nadmorske visine s referentnim podacima IGN-a.
+
+Aplikacija može raditi izvan mreže za neke od svojih funkcija nakon što se podaci preuzmu (GPS položaj, departman/općina, odašiljači, pitka voda, toaleti). Samo funkcije koje ispituju internetsku uslugu (adresa, usporedba nadmorske visine, ostale zanimljivosti, radar) zahtijevaju aktivnu vezu.
+
+Bez vlastitog aplikacijskog poslužitelja: nikakvi podaci o lokaciji se ne prikupljaju, pohranjuju niti prenose na poslužitelj OuSuisJe. Aplikacija izravno kontaktira relevantnu uslugu treće strane (OpenStreetMap, IGN, ANFR, RainViewer), nikada putem posrednika.
+
+Dostupno na 26 jezika (24 službena jezika Europske unije, mandarinski kineski i arapski).
+
+Izvori podataka: OpenStreetMap i njegovi suradnici (licenca ODbL), IGN (RGE ALTI, Admin Express), ANFR (otvorena licenca), Open-Elevation, RainViewer.

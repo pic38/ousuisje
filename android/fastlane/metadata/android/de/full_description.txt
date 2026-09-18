@@ -1,0 +1,11 @@
+OuSuisJe (WoBinIch) zeigt Ihre Position, Höhe, Geschwindigkeit und Genauigkeit, wie vom GPS Ihres Geräts gemeldet. Die App übersetzt Ihre Koordinaten in eine lesbare Adresse und bietet eine Suche nach Orten in der Nähe (Trinkwasser, Toiletten, Essen …) sowie einen Niederschlagsradar.
+
+In Frankreich erscheinen automatisch zusätzliche Funktionen, sobald Ihre Position dort erkannt wird: Suche nach 2G/3G/4G/5G-Mobilfunkmasten, Bestimmung von Département und Gemeinde sowie ein Vergleich der GPS-Höhe mit den Referenzdaten des IGN.
+
+Die App kann für einige Funktionen offline arbeiten, sobald die Daten heruntergeladen wurden (GPS-Position, Département/Gemeinde, Mobilfunkmasten, Trinkwasser, Toiletten). Nur die Funktionen, die einen Online-Dienst abfragen (Adresse, Höhenvergleich, andere Sehenswürdigkeiten, Radar), benötigen eine aktive Verbindung.
+
+Kein eigener Anwendungsserver: Es werden keine Standortdaten gesammelt, gespeichert oder an einen Server von OuSuisJe übertragen. Die App kontaktiert direkt den jeweiligen Drittanbieterdienst (OpenStreetMap, IGN, ANFR, RainViewer), niemals über einen Vermittler.
+
+Verfügbar in 26 Sprachen (die 24 Amtssprachen der Europäischen Union, Mandarin-Chinesisch und Arabisch).
+
+Datenquellen: OpenStreetMap und seine Mitwirkenden (ODbL-Lizenz), IGN (RGE ALTI, Admin Express), ANFR (offene Lizenz), Open-Elevation, RainViewer.

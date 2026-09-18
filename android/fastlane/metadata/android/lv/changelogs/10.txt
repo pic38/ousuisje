@@ -1,0 +1,1 @@
+Franču un angļu versiju apvienošana vienā lietotnē, kas tagad pieejama 26 valodās. Funkcijas, kas attiecas tikai uz Franciju (torņi, departaments/pašvaldība, IGN augstums), tagad parādās automātiski atbilstoši noteiktajai atrašanās vietai.

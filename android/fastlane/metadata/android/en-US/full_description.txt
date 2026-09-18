@@ -1,0 +1,11 @@
+WhereAmI shows your position, altitude, speed and accuracy, as reported by your device's GPS. The app translates your coordinates into a readable address and offers a search for nearby points of interest (drinking water, toilets, food…), as well as a precipitation radar.
+
+In France, additional features appear automatically based on your detected position: a search for 2G/3G/4G/5G cell towers, department and commune identification, and a comparison of GPS altitude against IGN's reference data.
+
+The app can work offline for some of its features once the data has been downloaded (GPS position, department/commune, cell towers, drinking water, toilets). Only the features that query an online service (address, altitude comparison, other points of interest, radar) need an active connection.
+
+No application server of its own: no location data is collected, stored, or transmitted to a WhereAmI server. The app contacts the relevant third-party service directly (OpenStreetMap, IGN, ANFR, RainViewer), never through an intermediary.
+
+Available in 26 languages (the 24 official languages of the European Union, Mandarin Chinese and Arabic).
+
+Data sources: OpenStreetMap and its contributors (ODbL license), IGN (RGE ALTI, Admin Express), ANFR (open license), Open-Elevation, RainViewer.

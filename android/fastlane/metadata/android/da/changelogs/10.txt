@@ -1,0 +1,1 @@
+Sammenlægning af den franske og engelske version til én app, nu tilgængelig på 26 sprog. Funktioner, der kun gælder Frankrig (mobilmaster, departement/kommune, IGN-højde), vises nu automatisk baseret på den registrerede position.

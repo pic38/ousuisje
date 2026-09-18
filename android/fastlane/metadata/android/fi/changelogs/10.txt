@@ -1,0 +1,1 @@
+Ranskan- ja englanninkielisen version yhdistäminen yhdeksi sovellukseksi, joka on nyt saatavilla 26 kielellä. Vain Ranskaa koskevat toiminnot (matkapuhelinmastot, departementti/kunta, IGN-korkeus) ilmestyvät nyt automaattisesti havaitun sijainnin perusteella.

@@ -1,0 +1,11 @@
+OuSuisJe affiche votre position, altitude, vitesse et précision, telles que fournies par le GPS de votre appareil. L'application traduit vos coordonnées en adresse lisible et propose une recherche de points d'intérêt à proximité (eau potable, toilettes, restauration…), ainsi qu'un radar de précipitations.
+
+En France, des fonctionnalités supplémentaires apparaissent automatiquement selon votre position détectée : recherche d'antennes relais 2G/3G/4G/5G, identification du département et de la commune, et comparaison de l'altitude GPS avec les données de référence de l'IGN.
+
+L'application peut fonctionner hors ligne pour certaines de ses fonctions une fois les données téléchargées (position GPS, département/commune, antennes relais, eau potable, toilettes). Seules les fonctions qui interrogent un service en ligne (adresse, altitude comparée, autres points d'intérêt, radar) nécessitent une connexion active.
+
+Aucun serveur applicatif propre : aucune donnée de localisation n'est collectée, stockée ou transmise à un serveur d'OuSuisJe. L'application contacte directement le service tiers concerné (OpenStreetMap, IGN, ANFR, RainViewer), jamais via un intermédiaire.
+
+Disponible en 26 langues (les 24 langues officielles de l'Union européenne, le chinois mandarin et l'arabe).
+
+Sources de données : OpenStreetMap et ses contributeurs (licence ODbL), IGN (RGE ALTI, Admin Express), ANFR (licence ouverte), Open-Elevation, RainViewer.

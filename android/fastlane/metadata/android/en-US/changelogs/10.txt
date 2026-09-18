@@ -1,0 +1,1 @@
+Merged the French and English versions into a single app, now available in 26 languages. France-only features (cell towers, department/commune, IGN altitude) now appear automatically based on detected position.

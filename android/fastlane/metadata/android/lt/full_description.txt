@@ -1,0 +1,11 @@
+OuSuisJe (KurEsu) rodo jūsų vietą, aukštį, greitį ir tikslumą, kaip praneša jūsų įrenginio GPS. Programėlė jūsų koordinates paverčia skaitomu adresu ir siūlo netoliese esančių objektų paiešką (geriamasis vanduo, tualetai, maitinimas…), taip pat kritulių radarą.
+
+Prancūzijoje pagal jūsų nustatytą vietą automatiškai atsiranda papildomos funkcijos: 2G/3G/4G/5G mobiliojo ryšio bokštų paieška, departamento ir savivaldybės nustatymas bei GPS aukščio palyginimas su IGN etaloniniais duomenimis.
+
+Programėlė gali veikti neprisijungus prie interneto kai kurioms savo funkcijoms, kai duomenys jau atsisiųsti (GPS vieta, departamentas/savivaldybė, bokštai, geriamasis vanduo, tualetai). Tik funkcijoms, kurios kreipiasi į internetinę paslaugą (adresas, aukščio palyginimas, kiti objektai, radaras), reikalingas aktyvus ryšys.
+
+Nėra nuosavo programėlės serverio: jokie vietos duomenys nerenkami, nesaugomi ir neperduodami į OuSuisJe serverį. Programėlė tiesiogiai susisiekia su atitinkama trečiosios šalies paslauga (OpenStreetMap, IGN, ANFR, RainViewer), niekada per tarpininką.
+
+Prieinama 26 kalbomis (24 oficialiomis Europos Sąjungos kalbomis, mandarinų kinų ir arabų kalbomis).
+
+Duomenų šaltiniai: OpenStreetMap ir jos prisidedantys nariai (ODbL licencija), IGN (RGE ALTI, Admin Express), ANFR (atviroji licencija), Open-Elevation, RainViewer.

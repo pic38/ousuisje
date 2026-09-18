@@ -1,0 +1,11 @@
+OuSuisJe (HvorErJeg) viser din position, højde, hastighed og nøjagtighed, som rapporteret af din enheds GPS. Appen oversætter dine koordinater til en læsbar adresse og tilbyder søgning efter seværdigheder i nærheden (drikkevand, toiletter, mad…) samt en nedbørsradar.
+
+I Frankrig vises automatisk yderligere funktioner baseret på din registrerede position: søgning efter 2G/3G/4G/5G-mobilmaster, identifikation af departement og kommune samt sammenligning af GPS-højde med IGN's referencedata.
+
+Appen kan fungere offline for nogle af sine funktioner, når data er downloadet (GPS-position, departement/kommune, mobilmaster, drikkevand, toiletter). Kun funktioner, der forespørger en onlinetjeneste (adresse, højdesammenligning, andre seværdigheder, radar), kræver en aktiv forbindelse.
+
+Ingen egen applikationsserver: ingen placeringsdata indsamles, gemmes eller overføres til en OuSuisJe-server. Appen kontakter direkte den relevante tredjepartstjeneste (OpenStreetMap, IGN, ANFR, RainViewer), aldrig via en mellemmand.
+
+Tilgængelig på 26 sprog (de 24 officielle sprog i Den Europæiske Union, mandarin-kinesisk og arabisk).
+
+Datakilder: OpenStreetMap og dets bidragydere (ODbL-licens), IGN (RGE ALTI, Admin Express), ANFR (åben licens), Open-Elevation, RainViewer.

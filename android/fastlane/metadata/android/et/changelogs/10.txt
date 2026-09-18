@@ -1,0 +1,1 @@
+Prantsuse ja inglise versiooni ühendamine üheks rakenduseks, mis on nüüd saadaval 26 keeles. Ainult Prantsusmaal kehtivad funktsioonid (mastid, departemang/omavalitsus, IGN-kõrgus) ilmuvad nüüd automaatselt vastavalt tuvastatud asukohale.

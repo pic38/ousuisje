@@ -1,0 +1,11 @@
+Taispeánann OuSuisJe (CáBhfuilim) do shuíomh, d'airde, do luas agus do chruinneas, mar a thuairiscíonn GPS d'fheiste. Aistríonn an aip do chomhordanáidí go seoladh inléite agus cuireann sí ar fáil cuardach ar phointí spéise in aice láimhe (uisce óil, leithris, bia…), chomh maith le radar báistí.
+
+San Fhrainc, taispeántar gnéithe breise go huathoibríoch bunaithe ar do shuíomh braite: cuardach ar chrainn theileafóin phóca 2G/3G/4G/5G, aithint an département agus an commune, agus comparáid idir airde GPS agus sonraí tagartha IGN.
+
+Is féidir leis an aip oibriú as líne do chuid dá gnéithe nuair a bhíonn na sonraí íoslódáilte (suíomh GPS, département/commune, crainn theileafóin, uisce óil, leithris). Ní theastaíonn ach ceangal gníomhach ó na gnéithe a fhiosraíonn seirbhís ar líne (seoladh, comparáid airde, pointí spéise eile, radar).
+
+Gan freastalaí feidhmchláir dá chuid féin: ní bhailítear, ní stóráiltear ná ní tharchuirtear aon sonraí suímh chuig freastalaí de chuid OuSuisJe. Déanann an aip teagmháil dhíreach leis an tseirbhís tríú páirtí ábhartha (OpenStreetMap, IGN, ANFR, RainViewer), riamh trí idirghabhálaí.
+
+Ar fáil i 26 teanga (24 teanga oifigiúla an Aontais Eorpaigh, Sínis Mandairínis agus Araibis).
+
+Foinsí sonraí: OpenStreetMap agus a rannpháirtithe (ceadúnas ODbL), IGN (RGE ALTI, Admin Express), ANFR (ceadúnas oscailte), Open-Elevation, RainViewer.

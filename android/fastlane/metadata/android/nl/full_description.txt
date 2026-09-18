@@ -1,0 +1,11 @@
+OuSuisJe (WaarBenIk) toont uw positie, hoogte, snelheid en nauwkeurigheid, zoals gerapporteerd door de GPS van uw apparaat. De app vertaalt uw coördinaten naar een leesbaar adres en biedt een zoekfunctie voor bezienswaardigheden in de buurt (drinkwater, toiletten, eten…), evenens een neerslagradar.
+
+In Frankrijk verschijnen automatisch extra functies op basis van uw gedetecteerde positie: zoeken naar 2G/3G/4G/5G-zendmasten, identificatie van het departement en de gemeente, en vergelijking van de GPS-hoogte met de referentiegegevens van het IGN.
+
+De app kan offline werken voor sommige functies zodra de gegevens zijn gedownload (GPS-positie, departement/gemeente, zendmasten, drinkwater, toiletten). Alleen de functies die een online dienst raadplegen (adres, hoogtevergelijking, andere bezienswaardigheden, radar) hebben een actieve verbinding nodig.
+
+Geen eigen applicatieserver: er worden geen locatiegegevens verzameld, opgeslagen of verzonden naar een server van OuSuisJe. De app neemt rechtstreeks contact op met de betreffende externe dienst (OpenStreetMap, IGN, ANFR, RainViewer), nooit via een tussenpersoon.
+
+Beschikbaar in 26 talen (de 24 officiële talen van de Europese Unie, Mandarijn-Chinees en Arabisch).
+
+Gegevensbronnen: OpenStreetMap en zijn bijdragers (ODbL-licentie), IGN (RGE ALTI, Admin Express), ANFR (open licentie), Open-Elevation, RainViewer.

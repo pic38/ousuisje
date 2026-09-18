@@ -1,0 +1,11 @@
+OuSuisJe (DoveSono) mostra la tua posizione, altitudine, velocità e precisione, come fornite dal GPS del tuo dispositivo. L'app traduce le tue coordinate in un indirizzo leggibile e offre una ricerca di punti di interesse nelle vicinanze (acqua potabile, servizi igienici, ristorazione…), oltre a un radar delle precipitazioni.
+
+In Francia, funzionalità aggiuntive appaiono automaticamente in base alla posizione rilevata: ricerca di antenne 2G/3G/4G/5G, identificazione del dipartimento e del comune, e confronto dell'altitudine GPS con i dati di riferimento dell'IGN.
+
+L'app può funzionare offline per alcune delle sue funzioni una volta scaricati i dati (posizione GPS, dipartimento/comune, antenne, acqua potabile, servizi igienici). Solo le funzioni che interrogano un servizio online (indirizzo, confronto altitudine, altri punti di interesse, radar) richiedono una connessione attiva.
+
+Nessun server applicativo proprio: nessun dato di localizzazione viene raccolto, memorizzato o trasmesso a un server di OuSuisJe. L'app contatta direttamente il servizio terzo interessato (OpenStreetMap, IGN, ANFR, RainViewer), mai tramite un intermediario.
+
+Disponibile in 26 lingue (le 24 lingue ufficiali dell'Unione Europea, il cinese mandarino e l'arabo).
+
+Fonti dei dati: OpenStreetMap e i suoi collaboratori (licenza ODbL), IGN (RGE ALTI, Admin Express), ANFR (licenza aperta), Open-Elevation, RainViewer.

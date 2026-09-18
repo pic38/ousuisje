@@ -1,0 +1,1 @@
+Połączenie wersji francuskiej i angielskiej w jedną aplikację, dostępną teraz w 26 językach. Funkcje dostępne wyłącznie we Francji (maszty, departament/gmina, wysokość IGN) pojawiają się teraz automatycznie w zależności od wykrytej pozycji.

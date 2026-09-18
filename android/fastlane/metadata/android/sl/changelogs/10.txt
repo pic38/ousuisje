@@ -1,0 +1,1 @@
+Združitev francoske in angleške različice v eno aplikacijo, zdaj na voljo v 26 jezikih. Funkcije, ki veljajo samo za Francijo (oddajniki, departma/občina, nadmorska višina IGN), se zdaj pojavijo samodejno glede na zaznan položaj.

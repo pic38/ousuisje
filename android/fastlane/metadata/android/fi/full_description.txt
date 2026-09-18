@@ -1,0 +1,11 @@
+OuSuisJe (MissäOlen) näyttää sijaintisi, korkeutesi, nopeutesi ja tarkkuutesi laitteesi GPS:n ilmoittamalla tavalla. Sovellus kääntää koordinaattisi luettavaksi osoitteeksi ja tarjoaa haun lähialueen kohteille (juomavesi, käymälät, ruokapaikat…) sekä sadetutkan.
+
+Ranskassa lisätoiminnot ilmestyvät automaattisesti havaitun sijaintisi perusteella: 2G/3G/4G/5G-matkapuhelinmastojen haku, departementin ja kunnan tunnistus sekä GPS-korkeuden vertailu IGN:n vertailutietoihin.
+
+Sovellus voi toimia offline-tilassa joissakin toiminnoissa, kun tiedot on ladattu (GPS-sijainti, departementti/kunta, matkapuhelinmastot, juomavesi, käymälät). Vain toiminnot, jotka kysyvät verkkopalvelua (osoite, korkeusvertailu, muut kohteet, tutka), vaativat aktiivisen yhteyden.
+
+Ei omaa sovelluspalvelinta: mitään sijaintitietoja ei kerätä, tallenneta tai lähetetä OuSuisJe-palvelimelle. Sovellus ottaa yhteyttä suoraan kyseiseen kolmannen osapuolen palveluun (OpenStreetMap, IGN, ANFR, RainViewer), ei koskaan välikäden kautta.
+
+Saatavilla 26 kielellä (Euroopan unionin 24 virallista kieltä, mandariinikiina ja arabia).
+
+Tietolähteet: OpenStreetMap ja sen avustajat (ODbL-lisenssi), IGN (RGE ALTI, Admin Express), ANFR (avoin lisenssi), Open-Elevation, RainViewer.

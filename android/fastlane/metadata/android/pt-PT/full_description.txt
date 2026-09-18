@@ -1,0 +1,11 @@
+OuSuisJe (OndeEstou) mostra a sua posição, altitude, velocidade e precisão, tal como fornecidas pelo GPS do seu dispositivo. A aplicação traduz as suas coordenadas numa morada legível e oferece uma pesquisa de pontos de interesse nas proximidades (água potável, casas de banho, restauração…), bem como um radar de precipitação.
+
+Em França, funcionalidades adicionais surgem automaticamente consoante a sua posição detetada: pesquisa de antenas 2G/3G/4G/5G, identificação do departamento e do município, e comparação da altitude GPS com os dados de referência do IGN.
+
+A aplicação pode funcionar offline para algumas das suas funções assim que os dados forem descarregados (posição GPS, departamento/município, antenas, água potável, casas de banho). Apenas as funções que consultam um serviço online (morada, comparação de altitude, outros pontos de interesse, radar) necessitam de uma ligação ativa.
+
+Sem servidor próprio: nenhum dado de localização é recolhido, armazenado ou transmitido para um servidor da OuSuisJe. A aplicação contacta diretamente o serviço terceiro em causa (OpenStreetMap, IGN, ANFR, RainViewer), nunca através de um intermediário.
+
+Disponível em 26 idiomas (os 24 idiomas oficiais da União Europeia, o chinês mandarim e o árabe).
+
+Fontes de dados: OpenStreetMap e os seus colaboradores (licença ODbL), IGN (RGE ALTI, Admin Express), ANFR (licença aberta), Open-Elevation, RainViewer.

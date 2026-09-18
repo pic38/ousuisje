@@ -1,0 +1,11 @@
+OuSuisJe (KusMaOlen) näitab teie asukohta, kõrgust, kiirust ja täpsust, nagu need on saadud teie seadme GPS-ilt. Rakendus tõlgib teie koordinaadid loetavaks aadressiks ja pakub lähedal asuvate vaatamisväärsuste otsingut (joogivesi, tualetid, toitlustus…), samuti sademeteradarit.
+
+Prantsusmaal ilmuvad automaatselt lisafunktsioonid vastavalt teie tuvastatud asukohale: 2G/3G/4G/5G mobiilimastide otsing, departemangu ja omavalitsuse tuvastamine ning GPS-kõrguse võrdlemine IGN-i võrdlusandmetega.
+
+Rakendus võib mõne oma funktsiooni jaoks töötada võrguühenduseta pärast andmete allalaadimist (GPS-asukoht, departemang/omavalitsus, mastid, joogivesi, tualetid). Ainult funktsioonid, mis pärivad võrguteenust (aadress, kõrguse võrdlus, muud vaatamisväärsused, radar), vajavad aktiivset ühendust.
+
+Ei ole oma rakendusserverit: ühtegi asukohaandmet ei koguta, salvestata ega edastata OuSuisJe serverisse. Rakendus võtab otse ühendust vastava kolmanda osapoole teenusega (OpenStreetMap, IGN, ANFR, RainViewer), mitte kunagi vahendaja kaudu.
+
+Saadaval 26 keeles (Euroopa Liidu 24 ametlikku keelt, mandariini hiina keel ja araabia keel).
+
+Andmeallikad: OpenStreetMap ja selle kaasautorid (ODbL litsents), IGN (RGE ALTI, Admin Express), ANFR (avatud litsents), Open-Elevation, RainViewer.

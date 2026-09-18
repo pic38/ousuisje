@@ -1,0 +1,11 @@
+OuSuisJe (FejnJien) turi l-pożizzjoni, l-għoli, il-veloċità u l-preċiżjoni tiegħek, kif irrappurtati mill-GPS tal-apparat tiegħek. L-app tittraduċi l-koordinati tiegħek f'indirizz li jinqara u toffri tfittxija ta' postijiet ta' interess fil-qrib (ilma tax-xorb, tojlits, ristorazzjoni…), kif ukoll radar tax-xita.
+
+Fi Franza, funzjonijiet addizzjonali jidhru awtomatikament skont il-pożizzjoni tiegħek misjuba: tfittxija ta' antenni 2G/3G/4G/5G, identifikazzjoni tad-dipartiment u l-muniċipalità, u tqabbil tal-għoli GPS mad-dejta ta' referenza tal-IGN.
+
+L-app tista' taħdem offline għal xi wħud mill-funzjonijiet tagħha ladarba d-dejta tkun tniżżlet (pożizzjoni GPS, dipartiment/muniċipalità, antenni, ilma tax-xorb, tojlits). Biss il-funzjonijiet li jitolbu servizz online (indirizz, tqabbil tal-għoli, postijiet oħra ta' interess, radar) jeħtieġu konnessjoni attiva.
+
+L-ebda server tal-applikazzjoni tagħha stess: l-ebda dejta ta' lokazzjoni ma tinġabar, tinħażen jew tintbagħat lil server ta' OuSuisJe. L-app tikkuntattja direttament is-servizz tal-parti terza kkonċernat (OpenStreetMap, IGN, ANFR, RainViewer), qatt permezz ta' intermedjarju.
+
+Disponibbli b'26 lingwa (il-24 lingwa uffiċjali tal-Unjoni Ewropea, iċ-Ċiniż Mandarin u l-Għarbi).
+
+Sorsi tad-dejta: OpenStreetMap u l-kontributuri tiegħu (liċenzja ODbL), IGN (RGE ALTI, Admin Express), ANFR (liċenzja miftuħa), Open-Elevation, RainViewer.

@@ -1,0 +1,1 @@
+Spajanje francuske i engleske verzije u jednu aplikaciju, sada dostupnu na 26 jezika. Značajke koje vrijede samo za Francusku (odašiljači, departman/općina, nadmorska visina IGN) sada se automatski prikazuju ovisno o otkrivenom položaju.

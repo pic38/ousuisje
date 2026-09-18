@@ -1,0 +1,11 @@
+OuSuisJe (KurEsmu) parāda jūsu atrašanās vietu, augstumu, ātrumu un precizitāti, kā to ziņo jūsu ierīces GPS. Lietotne pārvērš jūsu koordinātas salasāmā adresē un piedāvā tuvumā esošo interesanto vietu meklēšanu (dzeramais ūdens, tualetes, ēdināšana…), kā arī nokrišņu radaru.
+
+Francijā atkarībā no jūsu noteiktās atrašanās vietas automātiski parādās papildu funkcijas: 2G/3G/4G/5G mobilo sakaru torņu meklēšana, departamenta un pašvaldības identificēšana, kā arī GPS augstuma salīdzināšana ar IGN atsauces datiem.
+
+Lietotne dažām funkcijām var darboties bezsaistē, kad dati ir lejupielādēti (GPS atrašanās vieta, departaments/pašvaldība, torņi, dzeramais ūdens, tualetes). Tikai funkcijas, kas pieprasa tiešsaistes pakalpojumu (adrese, augstuma salīdzinājums, citas interesantās vietas, radars), nepieciešams aktīvs savienojums.
+
+Bez sava lietotnes servera: nekādi atrašanās vietas dati netiek vākti, glabāti vai pārsūtīti uz OuSuisJe serveri. Lietotne tieši sazinās ar attiecīgo trešās puses pakalpojumu (OpenStreetMap, IGN, ANFR, RainViewer), nekad ar starpnieku.
+
+Pieejama 26 valodās (24 Eiropas Savienības oficiālajās valodās, mandarīnu ķīniešu un arābu valodā).
+
+Datu avoti: OpenStreetMap un tā līdzstrādnieki (ODbL licence), IGN (RGE ALTI, Admin Express), ANFR (atvērtā licence), Open-Elevation, RainViewer.

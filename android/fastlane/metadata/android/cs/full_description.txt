@@ -1,0 +1,11 @@
+OuSuisJe (KdeJsem) zobrazuje vaši polohu, nadmořskou výšku, rychlost a přesnost, jak je hlásí GPS vašeho zařízení. Aplikace překládá vaše souřadnice do čitelné adresy a nabízí vyhledávání zajímavých míst v okolí (pitná voda, toalety, stravování…), stejně jako radar srážek.
+
+Ve Francii se automaticky zobrazují další funkce podle vaší zjištěné polohy: vyhledávání vysílačů 2G/3G/4G/5G, identifikace departementu a obce a porovnání nadmořské výšky GPS s referenčními daty IGN.
+
+Aplikace může fungovat offline pro některé své funkce po stažení dat (poloha GPS, departement/obec, vysílače, pitná voda, toalety). Pouze funkce, které dotazují online službu (adresa, porovnání nadmořské výšky, další zajímavá místa, radar), vyžadují aktivní připojení.
+
+Žádný vlastní aplikační server: žádná data o poloze nejsou shromažďována, uchovávána ani přenášena na server OuSuisJe. Aplikace kontaktuje přímo příslušnou službu třetí strany (OpenStreetMap, IGN, ANFR, RainViewer), nikdy prostřednictvím prostředníka.
+
+Dostupné ve 26 jazycích (24 úředních jazyků Evropské unie, mandarínská čínština a arabština).
+
+Zdroje dat: OpenStreetMap a jeho přispěvatelé (licence ODbL), IGN (RGE ALTI, Admin Express), ANFR (otevřená licence), Open-Elevation, RainViewer.

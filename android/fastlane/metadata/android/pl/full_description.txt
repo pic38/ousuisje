@@ -1,0 +1,11 @@
+OuSuisJe (GdzieJestem) pokazuje Twoją pozycję, wysokość, prędkość i dokładność, zgodnie z danymi z GPS Twojego urządzenia. Aplikacja tłumaczy Twoje współrzędne na czytelny adres i umożliwia wyszukiwanie pobliskich punktów zainteresowania (woda pitna, toalety, gastronomia…), a także oferuje radar opadów.
+
+We Francji automatycznie pojawiają się dodatkowe funkcje, w zależności od wykrytej pozycji: wyszukiwanie masztów telefonii komórkowej 2G/3G/4G/5G, identyfikacja departamentu i gminy oraz porównanie wysokości GPS z danymi referencyjnymi IGN.
+
+Aplikacja może działać offline dla niektórych funkcji po pobraniu danych (pozycja GPS, departament/gmina, maszty, woda pitna, toalety). Tylko funkcje korzystające z usługi online (adres, porównanie wysokości, inne punkty zainteresowania, radar) wymagają aktywnego połączenia.
+
+Brak własnego serwera aplikacji: żadne dane lokalizacyjne nie są zbierane, przechowywane ani przesyłane do serwera OuSuisJe. Aplikacja łączy się bezpośrednio z odpowiednią usługą zewnętrzną (OpenStreetMap, IGN, ANFR, RainViewer), nigdy za pośrednictwem pośrednika.
+
+Dostępna w 26 językach (24 oficjalne języki Unii Europejskiej, chiński mandaryński i arabski).
+
+Źródła danych: OpenStreetMap i jego współtwórcy (licencja ODbL), IGN (RGE ALTI, Admin Express), ANFR (licencja otwarta), Open-Elevation, RainViewer.

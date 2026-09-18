@@ -1,0 +1,11 @@
+Az OuSuisJe (HolVagyok) megjeleníti pozícióját, magasságát, sebességét és pontosságát, ahogyan azt az eszköze GPS-e jelenti. Az alkalmazás olvasható címmé alakítja koordinátáit, és lehetőséget kínál a közeli érdekes helyek keresésére (ivóvíz, mosdók, étkezési lehetőségek…), valamint csapadékradart is biztosít.
+
+Franciaországban automatikusan megjelennek további funkciók az észlelt pozíciója alapján: 2G/3G/4G/5G mobiltornyok keresése, a megye (département) és a település azonosítása, valamint a GPS-magasság összehasonlítása az IGN referenciaadataival.
+
+Az alkalmazás egyes funkciói offline is működhetnek, ha az adatok már le vannak töltve (GPS-pozíció, megye/település, mobiltornyok, ivóvíz, mosdók). Csak azok a funkciók igényelnek aktív kapcsolatot, amelyek online szolgáltatást kérdeznek le (cím, magasság-összehasonlítás, egyéb érdekes helyek, radar).
+
+Nincs saját alkalmazásszerver: semmilyen helyadat nem kerül gyűjtésre, tárolásra vagy továbbításra egy OuSuisJe szerverre. Az alkalmazás közvetlenül lép kapcsolatba az érintett harmadik féltől származó szolgáltatással (OpenStreetMap, IGN, ANFR, RainViewer), soha közvetítőn keresztül.
+
+26 nyelven elérhető (az Európai Unió 24 hivatalos nyelve, a mandarin kínai és az arab).
+
+Adatforrások: OpenStreetMap és közreműködői (ODbL licenc), IGN (RGE ALTI, Admin Express), ANFR (nyílt licenc), Open-Elevation, RainViewer.

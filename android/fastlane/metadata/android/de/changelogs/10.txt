@@ -1,0 +1,1 @@
+Die französische und englische Version wurden zu einer einzigen App zusammengeführt, die nun in 26 Sprachen verfügbar ist. Funktionen, die nur für Frankreich gelten (Mobilfunkmasten, Département/Gemeinde, IGN-Höhe), erscheinen jetzt automatisch je nach erkannter Position.

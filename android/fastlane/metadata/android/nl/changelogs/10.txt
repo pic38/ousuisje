@@ -1,0 +1,1 @@
+De Franse en Engelse versie zijn samengevoegd tot één app, nu beschikbaar in 26 talen. Functies die alleen voor Frankrijk gelden (zendmasten, departement/gemeente, IGN-hoogte) verschijnen nu automatisch op basis van de gedetecteerde positie.

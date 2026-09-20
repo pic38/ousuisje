@@ -2320,7 +2320,6 @@ I18N.ready.then(function () {
   const ANTENNAS_URL = 'data/anfr-antennas.min.csv';
   const ANTENNAS_RAW_BYTES = 6071089;
   const ANTENNAS_DOWNLOADED_STORAGE_KEY = 'ousuisje_anfr_antennas_downloaded';
-  const ANTENNA_RADIUS_M = 10000;
   const ANTENNA_MAX_RESULTS = 20;
   const OPERATOR_COLORS = {
     'ORANGE': '#FF7900',
@@ -2462,13 +2461,22 @@ I18N.ready.then(function () {
       return;
     }
 
-    const results = findNearbyAntennas(lat, lon, ANTENNA_RADIUS_M, ANTENNA_MAX_RESULTS);
+    // Scan local en mémoire (aucun coût réseau) : on élargit le rayon par palier jusqu'à
+    // trouver assez de résultats, sans passer par le cache géographique (inutile ici, la
+    // recherche est déjà instantanée).
+    let results = [];
+    let usedRadiusM = SEARCH_RADIUS_TIERS_M[0];
+    for (let i = 0; i < SEARCH_RADIUS_TIERS_M.length; i++) {
+      usedRadiusM = SEARCH_RADIUS_TIERS_M[i];
+      results = findNearbyAntennas(lat, lon, usedRadiusM, ANTENNA_MAX_RESULTS);
+      if (results.length > SEARCH_ESCALATE_STOP_ABOVE || i === SEARCH_RADIUS_TIERS_M.length - 1) break;
+    }
     clearAntennaMarkers();
     const bounds = [[lat, lon]];
 
     if (results.length === 0) {
       antennasTableBody.className = '';
-      antennasTableBody.innerHTML = `<tr><td colspan="4" class="dim">${I18N.t('common.emptyResultTemplate', { emptyLabel: I18N.t('antennas.emptyLabel'), radius: ANTENNA_RADIUS_M / 1000 })}</td></tr>`;
+      antennasTableBody.innerHTML = `<tr><td colspan="4" class="dim">${I18N.t('common.emptyResultTemplate', { emptyLabel: I18N.t('antennas.emptyLabel'), radius: usedRadiusM / 1000 })}</td></tr>`;
     } else {
       antennasTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
       antennasTableBody.innerHTML = results.map((r) => `
@@ -2500,7 +2508,7 @@ I18N.ready.then(function () {
         }
       }
     }
-    antennasSearchStatusEl.textContent = I18N.t('antennas.resultCount', { count: results.length, radius: ANTENNA_RADIUS_M });
+    antennasSearchStatusEl.textContent = I18N.t('antennas.resultCount', { count: results.length, radius: usedRadiusM });
     antennaMap._homeView = { bounds: bounds };
     antennaMap.fitBounds(bounds, { padding: [24, 24] });
   }
@@ -2580,13 +2588,142 @@ I18N.ready.then(function () {
     return Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
   }
 
+  // --- Escalade progressive de rayon + cache géographique (branche beta) ---
+  // Paliers communs à toutes les sections de recherche (points d'intérêt, escape games,
+  // escalade, sections perso, toilettes/eau/antennes) : on tente le palier le plus proche
+  // d'abord, et on n'élargit que si le nombre de résultats trouvés est encore faible.
+  const SEARCH_RADIUS_TIERS_M = [500, 5000, 50000];
+  const SEARCH_ESCALATE_STOP_ABOVE = 7; // arrête l'escalade dès que > 7 résultats
+
+  const GEOCACHE_KEY = 'ousuisje_geocache_v1';
+  const GEOCACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 jours
+  const GEOCACHE_GRID_DEG = 0.00005; // ~5,5 m de large à l'équateur
+  const GEOCACHE_MAX_ENTRIES = 300;
+
+  function geocacheRoundCoord(v) {
+    return Math.round(v / GEOCACHE_GRID_DEG) * GEOCACHE_GRID_DEG;
+  }
+
+  function geocacheLoad() {
+    try {
+      const raw = localStorage.getItem(GEOCACHE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function geocacheSave(store) {
+    try { localStorage.setItem(GEOCACHE_KEY, JSON.stringify(store)); } catch (e) {}
+  }
+
+  function geocacheKey(section, lat, lon, radiusM) {
+    return `${section}|${geocacheRoundCoord(lat).toFixed(5)}|${geocacheRoundCoord(lon).toFixed(5)}|${radiusM}`;
+  }
+
+  // Lecture exacte : même section, même case de grille (~5 m), même palier de rayon.
+  function geocacheGet(section, lat, lon, radiusM) {
+    const store = geocacheLoad();
+    const entry = store[geocacheKey(section, lat, lon, radiusM)];
+    if (!entry || Date.now() - entry.t > GEOCACHE_TTL_MS) return null;
+    return entry.items;
+  }
+
+  // Réutilisation en cascade : si une entrée en cache (même section) couvre entièrement le
+  // cercle demandé avec un rayon plus grand, on en extrait les points pertinents plutôt que
+  // de refaire une requête réseau. Les items en cache gardent leurs lat/lon d'origine — pas
+  // leur distance/cap, recalculés par l'appelant pour le nouveau point de référence.
+  function geocacheFindSuperset(section, lat, lon, radiusM) {
+    const store = geocacheLoad();
+    const now = Date.now();
+    let best = null;
+    for (const k in store) {
+      if (!k.startsWith(section + '|')) continue;
+      const entry = store[k];
+      if (now - entry.t > GEOCACHE_TTL_MS) continue;
+      if (entry.radiusM < radiusM) continue;
+      const distM = distanceMetersApprox(lat, lon, entry.lat, entry.lon);
+      if (distM + radiusM <= entry.radiusM && (!best || entry.radiusM < best.radiusM)) best = entry;
+    }
+    if (!best) return null;
+    return best.items.filter((it) => distanceMetersApprox(lat, lon, it.lat, it.lon) <= radiusM);
+  }
+
+  function geocacheSet(section, lat, lon, radiusM, items) {
+    const store = geocacheLoad();
+    const now = Date.now();
+    store[geocacheKey(section, lat, lon, radiusM)] = { t: now, lat: lat, lon: lon, radiusM: radiusM, items: items };
+    for (const k in store) {
+      if (now - store[k].t > GEOCACHE_TTL_MS) delete store[k];
+    }
+    const keys = Object.keys(store);
+    if (keys.length > GEOCACHE_MAX_ENTRIES) {
+      keys.sort((a, b) => store[a].t - store[b].t);
+      for (let i = 0; i < keys.length - GEOCACHE_MAX_ENTRIES; i++) delete store[keys[i]];
+    }
+    geocacheSave(store);
+  }
+
+  const OVERPASS_PRIMARY_URL = 'https://overpass-api.de/api/interpreter';
+  const OVERPASS_FALLBACK_URL = 'https://overpass.kumi.systems/api/interpreter';
+
+  // Repli automatique vers un miroir si le serveur principal échoue (panne, timeout, erreur
+  // HTTP) — jamais utilisé en alternance systématique, seulement en secours.
+  async function fetchOverpass(query) {
+    try {
+      const res = await fetch(OVERPASS_PRIMARY_URL, { method: 'POST', body: query });
+      if (!res.ok) throw new Error('overpass primary HTTP ' + res.status);
+      return await res.json();
+    } catch (e) {
+      const res = await fetch(OVERPASS_FALLBACK_URL, { method: 'POST', body: query });
+      if (!res.ok) throw new Error('overpass fallback HTTP ' + res.status);
+      return await res.json();
+    }
+  }
+
+  // Orchestre l'escalade de palier en palier pour une section donnée : vérifie le cache
+  // (correspondance exacte puis cascade depuis un rayon plus large déjà en cache) avant
+  // d'appeler `fetchItemsForRadius`, qui doit renvoyer des items bruts (lat/lon/nom/etc,
+  // sans distance ni cap — recalculés par l'appelant). S'arrête dès qu'un palier renvoie
+  // plus de SEARCH_ESCALATE_STOP_ABOVE résultats, ou au dernier palier.
+  async function runTieredSearch(section, lat, lon, statusEl, fetchItemsForRadius) {
+    let items = [];
+    let radiusM = SEARCH_RADIUS_TIERS_M[0];
+    for (let i = 0; i < SEARCH_RADIUS_TIERS_M.length; i++) {
+      radiusM = SEARCH_RADIUS_TIERS_M[i];
+      let tierItems = geocacheGet(section, lat, lon, radiusM);
+      if (tierItems === null) tierItems = geocacheFindSuperset(section, lat, lon, radiusM);
+      if (tierItems === null) {
+        if (statusEl && i > 0) {
+          statusEl.textContent = I18N.t('common.escalating', { radius: radiusM / 1000 });
+        }
+        tierItems = await fetchItemsForRadius(radiusM);
+        geocacheSet(section, lat, lon, radiusM, tierItems);
+      }
+      items = tierItems;
+      if (items.length > SEARCH_ESCALATE_STOP_ABOVE || i === SEARCH_RADIUS_TIERS_M.length - 1) break;
+    }
+    return { items, radiusM };
+  }
+
   function setupNearbyOverpassFeature(config) {
-    const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
+    const { btn, statusEl, tableBody, map, buildQuery, color, section, maxResults, defaultName, emptyLabel, badgeEl } = config;
     let markers = [];
     // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
     // doit pas faire disparaître le point de la position GPS, et inversement.
     let originGpsMarker = null;
     let originClickMarker = null;
+
+    async function fetchItemsForRadius(lat, lon, radiusM) {
+      const query = buildQuery(lat, lon, radiusM);
+      const data = await fetchOverpass(query);
+      return (data.elements || [])
+        .map((el) => {
+          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+          if (elat == null || elon == null) return null;
+          return { name: (el.tags && el.tags.name) || defaultName, lat: elat, lon: elon };
+        })
+        .filter(Boolean);
+    }
 
     async function runSearch(lat, lon, source) {
       if (source === undefined) {
@@ -2606,19 +2743,11 @@ I18N.ready.then(function () {
       }
 
       try {
-        const query = buildQuery(lat, lon, radiusM);
-        const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-        const data = await res.json();
-
-        const items = (data.elements || [])
-          .map((el) => {
-            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
-            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
-            if (elat == null || elon == null) return null;
-            const name = (el.tags && el.tags.name) || defaultName;
-            return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
-          })
-          .filter(Boolean)
+        const { items: rawItems, radiusM } = await runTieredSearch(
+          section, lat, lon, statusEl, (r) => fetchItemsForRadius(lat, lon, r)
+        );
+        const items = rawItems
+          .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
           .sort((a, b) => a.distM - b.distM)
           .slice(0, maxResults);
 
@@ -2687,7 +2816,7 @@ I18N.ready.then(function () {
     map: poiMap,
     badgeEl: poiSourceBadge,
     color: '#4FD1C5',
-    radiusM: 1500,
+    section: 'poi',
     maxResults: 10,
     defaultName: I18N.t('poi.defaultName'),
     emptyLabel: I18N.t('poi.emptyLabel'),
@@ -2702,7 +2831,7 @@ I18N.ready.then(function () {
     map: escapeGamesMap,
     badgeEl: escapeGamesSourceBadge,
     color: '#8B5CF6',
-    radiusM: 20000,
+    section: 'escape-games',
     maxResults: 10,
     defaultName: I18N.t('escapeGames.defaultName'),
     emptyLabel: I18N.t('escapeGames.emptyLabel'),
@@ -2717,7 +2846,7 @@ I18N.ready.then(function () {
     map: climbingGymsMap,
     badgeEl: climbingGymsSourceBadge,
     color: '#F2994A',
-    radiusM: 20000,
+    section: 'climbing-gyms',
     maxResults: 10,
     defaultName: I18N.t('climbingGyms.defaultName'),
     emptyLabel: I18N.t('climbingGyms.emptyLabel'),
@@ -2731,7 +2860,6 @@ I18N.ready.then(function () {
   const TOILETS_URL = 'data/toilets.min.csv';
   const TOILETS_RAW_BYTES = 788726;
   const TOILETS_DOWNLOADED_STORAGE_KEY = 'ousuisje_toilets_downloaded';
-  const TOILETS_RADIUS_M = 10000;
   const TOILETS_MAX_RESULTS = 10;
   const TOILETS_COLOR = '#6C7A89';
 
@@ -2777,12 +2905,12 @@ I18N.ready.then(function () {
     toiletsMarkers = [];
   }
 
-  function renderToiletsResults(lat, lon, source, items) {
+  function renderToiletsResults(lat, lon, source, items, radiusM) {
     clearToiletsMarkers();
     const bounds = [[lat, lon]];
     if (items.length === 0) {
       toiletsTableBody.className = '';
-      toiletsTableBody.innerHTML = `<tr><td colspan="3" class="dim">${I18N.t('common.emptyResultTemplate', { emptyLabel: I18N.t('toilets.emptyLabel'), radius: TOILETS_RADIUS_M / 1000 })}</td></tr>`;
+      toiletsTableBody.innerHTML = `<tr><td colspan="3" class="dim">${I18N.t('common.emptyResultTemplate', { emptyLabel: I18N.t('toilets.emptyLabel'), radius: radiusM / 1000 })}</td></tr>`;
     } else {
       toiletsTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
       toiletsTableBody.innerHTML = items.map((it) => `
@@ -2800,7 +2928,7 @@ I18N.ready.then(function () {
         bounds.push([it.lat, it.lon]);
       }
     }
-    toiletsStatusEl.textContent = I18N.t('common.resultCount', { count: items.length, radius: TOILETS_RADIUS_M / 1000 });
+    toiletsStatusEl.textContent = I18N.t('common.resultCount', { count: items.length, radius: radiusM / 1000 });
     toiletsMap._homeView = { bounds: bounds };
     toiletsMap.fitBounds(bounds, { padding: [24, 24] });
   }
@@ -2822,28 +2950,39 @@ I18N.ready.then(function () {
     }
 
     if (toiletsSites) {
-      const results = findNearbyToiletsOffline(lat, lon, TOILETS_RADIUS_M, TOILETS_MAX_RESULTS);
-      renderToiletsResults(lat, lon, source, results);
+      // Scan local en mémoire (gratuit) : escalade par palier sans passer par le cache
+      // géographique, la recherche étant déjà instantanée.
+      let results = [];
+      let usedRadiusM = SEARCH_RADIUS_TIERS_M[0];
+      for (let i = 0; i < SEARCH_RADIUS_TIERS_M.length; i++) {
+        usedRadiusM = SEARCH_RADIUS_TIERS_M[i];
+        results = findNearbyToiletsOffline(lat, lon, usedRadiusM, TOILETS_MAX_RESULTS);
+        if (results.length > SEARCH_ESCALATE_STOP_ABOVE || i === SEARCH_RADIUS_TIERS_M.length - 1) break;
+      }
+      renderToiletsResults(lat, lon, source, results, usedRadiusM);
       toiletsBtn.disabled = false;
       return;
     }
 
     toiletsStatusEl.textContent = I18N.t('common.searching');
     try {
-      const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
-      const items = (data.elements || [])
-        .map((el) => {
-          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
-          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
-          if (elat == null || elon == null) return null;
-          return { name: (el.tags && el.tags.name) || I18N.t('toilets.defaultName'), lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
-        })
-        .filter(Boolean)
+      const { items: rawItems, radiusM } = await runTieredSearch('toilets', lat, lon, toiletsStatusEl, async (r) => {
+        const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${r},${lat},${lon});way["amenity"="toilets"](around:${r},${lat},${lon}););out center 200;`;
+        const data = await fetchOverpass(query);
+        return (data.elements || [])
+          .map((el) => {
+            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+            if (elat == null || elon == null) return null;
+            return { name: (el.tags && el.tags.name) || I18N.t('toilets.defaultName'), lat: elat, lon: elon };
+          })
+          .filter(Boolean);
+      });
+      const items = rawItems
+        .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
         .sort((a, b) => a.distM - b.distM)
         .slice(0, TOILETS_MAX_RESULTS);
-      renderToiletsResults(lat, lon, source, items);
+      renderToiletsResults(lat, lon, source, items, radiusM);
     } catch (e) {
       toiletsStatusEl.textContent = I18N.t('common.overpassUnavailable');
       toiletsTableBody.className = '';
@@ -2894,7 +3033,6 @@ I18N.ready.then(function () {
   const DRINKING_WATER_URL = 'data/drinking-water.min.csv';
   const DRINKING_WATER_RAW_BYTES = 747017;
   const DRINKING_WATER_DOWNLOADED_STORAGE_KEY = 'ousuisje_drinking_water_downloaded';
-  const DRINKING_WATER_RADIUS_M = 10000;
   const DRINKING_WATER_MAX_RESULTS = 10;
   const DRINKING_WATER_COLOR = '#2AABE2';
 
@@ -2940,12 +3078,12 @@ I18N.ready.then(function () {
     drinkingWaterMarkers = [];
   }
 
-  function renderDrinkingWaterResults(lat, lon, source, items) {
+  function renderDrinkingWaterResults(lat, lon, source, items, radiusM) {
     clearDrinkingWaterMarkers();
     const bounds = [[lat, lon]];
     if (items.length === 0) {
       drinkingWaterTableBody.className = '';
-      drinkingWaterTableBody.innerHTML = `<tr><td colspan="3" class="dim">${I18N.t('common.emptyResultTemplate', { emptyLabel: I18N.t('drinkingWater.emptyLabel'), radius: DRINKING_WATER_RADIUS_M / 1000 })}</td></tr>`;
+      drinkingWaterTableBody.innerHTML = `<tr><td colspan="3" class="dim">${I18N.t('common.emptyResultTemplate', { emptyLabel: I18N.t('drinkingWater.emptyLabel'), radius: radiusM / 1000 })}</td></tr>`;
     } else {
       drinkingWaterTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
       drinkingWaterTableBody.innerHTML = items.map((it) => `
@@ -2963,7 +3101,7 @@ I18N.ready.then(function () {
         bounds.push([it.lat, it.lon]);
       }
     }
-    drinkingWaterStatusEl.textContent = I18N.t('common.resultCount', { count: items.length, radius: DRINKING_WATER_RADIUS_M / 1000 });
+    drinkingWaterStatusEl.textContent = I18N.t('common.resultCount', { count: items.length, radius: radiusM / 1000 });
     drinkingWaterMap._homeView = { bounds: bounds };
     drinkingWaterMap.fitBounds(bounds, { padding: [24, 24] });
   }
@@ -2985,26 +3123,37 @@ I18N.ready.then(function () {
     }
 
     if (drinkingWaterSites) {
-      const results = findNearbyDrinkingWaterOffline(lat, lon, DRINKING_WATER_RADIUS_M, DRINKING_WATER_MAX_RESULTS);
-      renderDrinkingWaterResults(lat, lon, source, results);
+      // Scan local en mémoire (gratuit) : escalade par palier sans passer par le cache
+      // géographique, la recherche étant déjà instantanée.
+      let results = [];
+      let usedRadiusM = SEARCH_RADIUS_TIERS_M[0];
+      for (let i = 0; i < SEARCH_RADIUS_TIERS_M.length; i++) {
+        usedRadiusM = SEARCH_RADIUS_TIERS_M[i];
+        results = findNearbyDrinkingWaterOffline(lat, lon, usedRadiusM, DRINKING_WATER_MAX_RESULTS);
+        if (results.length > SEARCH_ESCALATE_STOP_ABOVE || i === SEARCH_RADIUS_TIERS_M.length - 1) break;
+      }
+      renderDrinkingWaterResults(lat, lon, source, results, usedRadiusM);
       drinkingWaterBtn.disabled = false;
       return;
     }
 
     drinkingWaterStatusEl.textContent = I18N.t('common.searching');
     try {
-      const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
-      const items = (data.elements || [])
-        .map((el) => {
-          if (el.lat == null || el.lon == null) return null;
-          return { name: (el.tags && el.tags.name) || I18N.t('drinkingWater.defaultName'), lat: el.lat, lon: el.lon, distM: distanceMetersApprox(lat, lon, el.lat, el.lon), bearing: bearingTo(lat, lon, el.lat, el.lon) };
-        })
-        .filter(Boolean)
+      const { items: rawItems, radiusM } = await runTieredSearch('drinking-water', lat, lon, drinkingWaterStatusEl, async (r) => {
+        const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${r},${lat},${lon});out body 200;`;
+        const data = await fetchOverpass(query);
+        return (data.elements || [])
+          .map((el) => {
+            if (el.lat == null || el.lon == null) return null;
+            return { name: (el.tags && el.tags.name) || I18N.t('drinkingWater.defaultName'), lat: el.lat, lon: el.lon };
+          })
+          .filter(Boolean);
+      });
+      const items = rawItems
+        .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
         .sort((a, b) => a.distM - b.distM)
         .slice(0, DRINKING_WATER_MAX_RESULTS);
-      renderDrinkingWaterResults(lat, lon, source, items);
+      renderDrinkingWaterResults(lat, lon, source, items, radiusM);
     } catch (e) {
       drinkingWaterStatusEl.textContent = I18N.t('common.overpassUnavailable');
       drinkingWaterTableBody.className = '';
@@ -3057,7 +3206,7 @@ I18N.ready.then(function () {
     map: foodMap,
     badgeEl: foodSourceBadge,
     color: '#E24A4A',
-    radiusM: 2000,
+    section: 'food',
     maxResults: 10,
     defaultName: I18N.t('food.defaultName'),
     emptyLabel: I18N.t('food.emptyLabel'),
@@ -3171,7 +3320,7 @@ I18N.ready.then(function () {
       map: secMap,
       badgeEl: badgeEl,
       color: color,
-      radiusM: 5000,
+      section: 'custom-' + id,
       maxResults: 10,
       defaultName: label,
       emptyLabel: I18N.t('custom.emptyLabelTemplate', { label: label }),

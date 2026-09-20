@@ -82,6 +82,7 @@
     "sourceGps": "Position GPS",
     "sourceMap": "Point cliqué sur la carte",
     "searching": "Recherche…",
+    "escalating": "Aucun résultat, extension à {radius} km…",
     "pleaseWait": "Patientez…",
     "updated": "Mis à jour {time}",
     "unavailable": "Indisponible",

@@ -82,6 +82,7 @@
     "sourceGps": "GPS position",
     "sourceMap": "Point clicked on map",
     "searching": "Searching…",
+    "escalating": "No results, expanding to {radius} km…",
     "pleaseWait": "Please wait…",
     "updated": "Updated {time}",
     "unavailable": "Unavailable",

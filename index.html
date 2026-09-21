@@ -750,6 +750,21 @@ I18N.ready.then(function () {
   // (tableau mutable : les sections ajoutées dynamiquement par mot-clé s'y ajoutent aussi)
   const featureSections = [];
   const allMaps = []; // toutes les cartes Leaflet de la page, pour invalidateSize() à l'ouverture de leur section
+  // Désactivé pendant l'ouverture automatique de la première section au chargement (voir
+  // openFirstVisibleSection ci-dessous) : cette ouverture-là ne doit pas déclencher de défilement.
+  let suppressAccordionAutoScroll = true;
+
+  // Section visible suivante (dans l'ordre DOM actuel, qui reflète l'ordre glissé-déposé)
+  // après `section`, ou null si `section` est la dernière visible.
+  function nextVisibleSectionAfter(section) {
+    const all = Array.from(document.querySelectorAll('details.feature'));
+    const idx = all.indexOf(section);
+    for (let i = idx + 1; i < all.length; i++) {
+      if (all[i].style.display !== 'none') return all[i];
+    }
+    return null;
+  }
+
   function wireAccordionSection(section) {
     featureSections.push(section);
     section.addEventListener('toggle', () => {
@@ -765,9 +780,14 @@ I18N.ready.then(function () {
           setTimeout(() => m.invalidateSize(), 0);
         }
       });
+      if (suppressAccordionAutoScroll) return;
       // Aligne le BAS de la section sur le bas de l'écran (pas le haut), pour garder
-      // la fin de son contenu visible plutôt que son en-tête.
-      const bottom = section.getBoundingClientRect().bottom + window.scrollY + 8;
+      // la fin de son contenu visible plutôt que son en-tête — tout en laissant apparaître
+      // le titre de la section suivante juste en dessous, plutôt que de le masquer pile
+      // sous le bord inférieur de l'écran.
+      const nextSection = nextVisibleSectionAfter(section);
+      const nextTitleHeight = nextSection ? nextSection.querySelector('.feature-summary').getBoundingClientRect().height : 0;
+      const bottom = section.getBoundingClientRect().bottom + window.scrollY + 8 + nextTitleHeight;
       const top = bottom - window.innerHeight;
       window.scrollTo({ top, behavior: 'smooth' });
     });
@@ -3386,6 +3406,17 @@ I18N.ready.then(function () {
   reorderableCheckLabels().forEach(wireReorderHandle);
   const storedSectionOrder = loadSectionOrder();
   if (storedSectionOrder) applySectionOrder(storedSectionOrder);
+
+  // Ouvre par défaut la première section visible dans l'ordre actuel, plutôt qu'une section
+  // fixe : si l'utilisateur a glissé une autre section en tête de liste, c'est elle qui
+  // s'ouvre automatiquement aux prochaines visites (pas de défilement pour cette ouverture-là).
+  (function openFirstVisibleSection() {
+    const ordered = Array.from(document.querySelectorAll('details.feature'));
+    const first = ordered.find((s) => s.style.display !== 'none');
+    ordered.forEach((s) => { if (s !== first) s.open = false; });
+    if (first) first.open = true;
+  })();
+  suppressAccordionAutoScroll = false;
 
   const customSectionInput = $('customSectionInput');
   const customSectionAddBtn = $('customSectionAddBtn');

@@ -70,7 +70,7 @@
   },
   "grid": {
     "accuracy": "Précision horizontale",
-    "altitude": "Altitude GPS"
+    "altitude": "Altitude"
   },
   "warning": {
     "lowAccuracy": "Précision faible ({accuracy} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil)."
@@ -142,7 +142,15 @@
     "heading": "Cap",
     "time": "Heure",
     "altAccuracy": "Précision altitude",
+    "altRaw": "Altitude GPS brute",
+    "altCorrected": "Altitude GPS corrigée",
     "altOffset": "Décalage altitude",
+    "altOffsetAuto": "Décalage altitude auto",
+    "altOffsetAutoPending": "En cours de mesure…",
+    "altOffsetAutoSamples": "{count} mesures",
+    "altOffsetMode": "Mode de décalage altitude",
+    "altOffsetModeAuto": "Auto",
+    "altOffsetModeManual": "Manuel",
     "fixState": "État du fix",
     "fixAge": "Âge du relevé",
     "fixCount": "Relevés reçus",

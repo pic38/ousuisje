@@ -116,7 +116,7 @@
       <div id="accVal" class="value dim">—</div>
     </div>
     <div class="cell">
-      <div class="label" data-i18n="grid.altitude">Altitude GPS</div>
+      <div class="label" id="altLabel">Altitude</div>
       <div id="altVal" class="value dim">—</div>
     </div>
   </div>
@@ -173,9 +173,20 @@
         <div class="addr-row"><span class="k" data-i18n="diag.heading">Cap</span><span id="hdgVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k" data-i18n="diag.time">Heure</span><span id="tsVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k" data-i18n="diag.altAccuracy">Précision altitude</span><span id="altAccVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altRaw">Altitude GPS brute</span><span id="diagAltRaw" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altCorrected">Altitude GPS corrigée</span><span id="diagAltCorrected" class="v dim">—</span></div>
         <div class="addr-row"><span class="k" data-i18n="diag.altOffset">Décalage altitude</span>
           <span class="v" style="display:flex; align-items:center; gap:6px;">
             <input type="number" id="altOffsetInput" step="1" placeholder="0" class="altitude-offset-input" /> m
+          </span>
+        </div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altOffsetAuto">Décalage altitude auto</span><span id="altOffsetAutoVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altOffsetMode">Mode de décalage altitude</span>
+          <span class="v">
+            <select id="altOffsetModeSelect">
+              <option value="auto" data-i18n="diag.altOffsetModeAuto">Auto</option>
+              <option value="manual" data-i18n="diag.altOffsetModeManual">Manuel</option>
+            </select>
           </span>
         </div>
         <div class="addr-row"><span class="k" data-i18n="diag.fixState">État du fix</span><span id="diagFixState" class="v dim">—</span></div>
@@ -647,7 +658,12 @@ I18N.ready.then(function () {
   const hdgVal = $('hdgVal');
   const tsVal = $('tsVal');
   const altAccVal = $('altAccVal');
+  const altLabel = $('altLabel');
+  const diagAltRaw = $('diagAltRaw');
+  const diagAltCorrected = $('diagAltCorrected');
   const altOffsetInput = $('altOffsetInput');
+  const altOffsetAutoVal = $('altOffsetAutoVal');
+  const altOffsetModeSelect = $('altOffsetModeSelect');
   const accuracyWarning = $('accuracyWarning');
   const locateBtn = $('locateBtn');
   const autoStopCheckbox = $('autoStopCheckbox');
@@ -1223,14 +1239,80 @@ I18N.ready.then(function () {
 
   // --- Décalage manuel d'altitude (correction ajoutée à l'altitude brute du GPS) ---
   const ALT_OFFSET_STORAGE_KEY = 'ousuisje_altitude_offset_m';
-  let altitudeOffsetM = parseFloat(localStorage.getItem(ALT_OFFSET_STORAGE_KEY));
-  if (!Number.isFinite(altitudeOffsetM)) altitudeOffsetM = 0;
-  if (altitudeOffsetM) altOffsetInput.value = String(altitudeOffsetM);
+  let altitudeOffsetManualM = parseFloat(localStorage.getItem(ALT_OFFSET_STORAGE_KEY));
+  if (!Number.isFinite(altitudeOffsetManualM)) altitudeOffsetManualM = 0;
+  if (altitudeOffsetManualM) altOffsetInput.value = String(altitudeOffsetManualM);
+
+  // --- Décalage automatique d'altitude : mesuré une fois le fix GPS stabilisé, en comparant
+  // l'altitude brute du GPS à l'altitude IGN (ou Open-Elevation si l'IGN n'a pas de donnée à
+  // ce point, typiquement hors de France) au même endroit. Moyenné (moyenne glissante) au fil
+  // des sessions successives plutôt qu'écrasé à chaque fois, pour lisser le bruit du capteur.
+  const ALT_OFFSET_MODE_KEY = 'ousuisje_altitude_offset_mode'; // 'auto' | 'manual'
+  const ALT_OFFSET_AUTO_KEY = 'ousuisje_altitude_offset_auto_m';
+  const ALT_OFFSET_AUTO_COUNT_KEY = 'ousuisje_altitude_offset_auto_count';
+  const ALT_OFFSET_AUTO_SOURCE_KEY = 'ousuisje_altitude_offset_auto_source'; // 'ign' | 'oe'
+  let altitudeOffsetMode = localStorage.getItem(ALT_OFFSET_MODE_KEY) === 'manual' ? 'manual' : 'auto';
+  let altitudeOffsetAutoM = parseFloat(localStorage.getItem(ALT_OFFSET_AUTO_KEY));
+  if (!Number.isFinite(altitudeOffsetAutoM)) altitudeOffsetAutoM = null;
+  let altitudeOffsetAutoCount = parseInt(localStorage.getItem(ALT_OFFSET_AUTO_COUNT_KEY), 10);
+  if (!Number.isFinite(altitudeOffsetAutoCount) || altitudeOffsetAutoCount < 0) altitudeOffsetAutoCount = 0;
+  let altitudeOffsetAutoSource = localStorage.getItem(ALT_OFFSET_AUTO_SOURCE_KEY); // 'ign' | 'oe' | null
+  if (altitudeOffsetAutoSource !== 'ign' && altitudeOffsetAutoSource !== 'oe') altitudeOffsetAutoSource = null;
+  let autoOffsetAttempted = false; // une seule tentative de mesure par session GPS (voir startWatch)
+  let autoOffsetFirstFixAt = null;
+
+  // altitudeOffsetM est la valeur effectivement appliquée partout ailleurs dans l'app
+  // (affichage principal + sections IGN/Open-Elevation) ; elle suit le mode choisi ci-dessous.
+  let altitudeOffsetM = 0;
+
+  function updateAltOffsetAutoDisplay() {
+    if (altitudeOffsetAutoM != null) {
+      const rounded = Math.round(altitudeOffsetAutoM);
+      altOffsetAutoVal.textContent = (rounded >= 0 ? '+' : '') + rounded + ' m'
+        + (altitudeOffsetAutoCount > 1 ? ' (' + I18N.t('diag.altOffsetAutoSamples', { count: altitudeOffsetAutoCount }) + ')' : '');
+      altOffsetAutoVal.classList.remove('dim');
+    } else {
+      altOffsetAutoVal.textContent = I18N.t('diag.altOffsetAutoPending');
+      altOffsetAutoVal.classList.add('dim');
+    }
+  }
+
+  // Le libellé du champ altitude principal indique la source de la calibration
+  // actuellement appliquée : la source de la dernière mesure automatique réussie en mode
+  // auto, sinon "GPS" (brut, ou corrigé à la main sans référence externe validée).
+  function updateAltitudeLabel() {
+    const sourceLabel = (altitudeOffsetMode === 'auto' && altitudeOffsetAutoSource === 'ign') ? 'IGN'
+      : (altitudeOffsetMode === 'auto' && altitudeOffsetAutoSource === 'oe') ? 'Open Elevation'
+      : 'GPS';
+    altLabel.textContent = I18N.t('grid.altitude') + ' (' + sourceLabel + ')';
+  }
+
+  function applyOffsetMode() {
+    altitudeOffsetM = (altitudeOffsetMode === 'auto' && altitudeOffsetAutoM != null)
+      ? altitudeOffsetAutoM
+      : altitudeOffsetManualM;
+    altOffsetInput.disabled = (altitudeOffsetMode === 'auto');
+    updateAltitudeLabel();
+    if (lastPos) updateUI(lastPos);
+  }
+
+  window.addEventListener('i18n:changed', updateAltitudeLabel);
+
+  altOffsetModeSelect.value = altitudeOffsetMode;
+  updateAltOffsetAutoDisplay();
+  applyOffsetMode();
+
+  altOffsetModeSelect.addEventListener('change', () => {
+    altitudeOffsetMode = altOffsetModeSelect.value === 'manual' ? 'manual' : 'auto';
+    localStorage.setItem(ALT_OFFSET_MODE_KEY, altitudeOffsetMode);
+    applyOffsetMode();
+  });
+
   altOffsetInput.addEventListener('input', () => {
     const v = parseFloat(altOffsetInput.value);
-    altitudeOffsetM = Number.isFinite(v) ? v : 0;
-    localStorage.setItem(ALT_OFFSET_STORAGE_KEY, String(altitudeOffsetM));
-    if (lastPos) updateUI(lastPos);
+    altitudeOffsetManualM = Number.isFinite(v) ? v : 0;
+    localStorage.setItem(ALT_OFFSET_STORAGE_KEY, String(altitudeOffsetManualM));
+    applyOffsetMode();
   });
   const isFirefox = /firefox/i.test(navigator.userAgent);
   const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
@@ -1402,6 +1484,50 @@ I18N.ready.then(function () {
     const data = await res.json();
     const val = data && data.results && data.results[0] ? data.results[0].elevation : null;
     return val != null ? val : null;
+  }
+
+  // --- Mesure automatique du décalage d'altitude ---
+  // On attend que la position horizontale se stabilise (précision <= 10 m après au moins
+  // 5 s), avec un filet de sécurité à 30 s pour ne pas bloquer indéfiniment (intérieur, zone
+  // difficile) : on tente alors avec le meilleur fix reçu jusque-là.
+  const AUTO_OFFSET_MIN_WAIT_MS = 5000;
+  const AUTO_OFFSET_TIMEOUT_MS = 30000;
+  const AUTO_OFFSET_ACCURACY_TARGET_M = 10;
+
+  function maybeComputeAutoAltitudeOffset(pos) {
+    if (autoOffsetAttempted) return;
+    if (pos.coords.altitude == null) return; // rien à corriger sans altitude brute du GPS
+    if (autoOffsetFirstFixAt == null) autoOffsetFirstFixAt = Date.now();
+    const elapsed = Date.now() - autoOffsetFirstFixAt;
+    const accuracy = pos.coords.accuracy;
+    const stabilized = accuracy != null && accuracy <= AUTO_OFFSET_ACCURACY_TARGET_M && elapsed >= AUTO_OFFSET_MIN_WAIT_MS;
+    if (!stabilized && elapsed < AUTO_OFFSET_TIMEOUT_MS) return;
+    autoOffsetAttempted = true;
+    computeAutoAltitudeOffset(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+  }
+
+  async function computeAutoAltitudeOffset(lat, lon, rawAltitude) {
+    let reference = null;
+    let source = null;
+    try { reference = await fetchIGNAltitude(lat, lon); if (reference != null) source = 'ign'; } catch (e) { reference = null; }
+    if (reference == null) {
+      try { reference = await fetchOpenElevationAltitude(lat, lon); if (reference != null) source = 'oe'; } catch (e) { reference = null; }
+    }
+    if (reference == null) return; // aucune source disponible ; nouvelle tentative à la prochaine session GPS
+
+    // Moyenne glissante : chaque nouvelle mesure affine la précédente plutôt que de l'écraser.
+    // Si la source change d'une mesure à l'autre (ex. IGN puis Open-Elevation), le libellé
+    // de source suit simplement la mesure la plus récente.
+    const sample = reference - rawAltitude;
+    const prevAvg = altitudeOffsetAutoM != null ? altitudeOffsetAutoM : sample;
+    altitudeOffsetAutoCount += 1;
+    altitudeOffsetAutoM = prevAvg + (sample - prevAvg) / altitudeOffsetAutoCount;
+    altitudeOffsetAutoSource = source;
+    localStorage.setItem(ALT_OFFSET_AUTO_KEY, String(altitudeOffsetAutoM));
+    localStorage.setItem(ALT_OFFSET_AUTO_COUNT_KEY, String(altitudeOffsetAutoCount));
+    localStorage.setItem(ALT_OFFSET_AUTO_SOURCE_KEY, altitudeOffsetAutoSource);
+    updateAltOffsetAutoDisplay();
+    applyOffsetMode();
   }
 
   const altitudeMap = initSecondaryMap('altitudeMap');
@@ -1758,6 +1884,12 @@ I18N.ready.then(function () {
     }
     altVal.textContent = altitude != null ? Math.round(altitude + altitudeOffsetM) + ' m' : I18N.t('alt.gpsNotProvided');
     altVal.classList.toggle('dim', altitude == null);
+    diagAltRaw.textContent = altitude != null ? Math.round(altitude) + ' m' : '—';
+    diagAltRaw.classList.toggle('dim', altitude == null);
+    diagAltRaw.classList.toggle('copyable', altitude != null);
+    diagAltCorrected.textContent = altitude != null ? Math.round(altitude + altitudeOffsetM) + ' m' : '—';
+    diagAltCorrected.classList.toggle('dim', altitude == null);
+    diagAltCorrected.classList.toggle('copyable', altitude != null);
     const isMoving = lastKnownSpeedKmh != null && lastKnownSpeedKmh >= 2;
     spdVal.textContent = isMoving ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : '—';
     spdVal.classList.toggle('dim', !isMoving);
@@ -1828,6 +1960,7 @@ I18N.ready.then(function () {
     locateBtn.textContent = I18N.t('locate.disable');
     locateBtn.disabled = false;
     updateUI(pos);
+    maybeComputeAutoAltitudeOffset(pos);
   }
 
   function handleFixError(err) {
@@ -1857,6 +1990,8 @@ I18N.ready.then(function () {
     recentFixes = [];
     lastKnownSpeedKmh = null;
     diagFixCount.textContent = '0';
+    autoOffsetAttempted = false;
+    autoOffsetFirstFixAt = null;
 
     beginWatch();
 
@@ -3605,7 +3740,27 @@ I18N.ready.then(function () {
 
   // --- Service worker, installation, partage ---
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then((registration) => {
+        // Web uniquement : dans l'app Android, le contenu est chargé localement
+        // (WebViewAssetLoader) et cette détection de nouvelle version n'a pas de sens.
+        if (typeof window.CrashBridge !== 'undefined') return;
+
+        let refreshedForUpdate = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshedForUpdate) return;
+          refreshedForUpdate = true;
+          window.location.reload();
+        });
+
+        // Un onglet resté ouvert ne revérifie pas spontanément l'existence d'une version plus
+        // récente : on le fait nous-même périodiquement et au retour de visibilité de l'onglet.
+        setInterval(() => { registration.update().catch(() => {}); }, 5 * 60 * 1000);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') registration.update().catch(() => {});
+        });
+      }).catch(() => {});
+    });
   }
 
   const installBtn = $('installBtn');

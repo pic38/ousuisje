@@ -70,7 +70,7 @@
   },
   "grid": {
     "accuracy": "Horizontal accuracy",
-    "altitude": "GPS altitude"
+    "altitude": "Altitude"
   },
   "warning": {
     "lowAccuracy": "Low accuracy ({accuracy} m) — check that precise location is enabled for this site (browser and device settings)."
@@ -142,7 +142,15 @@
     "heading": "Heading",
     "time": "GPS time",
     "altAccuracy": "Altitude accuracy",
+    "altRaw": "Raw GPS altitude",
+    "altCorrected": "Corrected GPS altitude",
     "altOffset": "Altitude offset",
+    "altOffsetAuto": "Auto altitude offset",
+    "altOffsetAutoPending": "Measuring…",
+    "altOffsetAutoSamples": "{count} samples",
+    "altOffsetMode": "Altitude offset mode",
+    "altOffsetModeAuto": "Auto",
+    "altOffsetModeManual": "Manual",
     "fixState": "Fix status",
     "fixAge": "Fix age",
     "fixCount": "Fixes received",

@@ -2823,17 +2823,34 @@ I18N.ready.then(function () {
   const OVERPASS_PRIMARY_URL = 'https://overpass-api.de/api/interpreter';
   const OVERPASS_FALLBACK_URL = 'https://overpass.kumi.systems/api/interpreter';
 
-  // Repli automatique vers un miroir si le serveur principal échoue (panne, timeout, erreur
-  // HTTP) — jamais utilisé en alternance systématique, seulement en secours.
-  async function fetchOverpass(query) {
+  // Plafond côté client, indépendant du [timeout:20] dans la requête elle-même : celui-ci ne
+  // borne que le temps de traitement du serveur Overpass, pas un serveur qui ne répond pas du
+  // tout (connexion qui traîne). Sans ça, une requête bloquée pouvait laisser l'utilisateur
+  // sans aucune indication pendant un temps arbitrairement long.
+  const OVERPASS_ATTEMPT_TIMEOUT_MS = 12000;
+
+  async function fetchOverpassOnce(url, query) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), OVERPASS_ATTEMPT_TIMEOUT_MS);
     try {
-      const res = await fetch(OVERPASS_PRIMARY_URL, { method: 'POST', body: query });
-      if (!res.ok) throw new Error('overpass primary HTTP ' + res.status);
+      const res = await fetch(url, { method: 'POST', body: query, signal: controller.signal });
+      if (!res.ok) throw new Error('overpass HTTP ' + res.status);
       return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // Repli automatique vers un miroir si le serveur principal échoue ou ne répond pas dans les
+  // temps — jamais utilisé en alternance systématique, seulement en secours. `onRetry` (facultatif)
+  // permet à l'appelant d'informer l'utilisateur qu'on retente ailleurs plutôt que de le laisser
+  // sans aucun retour pendant la bascule.
+  async function fetchOverpass(query, onRetry) {
+    try {
+      return await fetchOverpassOnce(OVERPASS_PRIMARY_URL, query);
     } catch (e) {
-      const res = await fetch(OVERPASS_FALLBACK_URL, { method: 'POST', body: query });
-      if (!res.ok) throw new Error('overpass fallback HTTP ' + res.status);
-      return await res.json();
+      if (onRetry) onRetry();
+      return await fetchOverpassOnce(OVERPASS_FALLBACK_URL, query);
     }
   }
 
@@ -2878,7 +2895,7 @@ I18N.ready.then(function () {
       try {
         const rawItems = await cachedOverpassSearch(section, lat, lon, radiusM, async () => {
           const query = buildQuery(lat, lon, radiusM);
-          const data = await fetchOverpass(query);
+          const data = await fetchOverpass(query, () => { statusEl.textContent = I18N.t('common.overpassRetrying'); });
           return (data.elements || [])
             .map((el) => {
               const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
@@ -3107,7 +3124,7 @@ I18N.ready.then(function () {
     try {
       const rawItems = await cachedOverpassSearch('toilets', lat, lon, TOILETS_RADIUS_M, async () => {
         const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
-        const data = await fetchOverpass(query);
+        const data = await fetchOverpass(query, () => { toiletsStatusEl.textContent = I18N.t('common.overpassRetrying'); });
         return (data.elements || [])
           .map((el) => {
             const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
@@ -3273,7 +3290,7 @@ I18N.ready.then(function () {
     try {
       const rawItems = await cachedOverpassSearch('drinking-water', lat, lon, DRINKING_WATER_RADIUS_M, async () => {
         const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
-        const data = await fetchOverpass(query);
+        const data = await fetchOverpass(query, () => { drinkingWaterStatusEl.textContent = I18N.t('common.overpassRetrying'); });
         return (data.elements || [])
           .map((el) => {
             if (el.lat == null || el.lon == null) return null;

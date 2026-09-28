@@ -89,6 +89,7 @@
     "enableLocationPrompt": "Enable GPS location or select a point on the map.",
     "enableLocationTablePlaceholder": "Enable location or select a point, then run the search",
     "overpassUnavailable": "Overpass service unavailable",
+    "overpassRetrying": "Primary service not responding, retrying…",
     "searchImpossible": "Search unavailable right now",
     "resultCount": "{count} result(s) · radius {radius} km",
     "emptyResultTemplate": "{emptyLabel} within {radius} km",

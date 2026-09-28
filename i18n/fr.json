@@ -89,6 +89,7 @@
     "enableLocationPrompt": "Activez la localisation GPS ou sélectionnez un point sur la carte.",
     "enableLocationTablePlaceholder": "Activez la localisation ou sélectionnez un point, puis lancez la recherche",
     "overpassUnavailable": "Service Overpass indisponible",
+    "overpassRetrying": "Le service principal ne répond pas, nouvelle tentative…",
     "searchImpossible": "Recherche impossible pour le moment",
     "resultCount": "{count} résultat(s) · rayon {radius} km",
     "emptyResultTemplate": "{emptyLabel} dans un rayon de {radius} km",

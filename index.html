@@ -2475,7 +2475,7 @@ I18N.ready.then(function () {
   const ANTENNAS_URL = 'data/anfr-antennas.min.csv';
   const ANTENNAS_RAW_BYTES = 6071089;
   const ANTENNAS_DOWNLOADED_STORAGE_KEY = 'ousuisje_anfr_antennas_downloaded';
-  const ANTENNA_RADIUS_M = 10000;
+  const ANTENNA_RADIUS_M = 20000;
   const ANTENNA_MAX_RESULTS = 20;
   const OPERATOR_COLORS = {
     'ORANGE': '#FF7900',
@@ -2735,8 +2735,110 @@ I18N.ready.then(function () {
     return Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
   }
 
+  // --- Cache géographique + repli sur un miroir Overpass alternatif ---
+  // Pas d'escalade de rayon ici : chaque section garde un rayon fixe, seul le résultat de
+  // la requête est mis en cache (par section, grille ~5 m, 3 jours) pour éviter de refaire
+  // la même requête réseau à répétition sur un point quasi identique.
+  const GEOCACHE_KEY = 'ousuisje_geocache_v1';
+  const GEOCACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 jours
+  const GEOCACHE_GRID_DEG = 0.00005; // ~5,5 m de large à l'équateur
+  const GEOCACHE_MAX_ENTRIES = 300;
+
+  function geocacheRoundCoord(v) {
+    return Math.round(v / GEOCACHE_GRID_DEG) * GEOCACHE_GRID_DEG;
+  }
+
+  function geocacheLoad() {
+    try {
+      const raw = localStorage.getItem(GEOCACHE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function geocacheSave(store) {
+    try { localStorage.setItem(GEOCACHE_KEY, JSON.stringify(store)); } catch (e) {}
+  }
+
+  function geocacheKey(section, lat, lon, radiusM) {
+    return `${section}|${geocacheRoundCoord(lat).toFixed(5)}|${geocacheRoundCoord(lon).toFixed(5)}|${radiusM}`;
+  }
+
+  // Lecture exacte : même section, même case de grille (~5 m), même rayon.
+  function geocacheGet(section, lat, lon, radiusM) {
+    const store = geocacheLoad();
+    const entry = store[geocacheKey(section, lat, lon, radiusM)];
+    if (!entry || Date.now() - entry.t > GEOCACHE_TTL_MS) return null;
+    return entry.items;
+  }
+
+  // Réutilisation en cascade : si une entrée en cache (même section) couvre entièrement le
+  // cercle demandé avec un rayon plus grand (ex. recherche précédente à rayon plus large
+  // depuis un point proche), on en extrait les points pertinents plutôt que de refaire une
+  // requête réseau. Les items en cache gardent leurs lat/lon d'origine — pas leur
+  // distance/cap, recalculés par l'appelant pour le nouveau point de référence.
+  function geocacheFindSuperset(section, lat, lon, radiusM) {
+    const store = geocacheLoad();
+    const now = Date.now();
+    let best = null;
+    for (const k in store) {
+      if (!k.startsWith(section + '|')) continue;
+      const entry = store[k];
+      if (now - entry.t > GEOCACHE_TTL_MS) continue;
+      if (entry.radiusM < radiusM) continue;
+      const distM = distanceMetersApprox(lat, lon, entry.lat, entry.lon);
+      if (distM + radiusM <= entry.radiusM && (!best || entry.radiusM < best.radiusM)) best = entry;
+    }
+    if (!best) return null;
+    return best.items.filter((it) => distanceMetersApprox(lat, lon, it.lat, it.lon) <= radiusM);
+  }
+
+  function geocacheSet(section, lat, lon, radiusM, items) {
+    const store = geocacheLoad();
+    const now = Date.now();
+    store[geocacheKey(section, lat, lon, radiusM)] = { t: now, lat: lat, lon: lon, radiusM: radiusM, items: items };
+    for (const k in store) {
+      if (now - store[k].t > GEOCACHE_TTL_MS) delete store[k];
+    }
+    const keys = Object.keys(store);
+    if (keys.length > GEOCACHE_MAX_ENTRIES) {
+      keys.sort((a, b) => store[a].t - store[b].t);
+      for (let i = 0; i < keys.length - GEOCACHE_MAX_ENTRIES; i++) delete store[keys[i]];
+    }
+    geocacheSave(store);
+  }
+
+  const OVERPASS_PRIMARY_URL = 'https://overpass-api.de/api/interpreter';
+  const OVERPASS_FALLBACK_URL = 'https://overpass.kumi.systems/api/interpreter';
+
+  // Repli automatique vers un miroir si le serveur principal échoue (panne, timeout, erreur
+  // HTTP) — jamais utilisé en alternance systématique, seulement en secours.
+  async function fetchOverpass(query) {
+    try {
+      const res = await fetch(OVERPASS_PRIMARY_URL, { method: 'POST', body: query });
+      if (!res.ok) throw new Error('overpass primary HTTP ' + res.status);
+      return await res.json();
+    } catch (e) {
+      const res = await fetch(OVERPASS_FALLBACK_URL, { method: 'POST', body: query });
+      if (!res.ok) throw new Error('overpass fallback HTTP ' + res.status);
+      return await res.json();
+    }
+  }
+
+  // Vérifie le cache (correspondance exacte puis cascade depuis un rayon plus large déjà en
+  // cache) avant d'appeler `fetchItems`, qui doit renvoyer des items bruts (lat/lon/nom/etc,
+  // sans distance ni cap — recalculés par l'appelant).
+  async function cachedOverpassSearch(section, lat, lon, radiusM, fetchItems) {
+    let items = geocacheGet(section, lat, lon, radiusM);
+    if (items === null) items = geocacheFindSuperset(section, lat, lon, radiusM);
+    if (items === null) {
+      items = await fetchItems();
+      geocacheSet(section, lat, lon, radiusM, items);
+    }
+    return items;
+  }
+
   function setupNearbyOverpassFeature(config) {
-    const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
+    const { btn, statusEl, tableBody, map, buildQuery, color, section, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
     let markers = [];
     // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
     // doit pas faire disparaître le point de la position GPS, et inversement.
@@ -2761,19 +2863,21 @@ I18N.ready.then(function () {
       }
 
       try {
-        const query = buildQuery(lat, lon, radiusM);
-        const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-        const data = await res.json();
+        const rawItems = await cachedOverpassSearch(section, lat, lon, radiusM, async () => {
+          const query = buildQuery(lat, lon, radiusM);
+          const data = await fetchOverpass(query);
+          return (data.elements || [])
+            .map((el) => {
+              const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+              const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+              if (elat == null || elon == null) return null;
+              return { name: (el.tags && el.tags.name) || defaultName, lat: elat, lon: elon };
+            })
+            .filter(Boolean);
+        });
 
-        const items = (data.elements || [])
-          .map((el) => {
-            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
-            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
-            if (elat == null || elon == null) return null;
-            const name = (el.tags && el.tags.name) || defaultName;
-            return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
-          })
-          .filter(Boolean)
+        const items = rawItems
+          .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
           .sort((a, b) => a.distM - b.distM)
           .slice(0, maxResults);
 
@@ -2842,7 +2946,8 @@ I18N.ready.then(function () {
     map: poiMap,
     badgeEl: poiSourceBadge,
     color: '#4FD1C5',
-    radiusM: 1500,
+    section: 'poi',
+    radiusM: 5000,
     maxResults: 10,
     defaultName: I18N.t('poi.defaultName'),
     emptyLabel: I18N.t('poi.emptyLabel'),
@@ -2857,6 +2962,7 @@ I18N.ready.then(function () {
     map: escapeGamesMap,
     badgeEl: escapeGamesSourceBadge,
     color: '#8B5CF6',
+    section: 'escape-games',
     radiusM: 20000,
     maxResults: 10,
     defaultName: I18N.t('escapeGames.defaultName'),
@@ -2872,6 +2978,7 @@ I18N.ready.then(function () {
     map: climbingGymsMap,
     badgeEl: climbingGymsSourceBadge,
     color: '#F2994A',
+    section: 'climbing-gyms',
     radiusM: 20000,
     maxResults: 10,
     defaultName: I18N.t('climbingGyms.defaultName'),
@@ -2886,7 +2993,7 @@ I18N.ready.then(function () {
   const TOILETS_URL = 'data/toilets.min.csv';
   const TOILETS_RAW_BYTES = 788726;
   const TOILETS_DOWNLOADED_STORAGE_KEY = 'ousuisje_toilets_downloaded';
-  const TOILETS_RADIUS_M = 10000;
+  const TOILETS_RADIUS_M = 20000;
   const TOILETS_MAX_RESULTS = 10;
   const TOILETS_COLOR = '#6C7A89';
 
@@ -2985,17 +3092,20 @@ I18N.ready.then(function () {
 
     toiletsStatusEl.textContent = I18N.t('common.searching');
     try {
-      const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
-      const items = (data.elements || [])
-        .map((el) => {
-          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
-          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
-          if (elat == null || elon == null) return null;
-          return { name: (el.tags && el.tags.name) || I18N.t('toilets.defaultName'), lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
-        })
-        .filter(Boolean)
+      const rawItems = await cachedOverpassSearch('toilets', lat, lon, TOILETS_RADIUS_M, async () => {
+        const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
+        const data = await fetchOverpass(query);
+        return (data.elements || [])
+          .map((el) => {
+            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+            if (elat == null || elon == null) return null;
+            return { name: (el.tags && el.tags.name) || I18N.t('toilets.defaultName'), lat: elat, lon: elon };
+          })
+          .filter(Boolean);
+      });
+      const items = rawItems
+        .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
         .sort((a, b) => a.distM - b.distM)
         .slice(0, TOILETS_MAX_RESULTS);
       renderToiletsResults(lat, lon, source, items);
@@ -3049,7 +3159,7 @@ I18N.ready.then(function () {
   const DRINKING_WATER_URL = 'data/drinking-water.min.csv';
   const DRINKING_WATER_RAW_BYTES = 747017;
   const DRINKING_WATER_DOWNLOADED_STORAGE_KEY = 'ousuisje_drinking_water_downloaded';
-  const DRINKING_WATER_RADIUS_M = 10000;
+  const DRINKING_WATER_RADIUS_M = 20000;
   const DRINKING_WATER_MAX_RESULTS = 10;
   const DRINKING_WATER_COLOR = '#2AABE2';
 
@@ -3148,15 +3258,18 @@ I18N.ready.then(function () {
 
     drinkingWaterStatusEl.textContent = I18N.t('common.searching');
     try {
-      const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
-      const items = (data.elements || [])
-        .map((el) => {
-          if (el.lat == null || el.lon == null) return null;
-          return { name: (el.tags && el.tags.name) || I18N.t('drinkingWater.defaultName'), lat: el.lat, lon: el.lon, distM: distanceMetersApprox(lat, lon, el.lat, el.lon), bearing: bearingTo(lat, lon, el.lat, el.lon) };
-        })
-        .filter(Boolean)
+      const rawItems = await cachedOverpassSearch('drinking-water', lat, lon, DRINKING_WATER_RADIUS_M, async () => {
+        const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
+        const data = await fetchOverpass(query);
+        return (data.elements || [])
+          .map((el) => {
+            if (el.lat == null || el.lon == null) return null;
+            return { name: (el.tags && el.tags.name) || I18N.t('drinkingWater.defaultName'), lat: el.lat, lon: el.lon };
+          })
+          .filter(Boolean);
+      });
+      const items = rawItems
+        .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
         .sort((a, b) => a.distM - b.distM)
         .slice(0, DRINKING_WATER_MAX_RESULTS);
       renderDrinkingWaterResults(lat, lon, source, items);
@@ -3212,7 +3325,8 @@ I18N.ready.then(function () {
     map: foodMap,
     badgeEl: foodSourceBadge,
     color: '#E24A4A',
-    radiusM: 2000,
+    section: 'food',
+    radiusM: 5000,
     maxResults: 10,
     defaultName: I18N.t('food.defaultName'),
     emptyLabel: I18N.t('food.emptyLabel'),
@@ -3326,6 +3440,7 @@ I18N.ready.then(function () {
       map: secMap,
       badgeEl: badgeEl,
       color: color,
+      section: 'custom-' + id,
       radiusM: 5000,
       maxResults: 10,
       defaultName: label,

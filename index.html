@@ -1488,10 +1488,10 @@ I18N.ready.then(function () {
 
   // --- Mesure automatique du décalage d'altitude ---
   // On attend que la position horizontale se stabilise (précision <= 10 m après au moins
-  // 5 s), avec un filet de sécurité à 30 s pour ne pas bloquer indéfiniment (intérieur, zone
-  // difficile) : on tente alors avec le meilleur fix reçu jusque-là.
-  const AUTO_OFFSET_MIN_WAIT_MS = 5000;
-  const AUTO_OFFSET_TIMEOUT_MS = 30000;
+  // 30 s), avec un filet de sécurité à 1 min pour ne pas bloquer indéfiniment (intérieur,
+  // zone difficile) : on tente alors avec le meilleur fix reçu jusque-là.
+  const AUTO_OFFSET_MIN_WAIT_MS = 30000;
+  const AUTO_OFFSET_TIMEOUT_MS = 60000;
   const AUTO_OFFSET_ACCURACY_TARGET_M = 10;
 
   function maybeComputeAutoAltitudeOffset(pos) {
@@ -2058,7 +2058,20 @@ I18N.ready.then(function () {
     }
   });
 
-  locateBtn.addEventListener('click', () => { if (isTrackingActive()) stopWatch(); else startWatch(); });
+  locateBtn.addEventListener('click', () => {
+    if (isTrackingActive()) {
+      stopWatch();
+    } else {
+      // Un utilisateur qui active la localisation à la main veut probablement qu'elle
+      // démarre automatiquement aux prochaines ouvertures — on mémorise ce choix plutôt que
+      // de le forcer à cocher le réglage séparément.
+      if (!autoLocateCheckbox.checked) {
+        autoLocateCheckbox.checked = true;
+        localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, '1');
+      }
+      startWatch();
+    }
+  });
 
   const AUTO_LOCATE_STORAGE_KEY = 'ousuisje_alpha_auto_locate';
   autoLocateCheckbox.checked = localStorage.getItem(AUTO_LOCATE_STORAGE_KEY) === '1';

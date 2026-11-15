@@ -49,7 +49,9 @@
   },
   "welcome": {
     "message": "For the full experience, enable location (otherwise some features will be limited). Your location data is never stored, sold, or used for advertising. Tip: for easy access, add a shortcut to your home screen using the button at the very bottom.",
-    "dismiss": "Got it"
+    "question": "Do you want to enable GPS?",
+    "yes": "Yes",
+    "no": "No"
   },
   "translation": {
     "notice": "This translation is machine-generated and hasn't been reviewed by a native speaker yet.",

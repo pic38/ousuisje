@@ -49,7 +49,9 @@
   },
   "welcome": {
     "message": "Pour profiter de toutes les fonctionnalités, activez la localisation (sinon l'expérience sera limitée). Vos données de localisation ne sont ni stockées, ni revendues, ni utilisées pour de la publicité. Astuce : pour un accès facile, ajoutez un raccourci à votre écran d'accueil avec le bouton tout en bas.",
-    "dismiss": "Compris"
+    "question": "Voulez-vous activer le GPS ?",
+    "yes": "Oui",
+    "no": "Non"
   },
   "translation": {
     "notice": "Cette traduction est générée automatiquement et n'a pas encore été relue par un locuteur natif.",

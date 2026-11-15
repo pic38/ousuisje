@@ -561,6 +561,15 @@ h1 {
   line-height: 1.5;
   color: #C7CEDA;
 }
+.welcome-banner .welcome-question {
+  font-weight: 700;
+  color: var(--text);
+}
+.welcome-banner .welcome-actions {
+  display: flex;
+  gap: 10px;
+}
+.welcome-banner .welcome-actions button { flex: 1; }
 .welcome-banner.is-hidden { display: none; }
 
 

@@ -78,7 +78,8 @@
     "altitude": "Altitude"
   },
   "warning": {
-    "lowAccuracy": "Low accuracy ({accuracy} m) — check that precise location is enabled for this site (browser and device settings)."
+    "lowAccuracy": "Low accuracy ({accuracy} m) — check that precise location is enabled for this site (browser and device settings).",
+    "iosLocationHelp": "Location denied or disabled. On iPhone: <strong>Settings → Privacy & Security → Location Services</strong> (check it's turned on), then <strong>Settings → Safari → Location</strong> → choose \"Ask\"."
   },
   "common": {
     "mapHint": "The map is clickable to search from another point.",

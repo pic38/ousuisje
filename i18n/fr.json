@@ -78,7 +78,8 @@
     "altitude": "Altitude"
   },
   "warning": {
-    "lowAccuracy": "Précision faible ({accuracy} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil)."
+    "lowAccuracy": "Précision faible ({accuracy} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil).",
+    "iosLocationHelp": "Localisation refusée ou désactivée. Sur iPhone : <strong>Réglages → Confidentialité et sécurité → Service de localisation</strong> (vérifier qu'il est activé), puis <strong>Réglages → Safari → Localisation</strong> → choisir \"Demander\"."
   },
   "common": {
     "mapHint": "La carte est cliquable pour relancer la recherche ailleurs.",

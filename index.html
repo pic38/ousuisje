@@ -129,6 +129,7 @@
     </div>
   </div>
   <p id="accuracyWarning" class="accuracy-warning" style="display:none;"></p>
+  <p id="iosLocationHelp" class="accuracy-warning" style="display:none;" data-i18n-html="warning.iosLocationHelp">Localisation refusée ou désactivée. Sur iPhone : <strong>Réglages → Confidentialité et sécurité → Service de localisation</strong> (vérifier qu'il est activé), puis <strong>Réglages → Safari → Localisation</strong> → choisir "Demander".</p>
 
   <details class="feature" data-section="localisation" open>
     <summary class="feature-summary"><span data-i18n="settings.section.localisation">Localisation administrative</span><span class="feature-chevron">▾</span></summary>
@@ -642,6 +643,7 @@ I18N.ready.then(function () {
   const altOffsetAutoVal = $('altOffsetAutoVal');
   const altOffsetModeSelect = $('altOffsetModeSelect');
   const accuracyWarning = $('accuracyWarning');
+  const iosLocationHelp = $('iosLocationHelp');
   const welcomeBanner = $('welcomeBanner');
   const welcomeYesBtn = $('welcomeYesBtn');
   const welcomeNoBtn = $('welcomeNoBtn');
@@ -1292,6 +1294,7 @@ I18N.ready.then(function () {
     applyOffsetMode();
   });
   const isFirefox = /firefox/i.test(navigator.userAgent);
+  const isIPhone = /iPhone/i.test(navigator.userAgent);
   const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
 
   function haversine(lat1, lon1, lat2, lon2) {
@@ -1930,6 +1933,9 @@ I18N.ready.then(function () {
     else if (err.code === err.POSITION_UNAVAILABLE) msg = I18N.t('error.positionUnavailable');
     else if (err.code === err.TIMEOUT) msg = I18N.t('error.timeout');
     setStatus('err', msg);
+    // Sur iPhone, la localisation désactivée par défaut (ou refusée une fois pour toutes)
+    // ne redonne aucun message clair côté navigateur — on explique où la réactiver.
+    iosLocationHelp.style.display = (isIPhone && err.code === err.PERMISSION_DENIED) ? 'block' : 'none';
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
     if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
     if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
@@ -1955,6 +1961,7 @@ I18N.ready.then(function () {
     lastRawPos = pos;
     locateBtn.textContent = I18N.t('locate.disable');
     locateBtn.disabled = false;
+    iosLocationHelp.style.display = 'none';
     updateUI(pos);
     maybeComputeAutoAltitudeOffset(pos);
     maybeAutoGeocode(pos);

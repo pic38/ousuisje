@@ -734,6 +734,18 @@ I18N.ready.then(function () {
     return null;
   }
 
+  // Sections dont les données sont disponibles hors ligne (silencieusement pré-téléchargées,
+  // ou via le bouton dédié de la section) : on relance leur recherche à chaque ouverture,
+  // sans attendre un clic sur leur bouton, puisqu'aucun appel réseau à la demande n'est
+  // nécessaire pour avoir un résultat (ou, pour les antennes/contours précis, seulement si
+  // déjà téléchargées — sinon la recherche retombe simplement sur l'approximation usuelle).
+  const AUTO_SEARCH_ON_OPEN = {
+    'offline-geo': updateOfflineGeo,
+    'antennas': updateAntennasNearby,
+    'toilets': updateToiletsNearby,
+    'drinking-water': updateDrinkingWaterNearby
+  };
+
   function wireAccordionSection(section) {
     featureSections.push(section);
     section.addEventListener('toggle', () => {
@@ -741,6 +753,11 @@ I18N.ready.then(function () {
       featureSections.forEach((other) => {
         if (other !== section) other.open = false;
       });
+      const autoSearchFn = AUTO_SEARCH_ON_OPEN[section.dataset.section];
+      if (autoSearchFn) {
+        const point = getReferencePoint();
+        if (point) autoSearchFn(point.lat, point.lon);
+      }
       // Une carte Leaflet créée pendant que son conteneur est masqué (section repliée)
       // mémorise une taille invalide (0×0) et cadre alors n'importe comment tant qu'on
       // ne lui redit pas de re-mesurer son conteneur, une fois celui-ci enfin visible.

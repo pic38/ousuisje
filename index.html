@@ -337,31 +337,21 @@
         <div class="addr-head">
           <span data-i18n="offlineGeo.contoursTitle">Contours précis des communes (optionnel)</span>
         </div>
-        <table class="contours-table">
+        <table class="contours-table" id="contoursTable">
           <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+            <col class="col-version"><col class="col-action">
           </colgroup>
           <thead>
-            <tr><th data-i18n="offlineGeo.colVersion">Version</th><th data-i18n="offlineGeo.colStatus">Statut</th><th></th><th></th></tr>
+            <tr><th data-i18n="offlineGeo.colVersion">Version</th><th></th></tr>
           </thead>
           <tbody>
             <tr>
               <td data-i18n="offlineGeo.tierCentroidesLabel">Cercles (1,4 Mo)</td>
-              <td id="statusCentroides" class="dim" data-i18n="offlineGeo.downloadedActive">Téléchargées, actives</td>
               <td><button type="button" id="activateCentroides" class="btn-secondary" disabled data-i18n="common.active">Actif ✓</button></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td data-i18n="offlineGeo.tierSimplifieeLabel">Polygones (6,7 Mo)</td>
-              <td id="statusSimplifiee" class="dim" data-i18n="common.notDownloadedFem">Non téléchargée</td>
-              <td><button type="button" id="downloadSimplifiee" class="btn-secondary" data-i18n="common.download">Télécharger</button></td>
-              <td><button type="button" id="deleteSimplifiee" class="btn-delete" style="display:none" title="Supprimer les données téléchargées" data-i18n-attr="title:common.deleteAriaLabel">🗑</button></td>
             </tr>
             <tr>
               <td data-i18n="offlineGeo.tierPreciseLabel">Détaillée (16 Mo)</td>
-              <td id="statusPrecise" class="dim" data-i18n="common.notDownloadedFem">Non téléchargée</td>
               <td><button type="button" id="downloadPrecise" class="btn-secondary" data-i18n="common.download">Télécharger</button></td>
-              <td><button type="button" id="deletePrecise" class="btn-delete" style="display:none" title="Supprimer les données téléchargées" data-i18n-attr="title:common.deleteAriaLabel">🗑</button></td>
             </tr>
           </tbody>
         </table>
@@ -707,13 +697,8 @@ I18N.ready.then(function () {
   const offlineCommuneEl = $('offlineCommune');
   const offlineCPEl = $('offlineCP');
   const activateCentroidesBtn = $('activateCentroides');
-  const downloadSimplifieeBtn = $('downloadSimplifiee');
   const downloadPreciseBtn = $('downloadPrecise');
-  const deleteSimplifieeBtn = $('deleteSimplifiee');
-  const deletePreciseBtn = $('deletePrecise');
-  const tierButtons = { centroides: activateCentroidesBtn, simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
-  const tierStatusEls = { centroides: $('statusCentroides'), simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
-  const tierDeleteButtons = { simplifiee: deleteSimplifieeBtn, precise: deletePreciseBtn };
+  const tierButtons = { centroides: activateCentroidesBtn, precise: downloadPreciseBtn };
 
   const antennasRowStatusEl = $('antennasRowStatus');
   const downloadAntennasBtn = $('downloadAntennas');
@@ -2318,11 +2303,6 @@ I18N.ready.then(function () {
     centroides: {
       label: 'cercles (centroïdes)'
     },
-    simplifiee: {
-      url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes-version-simplifiee.geojson',
-      label: 'polygones (version simplifiée)',
-      rawSizeBytes: 19342488
-    },
     precise: {
       url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson',
       label: 'détaillée (pleine précision)',
@@ -2407,43 +2387,30 @@ I18N.ready.then(function () {
     }
   }
 
+  // Le statut (téléchargée/en cours/absente) vit directement dans le libellé du bouton,
+  // il n'y a plus de colonne "Statut" séparée. Pour le niveau "précise" (le seul qui se
+  // télécharge/supprime), le même bouton bascule entre les deux actions selon l'état.
   function updateTierUI(tier) {
     const btn = tierButtons[tier];
-    const statusEl = tierStatusEls[tier];
-    const deleteBtn = tierDeleteButtons[tier];
-    if (communeContoursTier === tier) {
-      btn.textContent = I18N.t('common.active');
-      btn.disabled = true;
-      statusEl.textContent = I18N.t('offlineGeo.downloadedActive');
-      statusEl.classList.remove('dim');
-    } else if (tier === 'centroides' || communeContoursDownloaded.has(tier)) {
-      btn.textContent = I18N.t('common.activate');
-      btn.disabled = false;
-      statusEl.textContent = tier === 'centroides' ? I18N.t('offlineGeo.downloadedInactiveCircles') : I18N.t('offlineGeo.downloadedInactive');
-      statusEl.classList.remove('dim');
-    } else {
-      btn.textContent = I18N.t('common.download');
-      btn.disabled = false;
-      statusEl.textContent = I18N.t('common.notDownloadedFem');
-      statusEl.classList.add('dim');
+    if (tier === 'centroides') {
+      const isActive = communeContoursTier === tier;
+      btn.textContent = I18N.t(isActive ? 'common.active' : 'common.activate');
+      btn.disabled = isActive;
+      return;
     }
-    if (deleteBtn) {
-      deleteBtn.style.display = communeContoursDownloaded.has(tier) ? '' : 'none';
-    }
+    const isDownloaded = communeContoursDownloaded.has(tier);
+    btn.textContent = I18N.t(isDownloaded ? 'common.delete' : 'common.download');
+    btn.disabled = false;
   }
 
   function refreshContoursUI() {
     updateTierUI('centroides');
-    updateTierUI('simplifiee');
     updateTierUI('precise');
   }
 
   function setContoursButtonsDisabled(disabled) {
     activateCentroidesBtn.disabled = disabled;
-    downloadSimplifieeBtn.disabled = disabled;
     downloadPreciseBtn.disabled = disabled;
-    deleteSimplifieeBtn.disabled = disabled;
-    deletePreciseBtn.disabled = disabled;
   }
 
   // Retire un jeu de contours téléchargé de l'appareil (cache du service worker) et,
@@ -2466,8 +2433,6 @@ I18N.ready.then(function () {
     setContoursButtonsDisabled(false);
     refreshContoursUI();
   }
-  deleteSimplifieeBtn.addEventListener('click', () => deleteContourTier('simplifiee'));
-  deletePreciseBtn.addEventListener('click', () => deleteContourTier('precise'));
 
   // Le niveau "cercles" (centroïdes) est toujours prêt (chargé avec les données de base) :
   // l'activer ne fait que basculer la recherche de commune sur l'approximation par proximité.
@@ -2484,19 +2449,16 @@ I18N.ready.then(function () {
   async function downloadCommuneContours(tier) {
     if (communeContoursLoading) return;
     const conf = CONTOUR_TIERS[tier];
-    const alreadyDownloaded = communeContoursDownloaded.has(tier);
     communeContoursLoading = true;
     setContoursButtonsDisabled(true);
-    const statusEl = tierStatusEls[tier];
-    statusEl.classList.remove('dim');
-    statusEl.textContent = alreadyDownloaded ? I18N.t('common.activating') : I18N.t('common.downloading', { pct: 0 });
+    const btn = tierButtons[tier];
+    btn.textContent = I18N.t('common.downloading', { pct: 0 });
     try {
       const text = await fetchTextWithProgress(conf.url, conf.rawSizeBytes, (frac) => {
-        if (alreadyDownloaded) return;
         const pct = Math.round(frac * 100);
-        statusEl.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
+        btn.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
       });
-      statusEl.textContent = I18N.t('common.analyzing');
+      btn.textContent = I18N.t('common.analyzing');
       const geojson = JSON.parse(text);
       communeContoursByDept = indexCommuneContours(geojson);
       communeContoursTier = tier;
@@ -2506,7 +2468,7 @@ I18N.ready.then(function () {
       const point = getReferencePoint();
       if (point) updateOfflineGeo(point.lat, point.lon);
     } catch (e) {
-      statusEl.textContent = alreadyDownloaded ? I18N.t('common.activationFailed') : I18N.t('common.downloadFailed');
+      btn.textContent = I18N.t('common.downloadFailed');
     } finally {
       communeContoursLoading = false;
       setContoursButtonsDisabled(false);
@@ -2514,13 +2476,17 @@ I18N.ready.then(function () {
     }
   }
 
-  downloadSimplifieeBtn.addEventListener('click', () => downloadCommuneContours('simplifiee'));
-  downloadPreciseBtn.addEventListener('click', () => downloadCommuneContours('precise'));
+  // Un seul bouton par niveau téléchargeable : télécharge s'il est absent, supprime s'il
+  // est déjà là (voir updateTierUI pour le libellé affiché selon l'état).
+  downloadPreciseBtn.addEventListener('click', () => {
+    if (communeContoursDownloaded.has('precise')) deleteContourTier('precise');
+    else downloadCommuneContours('precise');
+  });
 
   refreshContoursUI();
 
   const savedActiveTier = localStorage.getItem(CONTOURS_ACTIVE_STORAGE_KEY);
-  if (savedActiveTier === 'simplifiee' || savedActiveTier === 'precise') downloadCommuneContours(savedActiveTier);
+  if (savedActiveTier === 'precise') downloadCommuneContours(savedActiveTier);
 
   // --- Antennes relais ANFR (téléchargement optionnel, à la demande) ---
   const ANTENNAS_URL = 'data/anfr-antennas.min.csv';

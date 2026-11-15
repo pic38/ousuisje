@@ -735,6 +735,10 @@ h1 {
 .contours-table col.col-status { width: 31%; }
 .contours-table col.col-action { width: 21%; }
 .contours-table col.col-delete { width: 9%; }
+/* Tableau à 2 colonnes (contours communes) : le statut vit directement dans le libellé
+   du bouton plutôt que dans une colonne séparée, d'où des largeurs différentes. */
+#contoursTable col.col-version { width: 55%; }
+#contoursTable col.col-action { width: 45%; }
 .contours-table thead th {
   text-align: left;
   padding: 10px 16px;

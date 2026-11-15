@@ -2055,7 +2055,10 @@ I18N.ready.then(function () {
   });
 
   const AUTO_LOCATE_STORAGE_KEY = 'ousuisje_alpha_auto_locate';
-  autoLocateCheckbox.checked = localStorage.getItem(AUTO_LOCATE_STORAGE_KEY) === '1';
+  // Activée par défaut (y compris pour un tout nouveau visiteur, avant tout choix
+  // explicite) — seul un '0' mémorisé (l'utilisateur a décoché) désactive la demande
+  // automatique de localisation au chargement.
+  autoLocateCheckbox.checked = localStorage.getItem(AUTO_LOCATE_STORAGE_KEY) !== '0';
   autoLocateCheckbox.addEventListener('change', () => {
     localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, autoLocateCheckbox.checked ? '1' : '0');
   });

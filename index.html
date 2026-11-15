@@ -337,7 +337,7 @@
         <div class="addr-head">
           <span data-i18n="offlineGeo.contoursTitle">Contours précis des communes (optionnel)</span>
         </div>
-        <table class="contours-table" id="contoursTable">
+        <table class="contours-table contours-table-2col">
           <colgroup>
             <col class="col-version"><col class="col-action">
           </colgroup>
@@ -345,10 +345,6 @@
             <tr><th data-i18n="offlineGeo.colVersion">Version</th><th></th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td data-i18n="offlineGeo.tierCentroidesLabel">Cercles (1,4 Mo)</td>
-              <td><button type="button" id="activateCentroides" class="btn-secondary" disabled data-i18n="common.active">Actif ✓</button></td>
-            </tr>
             <tr>
               <td data-i18n="offlineGeo.tierPreciseLabel">Détaillée (16 Mo)</td>
               <td><button type="button" id="downloadPrecise" class="btn-secondary" data-i18n="common.download">Télécharger</button></td>
@@ -367,19 +363,17 @@
         <div class="addr-head">
           <span data-i18n="antennas.panelTitle">Antennes relais ANFR (hors ligne, sur demande)</span>
         </div>
-        <table class="contours-table">
+        <table class="contours-table contours-table-2col">
           <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+            <col class="col-version"><col class="col-action">
           </colgroup>
           <thead>
-            <tr><th data-i18n="antennas.colDataset">Jeu de données</th><th data-i18n="offlineGeo.colStatus">Statut</th><th></th><th></th></tr>
+            <tr><th data-i18n="antennas.colDataset">Jeu de données</th><th></th></tr>
           </thead>
           <tbody>
             <tr>
               <td data-i18n="antennas.datasetLabel">Sites ANFR, 4 opérateurs (1,3 Mo)</td>
-              <td id="antennasRowStatus" class="dim" data-i18n="common.notDownloadedFemPl">Non téléchargées</td>
               <td><button type="button" id="downloadAntennas" class="btn-secondary" data-i18n="common.download">Télécharger</button></td>
-              <td><button type="button" id="deleteAntennas" class="btn-delete" style="display:none" title="Supprimer les données téléchargées" data-i18n-attr="title:common.deleteAriaLabel">🗑</button></td>
             </tr>
           </tbody>
         </table>
@@ -696,13 +690,10 @@ I18N.ready.then(function () {
   const offlineRegionEl = $('offlineRegion');
   const offlineCommuneEl = $('offlineCommune');
   const offlineCPEl = $('offlineCP');
-  const activateCentroidesBtn = $('activateCentroides');
   const downloadPreciseBtn = $('downloadPrecise');
-  const tierButtons = { centroides: activateCentroidesBtn, precise: downloadPreciseBtn };
+  const tierButtons = { precise: downloadPreciseBtn };
 
-  const antennasRowStatusEl = $('antennasRowStatus');
   const downloadAntennasBtn = $('downloadAntennas');
-  const deleteAntennasBtn = $('deleteAntennas');
   const antennasSearchBtn = $('antennasSearchBtn');
   const antennaSourceBadge = $('antennaSourceBadge');
   const antennasSearchStatusEl = $('antennasSearchStatus');
@@ -2299,10 +2290,10 @@ I18N.ready.then(function () {
   }
 
   // --- Contours précis des communes (téléchargement optionnel, à la demande) ---
+  // Le niveau "centroides" (cercle indicatif) reste le filet de sécurité implicite tant
+  // que rien n'est téléchargé — il n'est juste plus proposé comme option explicite dans
+  // l'interface, qui n'offre plus que le téléchargement détaillé.
   const CONTOUR_TIERS = {
-    centroides: {
-      label: 'cercles (centroïdes)'
-    },
     precise: {
       url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson',
       label: 'détaillée (pleine précision)',
@@ -2392,29 +2383,22 @@ I18N.ready.then(function () {
   // télécharge/supprime), le même bouton bascule entre les deux actions selon l'état.
   function updateTierUI(tier) {
     const btn = tierButtons[tier];
-    if (tier === 'centroides') {
-      const isActive = communeContoursTier === tier;
-      btn.textContent = I18N.t(isActive ? 'common.active' : 'common.activate');
-      btn.disabled = isActive;
-      return;
-    }
     const isDownloaded = communeContoursDownloaded.has(tier);
     btn.textContent = I18N.t(isDownloaded ? 'common.delete' : 'common.download');
     btn.disabled = false;
   }
 
   function refreshContoursUI() {
-    updateTierUI('centroides');
     updateTierUI('precise');
   }
 
   function setContoursButtonsDisabled(disabled) {
-    activateCentroidesBtn.disabled = disabled;
     downloadPreciseBtn.disabled = disabled;
   }
 
   // Retire un jeu de contours téléchargé de l'appareil (cache du service worker) et,
-  // s'il était actif, retombe sur les cercles indicatifs.
+  // s'il était actif, retombe sur l'approximation par proximité (cercles indicatifs,
+  // implicite — ce n'est plus un niveau proposé explicitement dans l'interface).
   async function deleteContourTier(tier) {
     if (communeContoursLoading) return;
     communeContoursLoading = true;
@@ -2433,18 +2417,6 @@ I18N.ready.then(function () {
     setContoursButtonsDisabled(false);
     refreshContoursUI();
   }
-
-  // Le niveau "cercles" (centroïdes) est toujours prêt (chargé avec les données de base) :
-  // l'activer ne fait que basculer la recherche de commune sur l'approximation par proximité.
-  function activateCentroides() {
-    if (communeContoursLoading) return;
-    communeContoursTier = 'centroides';
-    localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, 'centroides');
-    refreshContoursUI();
-    const point = getReferencePoint();
-    if (point) updateOfflineGeo(point.lat, point.lon);
-  }
-  activateCentroidesBtn.addEventListener('click', activateCentroides);
 
   async function downloadCommuneContours(tier) {
     if (communeContoursLoading) return;
@@ -2691,32 +2663,29 @@ I18N.ready.then(function () {
     updateAntennasNearby(point.lat, point.lon);
   });
 
+  // Un seul bouton : le statut vit dans son libellé (Télécharger / Téléchargement… N% /
+  // Supprimer), plus de colonne "Statut" ni de bouton poubelle séparé.
   async function downloadAntennas() {
     if (antennasLoading) return;
-    const alreadyDownloaded = localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1';
     antennasLoading = true;
     downloadAntennasBtn.disabled = true;
-    antennasRowStatusEl.classList.remove('dim');
-    antennasRowStatusEl.textContent = alreadyDownloaded ? I18N.t('common.analyzing') : I18N.t('common.downloading', { pct: 0 });
+    downloadAntennasBtn.textContent = I18N.t('common.downloading', { pct: 0 });
     try {
       const text = await fetchTextWithProgress(ANTENNAS_URL, ANTENNAS_RAW_BYTES, (frac) => {
-        if (alreadyDownloaded) return;
         const pct = Math.round(frac * 100);
-        antennasRowStatusEl.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
+        downloadAntennasBtn.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
       });
-      antennasRowStatusEl.textContent = I18N.t('common.analyzing');
+      downloadAntennasBtn.textContent = I18N.t('common.analyzing');
       antennaSites = parseAntennasCsv(text);
       localStorage.setItem(ANTENNAS_DOWNLOADED_STORAGE_KEY, '1');
-      downloadAntennasBtn.textContent = I18N.t('common.downloadedFemPl');
-      antennasRowStatusEl.textContent = I18N.t('common.downloadedFemPl');
-      deleteAntennasBtn.style.display = '';
+      downloadAntennasBtn.textContent = I18N.t('common.delete');
       const point = getReferencePoint();
       if (point) updateAntennasNearby(point.lat, point.lon);
     } catch (e) {
-      antennasRowStatusEl.textContent = I18N.t('common.downloadFailed');
+      downloadAntennasBtn.textContent = I18N.t('common.downloadFailed');
     } finally {
       antennasLoading = false;
-      downloadAntennasBtn.disabled = !!antennaSites;
+      downloadAntennasBtn.disabled = false;
     }
   }
 
@@ -2724,24 +2693,21 @@ I18N.ready.then(function () {
     if (antennasLoading) return;
     antennasLoading = true;
     downloadAntennasBtn.disabled = true;
-    deleteAntennasBtn.disabled = true;
     await deleteCachedUrl(ANTENNAS_URL);
     antennaSites = null;
     clearAntennaMarkers();
     localStorage.removeItem(ANTENNAS_DOWNLOADED_STORAGE_KEY);
     downloadAntennasBtn.textContent = I18N.t('common.download');
-    antennasRowStatusEl.textContent = I18N.t('common.notDownloadedFemPl');
-    antennasRowStatusEl.classList.add('dim');
-    deleteAntennasBtn.style.display = 'none';
     antennasLoading = false;
     downloadAntennasBtn.disabled = false;
-    deleteAntennasBtn.disabled = false;
     const point = getReferencePoint();
     if (point) updateAntennasNearby(point.lat, point.lon);
   }
 
-  downloadAntennasBtn.addEventListener('click', downloadAntennas);
-  deleteAntennasBtn.addEventListener('click', deleteAntennas);
+  downloadAntennasBtn.addEventListener('click', () => {
+    if (antennaSites) deleteAntennas();
+    else downloadAntennas();
+  });
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
   // --- Points d'intérêt, en direct via Overpass (piscines, escalade) ---

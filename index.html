@@ -788,7 +788,11 @@ I18N.ready.then(function () {
 
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
-  const DEFAULT_HIDDEN_SECTIONS = new Set(); // plus rien de masqué par défaut
+  // Masquées par défaut : sections qui dépendent uniquement d'Overpass en direct, sans
+  // aucun mode hors ligne de repli (contrairement aux toilettes/eau potable, qui retombent
+  // sur un jeu de données téléchargé). Avec l'instabilité actuelle des miroirs Overpass
+  // publics, mieux vaut que l'utilisateur les active lui-même en connaissance de cause.
+  const DEFAULT_HIDDEN_SECTIONS = new Set(['poi', 'climbing-gyms', 'food']);
 
   // Sections qui ne concernent que la France (données ANFR/IGN, sans équivalent ailleurs).
   // Restent masquées tant que la position de l'utilisateur n'est pas connue ; se révèlent

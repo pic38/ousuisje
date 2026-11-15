@@ -1230,6 +1230,8 @@ I18N.ready.then(function () {
   if (altitudeOffsetAutoSource !== 'ign' && altitudeOffsetAutoSource !== 'oe') altitudeOffsetAutoSource = null;
   let autoOffsetAttempted = false; // une seule tentative de mesure par session GPS (voir startWatch)
   let autoOffsetFirstFixAt = null;
+  let autoGeocodeAttempted = false; // une seule recherche d'adresse automatique par session GPS
+  let autoGeocodeFirstFixAt = null;
 
   // altitudeOffsetM est la valeur effectivement appliquée partout ailleurs dans l'app
   // (affichage principal + sections IGN/Open-Elevation) ; elle suit le mode choisi ci-dessous.
@@ -1498,6 +1500,25 @@ I18N.ready.then(function () {
     localStorage.setItem(ALT_OFFSET_AUTO_SOURCE_KEY, altitudeOffsetAutoSource);
     updateAltOffsetAutoDisplay();
     applyOffsetMode();
+  }
+
+  // Même logique que le calage d'altitude automatique ci-dessus : on laisse le temps au
+  // GPS de converger (seuil de précision), avec une attente minimale pour éviter de partir
+  // sur un tout premier fix très imprécis, et un filet de sécurité pour ne pas bloquer
+  // indéfiniment si la précision ne s'améliore pas (on tente alors avec le meilleur fix reçu).
+  const AUTO_GEOCODE_MIN_WAIT_MS = 5000;
+  const AUTO_GEOCODE_TIMEOUT_MS = 60000;
+  const AUTO_GEOCODE_ACCURACY_TARGET_M = 20;
+
+  function maybeAutoGeocode(pos) {
+    if (autoGeocodeAttempted) return;
+    if (autoGeocodeFirstFixAt == null) autoGeocodeFirstFixAt = Date.now();
+    const elapsed = Date.now() - autoGeocodeFirstFixAt;
+    const accuracy = pos.coords.accuracy;
+    const stabilized = accuracy != null && accuracy <= AUTO_GEOCODE_ACCURACY_TARGET_M && elapsed >= AUTO_GEOCODE_MIN_WAIT_MS;
+    if (!stabilized && elapsed < AUTO_GEOCODE_TIMEOUT_MS) return;
+    autoGeocodeAttempted = true;
+    doGeocode(pos.coords.latitude, pos.coords.longitude, 'gps');
   }
 
   const altitudeMap = initSecondaryMap('altitudeMap');
@@ -1931,6 +1952,7 @@ I18N.ready.then(function () {
     locateBtn.disabled = false;
     updateUI(pos);
     maybeComputeAutoAltitudeOffset(pos);
+    maybeAutoGeocode(pos);
   }
 
   function handleFixError(err) {
@@ -1962,6 +1984,8 @@ I18N.ready.then(function () {
     diagFixCount.textContent = '0';
     autoOffsetAttempted = false;
     autoOffsetFirstFixAt = null;
+    autoGeocodeAttempted = false;
+    autoGeocodeFirstFixAt = null;
 
     beginWatch();
 

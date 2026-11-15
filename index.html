@@ -2070,12 +2070,17 @@ I18N.ready.then(function () {
   });
 
   const WELCOME_SEEN_KEY = 'ousuisje_welcome_seen';
-  if (localStorage.getItem(WELCOME_SEEN_KEY) !== '1') {
+  const isFirstVisit = localStorage.getItem(WELCOME_SEEN_KEY) !== '1';
+  if (isFirstVisit) {
     welcomeBanner.classList.remove('is-hidden');
   }
   welcomeDismissBtn.addEventListener('click', () => {
     localStorage.setItem(WELCOME_SEEN_KEY, '1');
     welcomeBanner.classList.add('is-hidden');
+    // C'est cette réponse au message d'accueil qui déclenche la vraie demande de
+    // localisation au tout premier passage (geste utilisateur direct, plutôt qu'une
+    // demande lancée silencieusement avant même qu'il ait pu lire le message).
+    if (autoLocateCheckbox.checked && !isTrackingActive()) startWatch();
   });
 
   const AUTO_LOCATE_STORAGE_KEY = 'ousuisje_alpha_auto_locate';
@@ -2086,7 +2091,10 @@ I18N.ready.then(function () {
   autoLocateCheckbox.addEventListener('change', () => {
     localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, autoLocateCheckbox.checked ? '1' : '0');
   });
-  if (autoLocateCheckbox.checked) startWatch();
+  // Pour un visiteur qui a déjà répondu au message d'accueil lors d'une visite précédente,
+  // on démarre directement comme avant. Pour un tout premier passage, c'est le clic sur le
+  // message d'accueil ci-dessus (ou sur le bouton principal) qui lance la demande.
+  if (!isFirstVisit && autoLocateCheckbox.checked) startWatch();
 
   // --- Radar de précipitations (RainViewer) ---
   // Ici, le recentrage zoome 2 crans de plus que le zoom "maison" (au lieu du comportement

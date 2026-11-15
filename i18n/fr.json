@@ -30,7 +30,6 @@
       "altitude": "Altitude depuis carte IGN",
       "offlineGeo": "Département et commune",
       "antennas": "Antennes relais 2G 3G 4G 5G",
-      "escapeGames": "Escape games",
       "climbingGyms": "Salles d'escalade",
       "toilets": "Toilettes",
       "drinkingWater": "Eau potable",
@@ -47,6 +46,10 @@
     "disable": "Désactiver la localisation GPS",
     "searching": "Recherche en cours…",
     "unavailableDevice": "Indisponible sur cet appareil"
+  },
+  "welcome": {
+    "message": "Pour profiter de toutes les fonctionnalités, activez la localisation (sinon l'expérience sera limitée). Vos données de localisation ne sont ni stockées, ni revendues, ni utilisées pour de la publicité. Astuce : pour un accès facile, ajoutez un raccourci à votre écran d'accueil avec le bouton tout en bas.",
+    "dismiss": "Compris"
   },
   "translation": {
     "notice": "Cette traduction est générée automatiquement et n'a pas encore été relue par un locuteur natif.",
@@ -229,13 +232,6 @@
     "downloadPromptTable": "Téléchargez les données, puis lancez une recherche.",
     "emptyLabel": "Aucune antenne",
     "resultCount": "{count} site(s) · rayon {radius} m"
-  },
-  "escapeGames": {
-    "findBtn": "Trouver les escape games",
-    "panelTitle": "Escape games",
-    "credit": "Escape games : © contributeurs <a class=\"inline\" href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> (Overpass API)",
-    "defaultName": "Escape game",
-    "emptyLabel": "Aucun escape game trouvé"
   },
   "climbingGyms": {
     "findBtn": "Trouver les salles d'escalade",

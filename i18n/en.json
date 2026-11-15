@@ -30,7 +30,6 @@
       "altitude": "Altitude from map",
       "offlineGeo": "Department and municipality",
       "antennas": "2G/3G/4G/5G cell towers",
-      "escapeGames": "Escape games",
       "climbingGyms": "Climbing gyms",
       "toilets": "Toilets",
       "drinkingWater": "Drinking water",
@@ -47,6 +46,10 @@
     "disable": "Turn off GPS location",
     "searching": "Searching…",
     "unavailableDevice": "Unavailable on this device"
+  },
+  "welcome": {
+    "message": "For the full experience, enable location (otherwise some features will be limited). Your location data is never stored, sold, or used for advertising. Tip: for easy access, add a shortcut to your home screen using the button at the very bottom.",
+    "dismiss": "Got it"
   },
   "translation": {
     "notice": "This translation is machine-generated and hasn't been reviewed by a native speaker yet.",
@@ -229,13 +232,6 @@
     "downloadPromptTable": "Download the data, then run a search.",
     "emptyLabel": "No cell towers",
     "resultCount": "{count} site(s) · radius {radius} m"
-  },
-  "escapeGames": {
-    "findBtn": "Find escape games",
-    "panelTitle": "Escape games",
-    "credit": "Escape games: © <a class=\"inline\" href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> contributors (Overpass API)",
-    "defaultName": "Escape game",
-    "emptyLabel": "No escape games found"
   },
   "climbingGyms": {
     "findBtn": "Find climbing gyms",

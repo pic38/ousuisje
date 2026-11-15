@@ -81,7 +81,6 @@
   <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span data-i18n="settings.section.altitude">Altitude depuis carte IGN</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="offline-geo"><span data-i18n="settings.section.offlineGeo">Département et commune</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="antennas"><span data-i18n="settings.section.antennas">Antennes relais 2G 3G 4G 5G</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
-  <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span data-i18n="settings.section.escapeGames">Escape games</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span data-i18n="settings.section.climbingGyms">Salles d'escalade</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span data-i18n="settings.section.toilets">Toilettes</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span data-i18n="settings.section.drinkingWater">Eau potable</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
@@ -102,6 +101,11 @@
     <div class="eyebrow" data-i18n="header.eyebrow">OuSuisJe · outils de localisation</div>
     <h1 data-i18n="header.title">Trouvez l'adresse et plus encore !</h1>
   </header>
+
+  <div id="welcomeBanner" class="welcome-banner is-hidden">
+    <p data-i18n="welcome.message">Pour profiter de toutes les fonctionnalités, activez la localisation (sinon l'expérience sera limitée). Vos données de localisation ne sont ni stockées, ni revendues, ni utilisées pour de la publicité. Astuce : pour un accès facile, ajoutez un raccourci à votre écran d'accueil avec le bouton tout en bas.</p>
+    <button type="button" id="welcomeDismissBtn" class="btn-secondary" data-i18n="welcome.dismiss">Compris</button>
+  </div>
 
   <button type="button" id="locateBtn" class="btn-primary" data-i18n="locate.enable">Activer la localisation GPS</button>
 
@@ -420,37 +424,6 @@
     </div>
   </details>
 
-  <details class="feature" data-section="escape-games">
-    <summary class="feature-summary"><span data-i18n="settings.section.escapeGames">Escape games</span><span class="feature-chevron">▾</span></summary>
-    <div class="feature-body">
-      <button type="button" id="escapeGamesBtn" class="btn-secondary" data-i18n="escapeGames.findBtn">Trouver les escape games</button>
-
-      <div class="source-mini-badge is-hidden" id="escapeGamesSourceBadge" data-i18n="common.sourcePlaceholder">Source : —</div>
-      <div class="map-wrap">
-        <div id="escapeGamesMap"></div>
-        <div class="map-footer">
-          <span class="map-hint" data-i18n="common.mapHint">La carte est cliquable pour relancer la recherche ailleurs.</span>
-        </div>
-      </div>
-
-      <div class="addr-panel">
-        <div class="addr-head">
-          <span data-i18n="escapeGames.panelTitle">Escape games</span>
-          <span id="escapeGamesStatus">—</span>
-        </div>
-        <table class="poi-table">
-          <thead>
-            <tr><th data-i18n="common.tableName">Nom</th><th data-i18n="common.tableDistance">Distance</th><th data-i18n="common.tableDirection">Direction</th></tr>
-          </thead>
-          <tbody id="escapeGamesTableBody">
-            <tr><td colspan="3" class="dim" data-i18n="common.enableLocationTablePlaceholder">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="osm-credit" data-i18n-html="escapeGames.credit">Escape games : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
-    </div>
-  </details>
-
   <details class="feature" data-section="climbing-gyms">
     <summary class="feature-summary"><span data-i18n="settings.section.climbingGyms">Salles d'escalade</span><span class="feature-chevron">▾</span></summary>
     <div class="feature-body">
@@ -665,6 +638,8 @@ I18N.ready.then(function () {
   const altOffsetAutoVal = $('altOffsetAutoVal');
   const altOffsetModeSelect = $('altOffsetModeSelect');
   const accuracyWarning = $('accuracyWarning');
+  const welcomeBanner = $('welcomeBanner');
+  const welcomeDismissBtn = $('welcomeDismissBtn');
   const locateBtn = $('locateBtn');
   const autoStopCheckbox = $('autoStopCheckbox');
   const autoLocateCheckbox = $('autoLocateCheckbox');
@@ -740,11 +715,6 @@ I18N.ready.then(function () {
   const antennaSourceBadge = $('antennaSourceBadge');
   const antennasSearchStatusEl = $('antennasSearchStatus');
   const antennasTableBody = $('antennasTableBody');
-
-  const escapeGamesBtn = $('escapeGamesBtn');
-  const escapeGamesStatusEl = $('escapeGamesStatus');
-  const escapeGamesTableBody = $('escapeGamesTableBody');
-  const escapeGamesSourceBadge = $('escapeGamesSourceBadge');
   const climbingGymsBtn = $('climbingGymsBtn');
   const climbingGymsStatusEl = $('climbingGymsStatus');
   const climbingGymsTableBody = $('climbingGymsTableBody');
@@ -2059,6 +2029,8 @@ I18N.ready.then(function () {
   });
 
   locateBtn.addEventListener('click', () => {
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+    welcomeBanner.classList.add('is-hidden');
     if (isTrackingActive()) {
       stopWatch();
     } else {
@@ -2071,6 +2043,15 @@ I18N.ready.then(function () {
       }
       startWatch();
     }
+  });
+
+  const WELCOME_SEEN_KEY = 'ousuisje_welcome_seen';
+  if (localStorage.getItem(WELCOME_SEEN_KEY) !== '1') {
+    welcomeBanner.classList.remove('is-hidden');
+  }
+  welcomeDismissBtn.addEventListener('click', () => {
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+    welcomeBanner.classList.add('is-hidden');
   });
 
   const AUTO_LOCATE_STORAGE_KEY = 'ousuisje_alpha_auto_locate';
@@ -2740,7 +2721,7 @@ I18N.ready.then(function () {
   deleteAntennasBtn.addEventListener('click', deleteAntennas);
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
-  // --- Points d'intérêt, en direct via Overpass (escape games, piscines, escalade) ---
+  // --- Points d'intérêt, en direct via Overpass (piscines, escalade) ---
   function distanceMetersApprox(lat1, lon1, lat2, lon2) {
     const coslat = Math.cos(lat1 * Math.PI / 180);
     const dLat = lat2 - lat1;
@@ -2963,7 +2944,6 @@ I18N.ready.then(function () {
   }
 
   const poiMap = initSecondaryMap('poiMap');
-  const escapeGamesMap = initSecondaryMap('escapeGamesMap');
   const climbingGymsMap = initSecondaryMap('climbingGymsMap');
   const toiletsMap = initSecondaryMap('toiletsMap');
   const drinkingWaterMap = initSecondaryMap('drinkingWaterMap');
@@ -2983,22 +2963,6 @@ I18N.ready.then(function () {
     emptyLabel: I18N.t('poi.emptyLabel'),
     buildQuery: (lat, lon, r) =>
       `[out:json][timeout:20];node(around:${r},${lat},${lon})["name"]["amenity"];out body 200;`
-  });
-
-  setupNearbyOverpassFeature({
-    btn: escapeGamesBtn,
-    statusEl: escapeGamesStatusEl,
-    tableBody: escapeGamesTableBody,
-    map: escapeGamesMap,
-    badgeEl: escapeGamesSourceBadge,
-    color: '#8B5CF6',
-    section: 'escape-games',
-    radiusM: 20000,
-    maxResults: 10,
-    defaultName: I18N.t('escapeGames.defaultName'),
-    emptyLabel: I18N.t('escapeGames.emptyLabel'),
-    buildQuery: (lat, lon, r) =>
-      `[out:json][timeout:20];(node["leisure"="escape_game"](around:${r},${lat},${lon});way["leisure"="escape_game"](around:${r},${lat},${lon}););out center 200;`
   });
 
   setupNearbyOverpassFeature({

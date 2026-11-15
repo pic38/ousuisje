@@ -788,7 +788,7 @@ I18N.ready.then(function () {
 
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
-  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas', 'offline-geo']); // masquées par défaut tant que l'utilisateur ne les active pas
+  const DEFAULT_HIDDEN_SECTIONS = new Set(); // plus rien de masqué par défaut
 
   // Sections qui ne concernent que la France (données ANFR/IGN, sans équivalent ailleurs).
   // Restent masquées tant que la position de l'utilisateur n'est pas connue ; se révèlent

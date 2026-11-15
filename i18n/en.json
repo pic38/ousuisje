@@ -18,6 +18,7 @@
     "dragHandleAriaLabel": "Drag to reorder",
     "removeAriaLabel": "Remove",
     "customPlaceholder": "Add a place: pharmacy, bakery…",
+    "customRadiusTitle": "Search radius (km)",
     "customAdd": "Add",
     "close": "Close",
     "langLabel": "Language",

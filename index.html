@@ -89,6 +89,7 @@
   <div id="settingsCustomList"></div>
   <div class="settings-custom-add">
     <input type="text" id="customSectionInput" class="settings-custom-input" placeholder="Ajouter un lieu : pharmacie, boulangerie…" data-i18n-attr="placeholder:settings.customPlaceholder" />
+    <input type="number" id="customSectionRadiusInput" class="settings-custom-radius-input" min="1" max="30" step="1" value="5" data-i18n-attr="title:settings.customRadiusTitle" title="Rayon de recherche (km)" />
     <button type="button" id="customSectionAddBtn" class="settings-bulk-btn" data-i18n="settings.customAdd">Ajouter</button>
   </div>
   <div class="settings-bulk">
@@ -3458,7 +3459,7 @@ I18N.ready.then(function () {
       badgeEl: badgeEl,
       color: color,
       section: 'custom-' + id,
-      radiusM: 5000,
+      radiusM: (opts.radiusKm || 5) * 1000,
       maxResults: 10,
       defaultName: label,
       emptyLabel: I18N.t('custom.emptyLabelTemplate', { label: label }),
@@ -3502,7 +3503,7 @@ I18N.ready.then(function () {
     });
 
     if (!opts.silent) {
-      saveCustomSections(loadCustomSections().concat([{ id: id, keyword: keyword, label: label }]));
+      saveCustomSections(loadCustomSections().concat([{ id: id, keyword: keyword, label: label, radiusKm: opts.radiusKm }]));
       applySectionVisibility();
       details.open = true; // ouvre la nouvelle section (referme les autres via l'accordéon)
     }
@@ -3514,7 +3515,7 @@ I18N.ready.then(function () {
   loadCustomSections().forEach((s) => {
     customSectionSeq = Math.max(customSectionSeq, parseInt((s.id || '').replace('custom-', ''), 10) + 1 || 0);
   });
-  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { id: s.id, label: s.label, silent: true }));
+  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { id: s.id, label: s.label, radiusKm: s.radiusKm, silent: true }));
   applySectionVisibility();
 
   // Toutes les sections (natives + personnalisées recréées) sont maintenant en place :
@@ -3537,12 +3538,17 @@ I18N.ready.then(function () {
   suppressAccordionAutoScroll = false;
 
   const customSectionInput = $('customSectionInput');
+  const customSectionRadiusInput = $('customSectionRadiusInput');
   const customSectionAddBtn = $('customSectionAddBtn');
+  const CUSTOM_SECTION_DEFAULT_RADIUS_KM = 5;
   customSectionAddBtn.addEventListener('click', () => {
     const kw = customSectionInput.value.trim();
     if (!kw) return;
-    addCustomSection(kw);
+    const parsedRadius = parseInt(customSectionRadiusInput.value, 10);
+    const radiusKm = Number.isFinite(parsedRadius) ? Math.min(30, Math.max(1, parsedRadius)) : CUSTOM_SECTION_DEFAULT_RADIUS_KM;
+    addCustomSection(kw, { radiusKm: radiusKm });
     customSectionInput.value = '';
+    customSectionRadiusInput.value = CUSTOM_SECTION_DEFAULT_RADIUS_KM;
   });
   customSectionInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); customSectionAddBtn.click(); }

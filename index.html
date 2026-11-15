@@ -1444,12 +1444,25 @@ I18N.ready.then(function () {
   });
 
   // --- Sources d'altitude ---
+  // Partagé entre le calage automatique d'altitude et la section "Altitude IGN" : l'un ou
+  // l'autre peut avoir déjà interrogé l'IGN pour (à peu près) le même point durant cette
+  // session, inutile de refaire la requête (l'altitude d'un point donné ne change pas).
+  // Arrondi à ~10 m, du même ordre que le seuil de précision du calage automatique.
+  const ignAltitudeCache = new Map();
+  function roundCoordKey(lat, lon) {
+    return lat.toFixed(4) + ',' + lon.toFixed(4);
+  }
+
   async function fetchIGNAltitude(lat, lon) {
+    const key = roundCoordKey(lat, lon);
+    if (ignAltitudeCache.has(key)) return ignAltitudeCache.get(key);
     const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
     const data = await res.json();
     const raw = data && data.elevations ? data.elevations[0] : null;
     const val = (raw != null && typeof raw === 'object') ? raw.z : raw;
-    return (val != null && val > -9999) ? val : null;
+    const result = (val != null && val > -9999) ? val : null;
+    ignAltitudeCache.set(key, result);
+    return result;
   }
 
   async function fetchOpenElevationAltitude(lat, lon) {

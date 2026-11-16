@@ -2495,7 +2495,7 @@ I18N.ready.then(function () {
   const ANTENNAS_URL = 'data/anfr-antennas.min.csv';
   const ANTENNAS_RAW_BYTES = 6071089;
   const ANTENNAS_DOWNLOADED_STORAGE_KEY = 'ousuisje_anfr_antennas_downloaded';
-  const ANTENNA_RADIUS_M = 20000;
+  const ANTENNA_RADIUS_M = 10000;
   const ANTENNA_MAX_RESULTS = 20;
   const OPERATOR_COLORS = {
     'ORANGE': '#FF7900',
@@ -2822,37 +2822,11 @@ I18N.ready.then(function () {
   }
 
   const OVERPASS_PRIMARY_URL = 'https://overpass-api.de/api/interpreter';
-  const OVERPASS_FALLBACK_URL = 'https://overpass.kumi.systems/api/interpreter';
 
-  // Plafond côté client, indépendant du [timeout:20] dans la requête elle-même : celui-ci ne
-  // borne que le temps de traitement du serveur Overpass, pas un serveur qui ne répond pas du
-  // tout (connexion qui traîne). Sans ça, une requête bloquée pouvait laisser l'utilisateur
-  // sans aucune indication pendant un temps arbitrairement long.
-  const OVERPASS_ATTEMPT_TIMEOUT_MS = 12000;
-
-  async function fetchOverpassOnce(url, query) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), OVERPASS_ATTEMPT_TIMEOUT_MS);
-    try {
-      const res = await fetch(url, { method: 'POST', body: query, signal: controller.signal });
-      if (!res.ok) throw new Error('overpass HTTP ' + res.status);
-      return await res.json();
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-
-  // Repli automatique vers un miroir si le serveur principal échoue ou ne répond pas dans les
-  // temps — jamais utilisé en alternance systématique, seulement en secours. `onRetry` (facultatif)
-  // permet à l'appelant d'informer l'utilisateur qu'on retente ailleurs plutôt que de le laisser
-  // sans aucun retour pendant la bascule.
-  async function fetchOverpass(query, onRetry) {
-    try {
-      return await fetchOverpassOnce(OVERPASS_PRIMARY_URL, query);
-    } catch (e) {
-      if (onRetry) onRetry();
-      return await fetchOverpassOnce(OVERPASS_FALLBACK_URL, query);
-    }
+  async function fetchOverpass(query) {
+    const res = await fetch(OVERPASS_PRIMARY_URL, { method: 'POST', body: query });
+    if (!res.ok) throw new Error('overpass HTTP ' + res.status);
+    return await res.json();
   }
 
   // Vérifie le cache (correspondance exacte puis cascade depuis un rayon plus large déjà en
@@ -2896,7 +2870,7 @@ I18N.ready.then(function () {
       try {
         const rawItems = await cachedOverpassSearch(section, lat, lon, radiusM, async () => {
           const query = buildQuery(lat, lon, radiusM);
-          const data = await fetchOverpass(query, () => { statusEl.textContent = I18N.t('common.overpassRetrying'); });
+          const data = await fetchOverpass(query);
           return (data.elements || [])
             .map((el) => {
               const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
@@ -2977,7 +2951,7 @@ I18N.ready.then(function () {
     badgeEl: poiSourceBadge,
     color: '#4FD1C5',
     section: 'poi',
-    radiusM: 5000,
+    radiusM: 1500,
     maxResults: 10,
     defaultName: I18N.t('poi.defaultName'),
     emptyLabel: I18N.t('poi.emptyLabel'),
@@ -3007,7 +2981,7 @@ I18N.ready.then(function () {
   const TOILETS_URL = 'data/toilets.min.csv';
   const TOILETS_RAW_BYTES = 788726;
   const TOILETS_DOWNLOADED_STORAGE_KEY = 'ousuisje_toilets_downloaded';
-  const TOILETS_RADIUS_M = 20000;
+  const TOILETS_RADIUS_M = 10000;
   const TOILETS_MAX_RESULTS = 10;
   const TOILETS_COLOR = '#6C7A89';
 
@@ -3108,7 +3082,7 @@ I18N.ready.then(function () {
     try {
       const rawItems = await cachedOverpassSearch('toilets', lat, lon, TOILETS_RADIUS_M, async () => {
         const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
-        const data = await fetchOverpass(query, () => { toiletsStatusEl.textContent = I18N.t('common.overpassRetrying'); });
+        const data = await fetchOverpass(query);
         return (data.elements || [])
           .map((el) => {
             const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
@@ -3173,7 +3147,7 @@ I18N.ready.then(function () {
   const DRINKING_WATER_URL = 'data/drinking-water.min.csv';
   const DRINKING_WATER_RAW_BYTES = 747017;
   const DRINKING_WATER_DOWNLOADED_STORAGE_KEY = 'ousuisje_drinking_water_downloaded';
-  const DRINKING_WATER_RADIUS_M = 20000;
+  const DRINKING_WATER_RADIUS_M = 10000;
   const DRINKING_WATER_MAX_RESULTS = 10;
   const DRINKING_WATER_COLOR = '#2AABE2';
 
@@ -3274,7 +3248,7 @@ I18N.ready.then(function () {
     try {
       const rawItems = await cachedOverpassSearch('drinking-water', lat, lon, DRINKING_WATER_RADIUS_M, async () => {
         const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
-        const data = await fetchOverpass(query, () => { drinkingWaterStatusEl.textContent = I18N.t('common.overpassRetrying'); });
+        const data = await fetchOverpass(query);
         return (data.elements || [])
           .map((el) => {
             if (el.lat == null || el.lon == null) return null;
@@ -3340,7 +3314,7 @@ I18N.ready.then(function () {
     badgeEl: foodSourceBadge,
     color: '#E24A4A',
     section: 'food',
-    radiusM: 5000,
+    radiusM: 2000,
     maxResults: 10,
     defaultName: I18N.t('food.defaultName'),
     emptyLabel: I18N.t('food.emptyLabel'),

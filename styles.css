@@ -579,6 +579,14 @@ h1 {
   line-height: 1.5;
   color: #C7CEDA;
 }
+.welcome-banner .welcome-points {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #C7CEDA;
+}
+.welcome-banner .welcome-points li + li { margin-top: 4px; }
 .welcome-banner .welcome-question {
   font-weight: 700;
   color: var(--text);

@@ -49,7 +49,9 @@
     "unavailableDevice": "Unavailable on this device"
   },
   "welcome": {
-    "message": "For the full experience, enable location. Your location data is never stored, sold, or used for advertising. For easy access, add a shortcut to your home screen using the button at the very bottom.",
+    "point1": "For the full experience, enable location.",
+    "point2": "Your location data is never stored, sold, or used for advertising.",
+    "point3": "For easy access, add a shortcut to your home screen using the button at the very bottom.",
     "question": "Do you want to enable GPS?",
     "yes": "Yes",
     "no": "No"

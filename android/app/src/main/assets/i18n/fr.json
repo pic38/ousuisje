@@ -18,6 +18,7 @@
     "dragHandleAriaLabel": "Glisser pour réorganiser",
     "removeAriaLabel": "Retirer",
     "customPlaceholder": "Ajouter un lieu : pharmacie, boulangerie…",
+    "customRadiusTitle": "Rayon de recherche (km)",
     "customAdd": "Ajouter",
     "close": "Fermer",
     "langLabel": "Langue",
@@ -30,7 +31,6 @@
       "altitude": "Altitude depuis carte IGN",
       "offlineGeo": "Département et commune",
       "antennas": "Antennes relais 2G 3G 4G 5G",
-      "escapeGames": "Escape games",
       "climbingGyms": "Salles d'escalade",
       "toilets": "Toilettes",
       "drinkingWater": "Eau potable",
@@ -47,6 +47,14 @@
     "disable": "Désactiver la localisation GPS",
     "searching": "Recherche en cours…",
     "unavailableDevice": "Indisponible sur cet appareil"
+  },
+  "welcome": {
+    "point1": "Pour profiter de toutes les fonctionnalités, activez la localisation.",
+    "point2": "Vos données de localisation ne sont ni stockées, ni revendues, ni utilisées pour de la publicité.",
+    "point3": "Pour un accès facile, ajoutez un raccourci à votre écran d'accueil avec le bouton tout en bas.",
+    "question": "Voulez-vous activer le GPS ?",
+    "yes": "Oui",
+    "no": "Non"
   },
   "translation": {
     "notice": "Cette traduction est générée automatiquement et n'a pas encore été relue par un locuteur natif.",
@@ -70,10 +78,11 @@
   },
   "grid": {
     "accuracy": "Précision horizontale",
-    "altitude": "Altitude GPS"
+    "altitude": "Altitude"
   },
   "warning": {
-    "lowAccuracy": "Précision faible ({accuracy} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil)."
+    "lowAccuracy": "Précision faible ({accuracy} m) — vérifiez que la localisation précise est activée pour ce site (réglages du navigateur et de l'appareil).",
+    "iosLocationHelp": "Localisation refusée ou désactivée. Sur iPhone : <strong>Réglages → Confidentialité et sécurité → Service de localisation</strong> (vérifier qu'il est activé), puis <strong>Réglages → Safari → Localisation</strong> → choisir \"Demander\"."
   },
   "common": {
     "mapHint": "La carte est cliquable pour relancer la recherche ailleurs.",
@@ -96,17 +105,10 @@
     "tableDistance": "Distance",
     "tableDirection": "Direction",
     "download": "Télécharger",
-    "notDownloadedFem": "Non téléchargée",
-    "notDownloadedFemPl": "Non téléchargées",
-    "downloadedFemPl": "Téléchargées",
-    "activate": "Activer",
-    "active": "Actif ✓",
+    "delete": "Supprimer",
     "downloading": "Téléchargement… {pct}%",
-    "activating": "Activation…",
     "analyzing": "Analyse du fichier…",
     "downloadFailed": "Échec du téléchargement",
-    "activationFailed": "Échec de l'activation",
-    "deleteAriaLabel": "Supprimer les données téléchargées",
     "goto": "Y aller →",
     "homeControlTitle": "Revenir à la vue par défaut",
     "recenterControlTitle": "Recentrer sur ma position GPS"
@@ -141,7 +143,15 @@
     "heading": "Cap",
     "time": "Heure",
     "altAccuracy": "Précision altitude",
+    "altRaw": "Altitude GPS brute",
+    "altCorrected": "Altitude GPS corrigée",
     "altOffset": "Décalage altitude",
+    "altOffsetAuto": "Décalage altitude auto",
+    "altOffsetAutoPending": "En cours de mesure…",
+    "altOffsetAutoSamples": "{count} mesures",
+    "altOffsetMode": "Mode de décalage altitude",
+    "altOffsetModeAuto": "Auto",
+    "altOffsetModeManual": "Manuel",
     "fixState": "État du fix",
     "fixAge": "Âge du relevé",
     "fixCount": "Relevés reçus",
@@ -195,13 +205,7 @@
     "cp": "Code postal",
     "contoursTitle": "Contours précis des communes (optionnel)",
     "colVersion": "Version",
-    "colStatus": "Statut",
-    "tierCentroidesLabel": "Cercles (1,4 Mo)",
-    "tierSimplifieeLabel": "Polygones (6,7 Mo)",
     "tierPreciseLabel": "Détaillée (16 Mo)",
-    "downloadedActive": "Téléchargées, actives",
-    "downloadedInactiveCircles": "Téléchargées, inactives",
-    "downloadedInactive": "Téléchargée, inactive",
     "credit": "Contours : © IGN Admin Express, via le projet <a class=\"inline\" href=\"https://github.com/gregoiredavid/france-geojson\" target=\"_blank\" rel=\"noopener\">france-geojson</a>",
     "notFound": "Introuvable",
     "notAvailable": "Non disponible",
@@ -220,13 +224,6 @@
     "downloadPromptTable": "Téléchargez les données, puis lancez une recherche.",
     "emptyLabel": "Aucune antenne",
     "resultCount": "{count} site(s) · rayon {radius} m"
-  },
-  "escapeGames": {
-    "findBtn": "Trouver les escape games",
-    "panelTitle": "Escape games",
-    "credit": "Escape games : © contributeurs <a class=\"inline\" href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> (Overpass API)",
-    "defaultName": "Escape game",
-    "emptyLabel": "Aucun escape game trouvé"
   },
   "climbingGyms": {
     "findBtn": "Trouver les salles d'escalade",

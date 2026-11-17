@@ -49,7 +49,7 @@
     "unavailableDevice": "Indisponible sur cet appareil"
   },
   "welcome": {
-    "message": "Pour profiter de toutes les fonctionnalités, activez la localisation (sinon l'expérience sera limitée). Vos données de localisation ne sont ni stockées, ni revendues, ni utilisées pour de la publicité. Astuce : pour un accès facile, ajoutez un raccourci à votre écran d'accueil avec le bouton tout en bas.",
+    "message": "Pour profiter de toutes les fonctionnalités, activez la localisation. Vos données de localisation ne sont ni stockées, ni revendues, ni utilisées pour de la publicité. Astuce : pour un accès facile, ajoutez un raccourci à votre écran d'accueil avec le bouton tout en bas.",
     "question": "Voulez-vous activer le GPS ?",
     "yes": "Oui",
     "no": "Non"

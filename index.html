@@ -2096,6 +2096,10 @@ I18N.ready.then(function () {
   const isFirstVisit = localStorage.getItem(WELCOME_SEEN_KEY) !== '1';
   if (isFirstVisit) {
     welcomeBanner.classList.remove('is-hidden');
+    // Le message d'accueil propose déjà d'activer la localisation (boutons Oui/Non) : cacher
+    // ce bouton redondant tant qu'il n'y a pas répondu, pour ne pas pousser tout le reste du
+    // contenu hors écran sur les petits téléphones.
+    locateBtn.classList.add('is-hidden');
   }
   // Ces deux réponses au message d'accueil déclenchent (ou non) la vraie demande de
   // localisation au tout premier passage — geste utilisateur direct, plutôt qu'une demande
@@ -2103,6 +2107,7 @@ I18N.ready.then(function () {
   welcomeYesBtn.addEventListener('click', () => {
     localStorage.setItem(WELCOME_SEEN_KEY, '1');
     welcomeBanner.classList.add('is-hidden');
+    locateBtn.classList.remove('is-hidden');
     if (!autoLocateCheckbox.checked) {
       autoLocateCheckbox.checked = true;
       localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, '1');
@@ -2112,6 +2117,7 @@ I18N.ready.then(function () {
   welcomeNoBtn.addEventListener('click', () => {
     localStorage.setItem(WELCOME_SEEN_KEY, '1');
     welcomeBanner.classList.add('is-hidden');
+    locateBtn.classList.remove('is-hidden');
     autoLocateCheckbox.checked = false;
     localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, '0');
   });

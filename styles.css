@@ -597,6 +597,7 @@ h1 {
 }
 .welcome-banner .welcome-actions button { flex: 1; }
 .welcome-banner.is-hidden { display: none; }
+#locateBtn.is-hidden { display: none; }
 
 
 /* --- Address panel --- */

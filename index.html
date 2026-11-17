@@ -1526,7 +1526,7 @@ I18N.ready.then(function () {
   // sur un tout premier fix très imprécis, et un filet de sécurité pour ne pas bloquer
   // indéfiniment si la précision ne s'améliore pas (on tente alors avec le meilleur fix reçu).
   const AUTO_GEOCODE_MIN_WAIT_MS = 5000;
-  const AUTO_GEOCODE_TIMEOUT_MS = 60000;
+  const AUTO_GEOCODE_TIMEOUT_MS = 30000;
   const AUTO_GEOCODE_ACCURACY_TARGET_M = 20;
 
   function maybeAutoGeocode(pos) {

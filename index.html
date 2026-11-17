@@ -81,7 +81,6 @@
   <label class="settings-check"><input type="checkbox" data-section="altitude" checked><span data-i18n="settings.section.altitude">Altitude depuis carte IGN</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="offline-geo"><span data-i18n="settings.section.offlineGeo">Département et commune</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="antennas"><span data-i18n="settings.section.antennas">Antennes relais 2G 3G 4G 5G</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
-  <label class="settings-check"><input type="checkbox" data-section="escape-games" checked><span data-i18n="settings.section.escapeGames">Escape games</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="climbing-gyms" checked><span data-i18n="settings.section.climbingGyms">Salles d'escalade</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="toilets" checked><span data-i18n="settings.section.toilets">Toilettes</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
   <label class="settings-check"><input type="checkbox" data-section="drinking-water" checked><span data-i18n="settings.section.drinkingWater">Eau potable</span><span class="settings-check-actions"><button type="button" class="settings-drag-handle" aria-label="Glisser pour réorganiser" data-i18n-attr="aria-label:settings.dragHandleAriaLabel"><svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="0" y="0" width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="8" width="14" height="2" rx="1" fill="currentColor"/></svg></button></span></label>
@@ -90,6 +89,7 @@
   <div id="settingsCustomList"></div>
   <div class="settings-custom-add">
     <input type="text" id="customSectionInput" class="settings-custom-input" placeholder="Ajouter un lieu : pharmacie, boulangerie…" data-i18n-attr="placeholder:settings.customPlaceholder" />
+    <input type="number" id="customSectionRadiusInput" class="settings-custom-radius-input" min="1" max="30" step="1" value="5" data-i18n-attr="title:settings.customRadiusTitle" title="Rayon de recherche (km)" />
     <button type="button" id="customSectionAddBtn" class="settings-bulk-btn" data-i18n="settings.customAdd">Ajouter</button>
   </div>
   <div class="settings-bulk">
@@ -102,6 +102,19 @@
     <div class="eyebrow" data-i18n="header.eyebrow">OuSuisJe · outils de localisation</div>
     <h1 data-i18n="header.title">Trouvez l'adresse et plus encore !</h1>
   </header>
+
+  <div id="welcomeBanner" class="welcome-banner is-hidden">
+    <ul class="welcome-points">
+      <li data-i18n="welcome.point1">Pour profiter de toutes les fonctionnalités, activez la localisation.</li>
+      <li data-i18n="welcome.point2">Vos données de localisation ne sont ni stockées, ni revendues, ni utilisées pour de la publicité.</li>
+      <li data-i18n="welcome.point3">Pour un accès facile, ajoutez un raccourci à votre écran d'accueil avec le bouton tout en bas.</li>
+    </ul>
+    <p class="welcome-question" data-i18n="welcome.question">Voulez-vous activer le GPS ?</p>
+    <div class="welcome-actions">
+      <button type="button" id="welcomeYesBtn" class="btn-primary" data-i18n="welcome.yes">Oui</button>
+      <button type="button" id="welcomeNoBtn" class="btn-secondary" data-i18n="welcome.no">Non</button>
+    </div>
+  </div>
 
   <button type="button" id="locateBtn" class="btn-primary" data-i18n="locate.enable">Activer la localisation GPS</button>
 
@@ -116,11 +129,12 @@
       <div id="accVal" class="value dim">—</div>
     </div>
     <div class="cell">
-      <div class="label" data-i18n="grid.altitude">Altitude GPS</div>
+      <div class="label" id="altLabel">Altitude</div>
       <div id="altVal" class="value dim">—</div>
     </div>
   </div>
   <p id="accuracyWarning" class="accuracy-warning" style="display:none;"></p>
+  <p id="iosLocationHelp" class="accuracy-warning" style="display:none;" data-i18n-html="warning.iosLocationHelp">Localisation refusée ou désactivée. Sur iPhone : <strong>Réglages → Confidentialité et sécurité → Service de localisation</strong> (vérifier qu'il est activé), puis <strong>Réglages → Safari → Localisation</strong> → choisir "Demander".</p>
 
   <details class="feature" data-section="localisation" open>
     <summary class="feature-summary"><span data-i18n="settings.section.localisation">Localisation administrative</span><span class="feature-chevron">▾</span></summary>
@@ -173,9 +187,20 @@
         <div class="addr-row"><span class="k" data-i18n="diag.heading">Cap</span><span id="hdgVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k" data-i18n="diag.time">Heure</span><span id="tsVal" class="v dim">—</span></div>
         <div class="addr-row"><span class="k" data-i18n="diag.altAccuracy">Précision altitude</span><span id="altAccVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altRaw">Altitude GPS brute</span><span id="diagAltRaw" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altCorrected">Altitude GPS corrigée</span><span id="diagAltCorrected" class="v dim">—</span></div>
         <div class="addr-row"><span class="k" data-i18n="diag.altOffset">Décalage altitude</span>
           <span class="v" style="display:flex; align-items:center; gap:6px;">
             <input type="number" id="altOffsetInput" step="1" placeholder="0" class="altitude-offset-input" /> m
+          </span>
+        </div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altOffsetAuto">Décalage altitude auto</span><span id="altOffsetAutoVal" class="v dim">—</span></div>
+        <div class="addr-row"><span class="k" data-i18n="diag.altOffsetMode">Mode de décalage altitude</span>
+          <span class="v">
+            <select id="altOffsetModeSelect">
+              <option value="auto" data-i18n="diag.altOffsetModeAuto">Auto</option>
+              <option value="manual" data-i18n="diag.altOffsetModeManual">Manuel</option>
+            </select>
           </span>
         </div>
         <div class="addr-row"><span class="k" data-i18n="diag.fixState">État du fix</span><span id="diagFixState" class="v dim">—</span></div>
@@ -317,31 +342,17 @@
         <div class="addr-head">
           <span data-i18n="offlineGeo.contoursTitle">Contours précis des communes (optionnel)</span>
         </div>
-        <table class="contours-table">
+        <table class="contours-table contours-table-2col">
           <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+            <col class="col-version"><col class="col-action">
           </colgroup>
           <thead>
-            <tr><th data-i18n="offlineGeo.colVersion">Version</th><th data-i18n="offlineGeo.colStatus">Statut</th><th></th><th></th></tr>
+            <tr><th data-i18n="offlineGeo.colVersion">Version</th><th></th></tr>
           </thead>
           <tbody>
             <tr>
-              <td data-i18n="offlineGeo.tierCentroidesLabel">Cercles (1,4 Mo)</td>
-              <td id="statusCentroides" class="dim" data-i18n="offlineGeo.downloadedActive">Téléchargées, actives</td>
-              <td><button type="button" id="activateCentroides" class="btn-secondary" disabled data-i18n="common.active">Actif ✓</button></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td data-i18n="offlineGeo.tierSimplifieeLabel">Polygones (6,7 Mo)</td>
-              <td id="statusSimplifiee" class="dim" data-i18n="common.notDownloadedFem">Non téléchargée</td>
-              <td><button type="button" id="downloadSimplifiee" class="btn-secondary" data-i18n="common.download">Télécharger</button></td>
-              <td><button type="button" id="deleteSimplifiee" class="btn-delete" style="display:none" title="Supprimer les données téléchargées" data-i18n-attr="title:common.deleteAriaLabel">🗑</button></td>
-            </tr>
-            <tr>
               <td data-i18n="offlineGeo.tierPreciseLabel">Détaillée (16 Mo)</td>
-              <td id="statusPrecise" class="dim" data-i18n="common.notDownloadedFem">Non téléchargée</td>
               <td><button type="button" id="downloadPrecise" class="btn-secondary" data-i18n="common.download">Télécharger</button></td>
-              <td><button type="button" id="deletePrecise" class="btn-delete" style="display:none" title="Supprimer les données téléchargées" data-i18n-attr="title:common.deleteAriaLabel">🗑</button></td>
             </tr>
           </tbody>
         </table>
@@ -357,19 +368,17 @@
         <div class="addr-head">
           <span data-i18n="antennas.panelTitle">Antennes relais ANFR (hors ligne, sur demande)</span>
         </div>
-        <table class="contours-table">
+        <table class="contours-table contours-table-2col">
           <colgroup>
-            <col class="col-version"><col class="col-status"><col class="col-action"><col class="col-delete">
+            <col class="col-version"><col class="col-action">
           </colgroup>
           <thead>
-            <tr><th data-i18n="antennas.colDataset">Jeu de données</th><th data-i18n="offlineGeo.colStatus">Statut</th><th></th><th></th></tr>
+            <tr><th data-i18n="antennas.colDataset">Jeu de données</th><th></th></tr>
           </thead>
           <tbody>
             <tr>
               <td data-i18n="antennas.datasetLabel">Sites ANFR, 4 opérateurs (1,3 Mo)</td>
-              <td id="antennasRowStatus" class="dim" data-i18n="common.notDownloadedFemPl">Non téléchargées</td>
               <td><button type="button" id="downloadAntennas" class="btn-secondary" data-i18n="common.download">Télécharger</button></td>
-              <td><button type="button" id="deleteAntennas" class="btn-delete" style="display:none" title="Supprimer les données téléchargées" data-i18n-attr="title:common.deleteAriaLabel">🗑</button></td>
             </tr>
           </tbody>
         </table>
@@ -406,37 +415,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-  </details>
-
-  <details class="feature" data-section="escape-games">
-    <summary class="feature-summary"><span data-i18n="settings.section.escapeGames">Escape games</span><span class="feature-chevron">▾</span></summary>
-    <div class="feature-body">
-      <button type="button" id="escapeGamesBtn" class="btn-secondary" data-i18n="escapeGames.findBtn">Trouver les escape games</button>
-
-      <div class="source-mini-badge is-hidden" id="escapeGamesSourceBadge" data-i18n="common.sourcePlaceholder">Source : —</div>
-      <div class="map-wrap">
-        <div id="escapeGamesMap"></div>
-        <div class="map-footer">
-          <span class="map-hint" data-i18n="common.mapHint">La carte est cliquable pour relancer la recherche ailleurs.</span>
-        </div>
-      </div>
-
-      <div class="addr-panel">
-        <div class="addr-head">
-          <span data-i18n="escapeGames.panelTitle">Escape games</span>
-          <span id="escapeGamesStatus">—</span>
-        </div>
-        <table class="poi-table">
-          <thead>
-            <tr><th data-i18n="common.tableName">Nom</th><th data-i18n="common.tableDistance">Distance</th><th data-i18n="common.tableDirection">Direction</th></tr>
-          </thead>
-          <tbody id="escapeGamesTableBody">
-            <tr><td colspan="3" class="dim" data-i18n="common.enableLocationTablePlaceholder">Activez la localisation ou sélectionnez un point, puis lancez la recherche</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="osm-credit" data-i18n-html="escapeGames.credit">Escape games : © contributeurs <a class="inline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (Overpass API)</p>
     </div>
   </details>
 
@@ -647,8 +625,17 @@ I18N.ready.then(function () {
   const hdgVal = $('hdgVal');
   const tsVal = $('tsVal');
   const altAccVal = $('altAccVal');
+  const altLabel = $('altLabel');
+  const diagAltRaw = $('diagAltRaw');
+  const diagAltCorrected = $('diagAltCorrected');
   const altOffsetInput = $('altOffsetInput');
+  const altOffsetAutoVal = $('altOffsetAutoVal');
+  const altOffsetModeSelect = $('altOffsetModeSelect');
   const accuracyWarning = $('accuracyWarning');
+  const iosLocationHelp = $('iosLocationHelp');
+  const welcomeBanner = $('welcomeBanner');
+  const welcomeYesBtn = $('welcomeYesBtn');
+  const welcomeNoBtn = $('welcomeNoBtn');
   const locateBtn = $('locateBtn');
   const autoStopCheckbox = $('autoStopCheckbox');
   const autoLocateCheckbox = $('autoLocateCheckbox');
@@ -708,27 +695,14 @@ I18N.ready.then(function () {
   const offlineRegionEl = $('offlineRegion');
   const offlineCommuneEl = $('offlineCommune');
   const offlineCPEl = $('offlineCP');
-  const activateCentroidesBtn = $('activateCentroides');
-  const downloadSimplifieeBtn = $('downloadSimplifiee');
   const downloadPreciseBtn = $('downloadPrecise');
-  const deleteSimplifieeBtn = $('deleteSimplifiee');
-  const deletePreciseBtn = $('deletePrecise');
-  const tierButtons = { centroides: activateCentroidesBtn, simplifiee: downloadSimplifieeBtn, precise: downloadPreciseBtn };
-  const tierStatusEls = { centroides: $('statusCentroides'), simplifiee: $('statusSimplifiee'), precise: $('statusPrecise') };
-  const tierDeleteButtons = { simplifiee: deleteSimplifieeBtn, precise: deletePreciseBtn };
+  const tierButtons = { precise: downloadPreciseBtn };
 
-  const antennasRowStatusEl = $('antennasRowStatus');
   const downloadAntennasBtn = $('downloadAntennas');
-  const deleteAntennasBtn = $('deleteAntennas');
   const antennasSearchBtn = $('antennasSearchBtn');
   const antennaSourceBadge = $('antennaSourceBadge');
   const antennasSearchStatusEl = $('antennasSearchStatus');
   const antennasTableBody = $('antennasTableBody');
-
-  const escapeGamesBtn = $('escapeGamesBtn');
-  const escapeGamesStatusEl = $('escapeGamesStatus');
-  const escapeGamesTableBody = $('escapeGamesTableBody');
-  const escapeGamesSourceBadge = $('escapeGamesSourceBadge');
   const climbingGymsBtn = $('climbingGymsBtn');
   const climbingGymsStatusEl = $('climbingGymsStatus');
   const climbingGymsTableBody = $('climbingGymsTableBody');
@@ -750,6 +724,33 @@ I18N.ready.then(function () {
   // (tableau mutable : les sections ajoutées dynamiquement par mot-clé s'y ajoutent aussi)
   const featureSections = [];
   const allMaps = []; // toutes les cartes Leaflet de la page, pour invalidateSize() à l'ouverture de leur section
+  // Désactivé pendant l'ouverture automatique de la première section au chargement (voir
+  // openFirstVisibleSection ci-dessous) : cette ouverture-là ne doit pas déclencher de défilement.
+  let suppressAccordionAutoScroll = true;
+
+  // Section visible suivante (dans l'ordre DOM actuel, qui reflète l'ordre glissé-déposé)
+  // après `section`, ou null si `section` est la dernière visible.
+  function nextVisibleSectionAfter(section) {
+    const all = Array.from(document.querySelectorAll('details.feature'));
+    const idx = all.indexOf(section);
+    for (let i = idx + 1; i < all.length; i++) {
+      if (all[i].style.display !== 'none') return all[i];
+    }
+    return null;
+  }
+
+  // Sections dont les données sont disponibles hors ligne (silencieusement pré-téléchargées,
+  // ou via le bouton dédié de la section) : on relance leur recherche à chaque ouverture,
+  // sans attendre un clic sur leur bouton, puisqu'aucun appel réseau à la demande n'est
+  // nécessaire pour avoir un résultat (ou, pour les antennes/contours précis, seulement si
+  // déjà téléchargées — sinon la recherche retombe simplement sur l'approximation usuelle).
+  const AUTO_SEARCH_ON_OPEN = {
+    'offline-geo': updateOfflineGeo,
+    'antennas': updateAntennasNearby,
+    'toilets': updateToiletsNearby,
+    'drinking-water': updateDrinkingWaterNearby
+  };
+
   function wireAccordionSection(section) {
     featureSections.push(section);
     section.addEventListener('toggle', () => {
@@ -757,6 +758,11 @@ I18N.ready.then(function () {
       featureSections.forEach((other) => {
         if (other !== section) other.open = false;
       });
+      const autoSearchFn = AUTO_SEARCH_ON_OPEN[section.dataset.section];
+      if (autoSearchFn) {
+        const point = getReferencePoint();
+        if (point) autoSearchFn(point.lat, point.lon);
+      }
       // Une carte Leaflet créée pendant que son conteneur est masqué (section repliée)
       // mémorise une taille invalide (0×0) et cadre alors n'importe comment tant qu'on
       // ne lui redit pas de re-mesurer son conteneur, une fois celui-ci enfin visible.
@@ -765,9 +771,14 @@ I18N.ready.then(function () {
           setTimeout(() => m.invalidateSize(), 0);
         }
       });
+      if (suppressAccordionAutoScroll) return;
       // Aligne le BAS de la section sur le bas de l'écran (pas le haut), pour garder
-      // la fin de son contenu visible plutôt que son en-tête.
-      const bottom = section.getBoundingClientRect().bottom + window.scrollY + 8;
+      // la fin de son contenu visible plutôt que son en-tête — tout en laissant apparaître
+      // le titre de la section suivante juste en dessous, plutôt que de le masquer pile
+      // sous le bord inférieur de l'écran.
+      const nextSection = nextVisibleSectionAfter(section);
+      const nextTitleHeight = nextSection ? nextSection.querySelector('.feature-summary').getBoundingClientRect().height : 0;
+      const bottom = section.getBoundingClientRect().bottom + window.scrollY + 8 + nextTitleHeight;
       const top = bottom - window.innerHeight;
       window.scrollTo({ top, behavior: 'smooth' });
     });
@@ -782,7 +793,7 @@ I18N.ready.then(function () {
 
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
-  const DEFAULT_HIDDEN_SECTIONS = new Set(['antennas', 'offline-geo']); // masquées par défaut tant que l'utilisateur ne les active pas
+  const DEFAULT_HIDDEN_SECTIONS = new Set(); // plus rien de masqué par défaut
 
   // Sections qui ne concernent que la France (données ANFR/IGN, sans équivalent ailleurs).
   // Restent masquées tant que la position de l'utilisateur n'est pas connue ; se révèlent
@@ -1203,16 +1214,85 @@ I18N.ready.then(function () {
 
   // --- Décalage manuel d'altitude (correction ajoutée à l'altitude brute du GPS) ---
   const ALT_OFFSET_STORAGE_KEY = 'ousuisje_altitude_offset_m';
-  let altitudeOffsetM = parseFloat(localStorage.getItem(ALT_OFFSET_STORAGE_KEY));
-  if (!Number.isFinite(altitudeOffsetM)) altitudeOffsetM = 0;
-  if (altitudeOffsetM) altOffsetInput.value = String(altitudeOffsetM);
+  let altitudeOffsetManualM = parseFloat(localStorage.getItem(ALT_OFFSET_STORAGE_KEY));
+  if (!Number.isFinite(altitudeOffsetManualM)) altitudeOffsetManualM = 0;
+  if (altitudeOffsetManualM) altOffsetInput.value = String(altitudeOffsetManualM);
+
+  // --- Décalage automatique d'altitude : mesuré une fois le fix GPS stabilisé, en comparant
+  // l'altitude brute du GPS à l'altitude IGN (ou Open-Elevation si l'IGN n'a pas de donnée à
+  // ce point, typiquement hors de France) au même endroit. Moyenné (moyenne glissante) au fil
+  // des sessions successives plutôt qu'écrasé à chaque fois, pour lisser le bruit du capteur.
+  const ALT_OFFSET_MODE_KEY = 'ousuisje_altitude_offset_mode'; // 'auto' | 'manual'
+  const ALT_OFFSET_AUTO_KEY = 'ousuisje_altitude_offset_auto_m';
+  const ALT_OFFSET_AUTO_COUNT_KEY = 'ousuisje_altitude_offset_auto_count';
+  const ALT_OFFSET_AUTO_SOURCE_KEY = 'ousuisje_altitude_offset_auto_source'; // 'ign' | 'oe'
+  let altitudeOffsetMode = localStorage.getItem(ALT_OFFSET_MODE_KEY) === 'manual' ? 'manual' : 'auto';
+  let altitudeOffsetAutoM = parseFloat(localStorage.getItem(ALT_OFFSET_AUTO_KEY));
+  if (!Number.isFinite(altitudeOffsetAutoM)) altitudeOffsetAutoM = null;
+  let altitudeOffsetAutoCount = parseInt(localStorage.getItem(ALT_OFFSET_AUTO_COUNT_KEY), 10);
+  if (!Number.isFinite(altitudeOffsetAutoCount) || altitudeOffsetAutoCount < 0) altitudeOffsetAutoCount = 0;
+  let altitudeOffsetAutoSource = localStorage.getItem(ALT_OFFSET_AUTO_SOURCE_KEY); // 'ign' | 'oe' | null
+  if (altitudeOffsetAutoSource !== 'ign' && altitudeOffsetAutoSource !== 'oe') altitudeOffsetAutoSource = null;
+  let autoOffsetAttempted = false; // une seule tentative de mesure par session GPS (voir startWatch)
+  let autoOffsetFirstFixAt = null;
+  let autoGeocodeAttempted = false; // une seule recherche d'adresse automatique par session GPS
+  let autoGeocodeFirstFixAt = null;
+
+  // altitudeOffsetM est la valeur effectivement appliquée partout ailleurs dans l'app
+  // (affichage principal + sections IGN/Open-Elevation) ; elle suit le mode choisi ci-dessous.
+  let altitudeOffsetM = 0;
+
+  function updateAltOffsetAutoDisplay() {
+    if (altitudeOffsetAutoM != null) {
+      const rounded = Math.round(altitudeOffsetAutoM);
+      altOffsetAutoVal.textContent = (rounded >= 0 ? '+' : '') + rounded + ' m'
+        + (altitudeOffsetAutoCount > 1 ? ' (' + I18N.t('diag.altOffsetAutoSamples', { count: altitudeOffsetAutoCount }) + ')' : '');
+      altOffsetAutoVal.classList.remove('dim');
+    } else {
+      altOffsetAutoVal.textContent = I18N.t('diag.altOffsetAutoPending');
+      altOffsetAutoVal.classList.add('dim');
+    }
+  }
+
+  // Le libellé du champ altitude principal indique la source de la calibration
+  // actuellement appliquée : la source de la dernière mesure automatique réussie en mode
+  // auto, sinon "GPS" (brut, ou corrigé à la main sans référence externe validée).
+  function updateAltitudeLabel() {
+    const sourceLabel = (altitudeOffsetMode === 'auto' && altitudeOffsetAutoSource === 'ign') ? 'IGN'
+      : (altitudeOffsetMode === 'auto' && altitudeOffsetAutoSource === 'oe') ? 'Open Elevation'
+      : 'GPS';
+    altLabel.textContent = I18N.t('grid.altitude') + ' (' + sourceLabel + ')';
+  }
+
+  function applyOffsetMode() {
+    altitudeOffsetM = (altitudeOffsetMode === 'auto' && altitudeOffsetAutoM != null)
+      ? altitudeOffsetAutoM
+      : altitudeOffsetManualM;
+    altOffsetInput.disabled = (altitudeOffsetMode === 'auto');
+    updateAltitudeLabel();
+    if (lastPos) updateUI(lastPos);
+  }
+
+  window.addEventListener('i18n:changed', updateAltitudeLabel);
+
+  altOffsetModeSelect.value = altitudeOffsetMode;
+  updateAltOffsetAutoDisplay();
+  applyOffsetMode();
+
+  altOffsetModeSelect.addEventListener('change', () => {
+    altitudeOffsetMode = altOffsetModeSelect.value === 'manual' ? 'manual' : 'auto';
+    localStorage.setItem(ALT_OFFSET_MODE_KEY, altitudeOffsetMode);
+    applyOffsetMode();
+  });
+
   altOffsetInput.addEventListener('input', () => {
     const v = parseFloat(altOffsetInput.value);
-    altitudeOffsetM = Number.isFinite(v) ? v : 0;
-    localStorage.setItem(ALT_OFFSET_STORAGE_KEY, String(altitudeOffsetM));
-    if (lastPos) updateUI(lastPos);
+    altitudeOffsetManualM = Number.isFinite(v) ? v : 0;
+    localStorage.setItem(ALT_OFFSET_STORAGE_KEY, String(altitudeOffsetManualM));
+    applyOffsetMode();
   });
   const isFirefox = /firefox/i.test(navigator.userAgent);
+  const isIPhone = /iPhone/i.test(navigator.userAgent);
   const WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, accuracyMode: 'precise' };
 
   function haversine(lat1, lon1, lat2, lon2) {
@@ -1369,12 +1449,25 @@ I18N.ready.then(function () {
   });
 
   // --- Sources d'altitude ---
+  // Partagé entre le calage automatique d'altitude et la section "Altitude IGN" : l'un ou
+  // l'autre peut avoir déjà interrogé l'IGN pour (à peu près) le même point durant cette
+  // session, inutile de refaire la requête (l'altitude d'un point donné ne change pas).
+  // Arrondi à ~10 m, du même ordre que le seuil de précision du calage automatique.
+  const ignAltitudeCache = new Map();
+  function roundCoordKey(lat, lon) {
+    return lat.toFixed(4) + ',' + lon.toFixed(4);
+  }
+
   async function fetchIGNAltitude(lat, lon) {
+    const key = roundCoordKey(lat, lon);
+    if (ignAltitudeCache.has(key)) return ignAltitudeCache.get(key);
     const res = await fetch(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&indent=false&measures=false&zonly=true`);
     const data = await res.json();
     const raw = data && data.elevations ? data.elevations[0] : null;
     const val = (raw != null && typeof raw === 'object') ? raw.z : raw;
-    return (val != null && val > -9999) ? val : null;
+    const result = (val != null && val > -9999) ? val : null;
+    ignAltitudeCache.set(key, result);
+    return result;
   }
 
   async function fetchOpenElevationAltitude(lat, lon) {
@@ -1382,6 +1475,69 @@ I18N.ready.then(function () {
     const data = await res.json();
     const val = data && data.results && data.results[0] ? data.results[0].elevation : null;
     return val != null ? val : null;
+  }
+
+  // --- Mesure automatique du décalage d'altitude ---
+  // On attend que la position horizontale se stabilise (précision <= 10 m après au moins
+  // 30 s), avec un filet de sécurité à 1 min pour ne pas bloquer indéfiniment (intérieur,
+  // zone difficile) : on tente alors avec le meilleur fix reçu jusque-là.
+  const AUTO_OFFSET_MIN_WAIT_MS = 30000;
+  const AUTO_OFFSET_TIMEOUT_MS = 60000;
+  const AUTO_OFFSET_ACCURACY_TARGET_M = 10;
+
+  function maybeComputeAutoAltitudeOffset(pos) {
+    if (autoOffsetAttempted) return;
+    if (pos.coords.altitude == null) return; // rien à corriger sans altitude brute du GPS
+    if (autoOffsetFirstFixAt == null) autoOffsetFirstFixAt = Date.now();
+    const elapsed = Date.now() - autoOffsetFirstFixAt;
+    const accuracy = pos.coords.accuracy;
+    const stabilized = accuracy != null && accuracy <= AUTO_OFFSET_ACCURACY_TARGET_M && elapsed >= AUTO_OFFSET_MIN_WAIT_MS;
+    if (!stabilized && elapsed < AUTO_OFFSET_TIMEOUT_MS) return;
+    autoOffsetAttempted = true;
+    computeAutoAltitudeOffset(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+  }
+
+  async function computeAutoAltitudeOffset(lat, lon, rawAltitude) {
+    let reference = null;
+    let source = null;
+    try { reference = await fetchIGNAltitude(lat, lon); if (reference != null) source = 'ign'; } catch (e) { reference = null; }
+    if (reference == null) {
+      try { reference = await fetchOpenElevationAltitude(lat, lon); if (reference != null) source = 'oe'; } catch (e) { reference = null; }
+    }
+    if (reference == null) return; // aucune source disponible ; nouvelle tentative à la prochaine session GPS
+
+    // Moyenne glissante : chaque nouvelle mesure affine la précédente plutôt que de l'écraser.
+    // Si la source change d'une mesure à l'autre (ex. IGN puis Open-Elevation), le libellé
+    // de source suit simplement la mesure la plus récente.
+    const sample = reference - rawAltitude;
+    const prevAvg = altitudeOffsetAutoM != null ? altitudeOffsetAutoM : sample;
+    altitudeOffsetAutoCount += 1;
+    altitudeOffsetAutoM = prevAvg + (sample - prevAvg) / altitudeOffsetAutoCount;
+    altitudeOffsetAutoSource = source;
+    localStorage.setItem(ALT_OFFSET_AUTO_KEY, String(altitudeOffsetAutoM));
+    localStorage.setItem(ALT_OFFSET_AUTO_COUNT_KEY, String(altitudeOffsetAutoCount));
+    localStorage.setItem(ALT_OFFSET_AUTO_SOURCE_KEY, altitudeOffsetAutoSource);
+    updateAltOffsetAutoDisplay();
+    applyOffsetMode();
+  }
+
+  // Même logique que le calage d'altitude automatique ci-dessus : on laisse le temps au
+  // GPS de converger (seuil de précision), avec une attente minimale pour éviter de partir
+  // sur un tout premier fix très imprécis, et un filet de sécurité pour ne pas bloquer
+  // indéfiniment si la précision ne s'améliore pas (on tente alors avec le meilleur fix reçu).
+  const AUTO_GEOCODE_MIN_WAIT_MS = 5000;
+  const AUTO_GEOCODE_TIMEOUT_MS = 60000;
+  const AUTO_GEOCODE_ACCURACY_TARGET_M = 20;
+
+  function maybeAutoGeocode(pos) {
+    if (autoGeocodeAttempted) return;
+    if (autoGeocodeFirstFixAt == null) autoGeocodeFirstFixAt = Date.now();
+    const elapsed = Date.now() - autoGeocodeFirstFixAt;
+    const accuracy = pos.coords.accuracy;
+    const stabilized = accuracy != null && accuracy <= AUTO_GEOCODE_ACCURACY_TARGET_M && elapsed >= AUTO_GEOCODE_MIN_WAIT_MS;
+    if (!stabilized && elapsed < AUTO_GEOCODE_TIMEOUT_MS) return;
+    autoGeocodeAttempted = true;
+    doGeocode(pos.coords.latitude, pos.coords.longitude, 'gps');
   }
 
   const altitudeMap = initSecondaryMap('altitudeMap');
@@ -1738,6 +1894,12 @@ I18N.ready.then(function () {
     }
     altVal.textContent = altitude != null ? Math.round(altitude + altitudeOffsetM) + ' m' : I18N.t('alt.gpsNotProvided');
     altVal.classList.toggle('dim', altitude == null);
+    diagAltRaw.textContent = altitude != null ? Math.round(altitude) + ' m' : '—';
+    diagAltRaw.classList.toggle('dim', altitude == null);
+    diagAltRaw.classList.toggle('copyable', altitude != null);
+    diagAltCorrected.textContent = altitude != null ? Math.round(altitude + altitudeOffsetM) + ' m' : '—';
+    diagAltCorrected.classList.toggle('dim', altitude == null);
+    diagAltCorrected.classList.toggle('copyable', altitude != null);
     const isMoving = lastKnownSpeedKmh != null && lastKnownSpeedKmh >= 2;
     spdVal.textContent = isMoving ? lastKnownSpeedKmh.toFixed(1) + ' km/h' : '—';
     spdVal.classList.toggle('dim', !isMoving);
@@ -1782,6 +1944,9 @@ I18N.ready.then(function () {
     else if (err.code === err.POSITION_UNAVAILABLE) msg = I18N.t('error.positionUnavailable');
     else if (err.code === err.TIMEOUT) msg = I18N.t('error.timeout');
     setStatus('err', msg);
+    // Sur iPhone, la localisation désactivée par défaut (ou refusée une fois pour toutes)
+    // ne redonne aucun message clair côté navigateur — on explique où la réactiver.
+    iosLocationHelp.style.display = (isIPhone && err.code === err.PERMISSION_DENIED) ? 'block' : 'none';
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
     if (restartTimerId != null) { clearInterval(restartTimerId); restartTimerId = null; }
     if (renderInterval) { clearInterval(renderInterval); renderInterval = null; }
@@ -1807,7 +1972,10 @@ I18N.ready.then(function () {
     lastRawPos = pos;
     locateBtn.textContent = I18N.t('locate.disable');
     locateBtn.disabled = false;
+    iosLocationHelp.style.display = 'none';
     updateUI(pos);
+    maybeComputeAutoAltitudeOffset(pos);
+    maybeAutoGeocode(pos);
   }
 
   function handleFixError(err) {
@@ -1837,6 +2005,10 @@ I18N.ready.then(function () {
     recentFixes = [];
     lastKnownSpeedKmh = null;
     diagFixCount.textContent = '0';
+    autoOffsetAttempted = false;
+    autoOffsetFirstFixAt = null;
+    autoGeocodeAttempted = false;
+    autoGeocodeFirstFixAt = null;
 
     beginWatch();
 
@@ -1903,14 +2075,65 @@ I18N.ready.then(function () {
     }
   });
 
-  locateBtn.addEventListener('click', () => { if (isTrackingActive()) stopWatch(); else startWatch(); });
+  locateBtn.addEventListener('click', () => {
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+    welcomeBanner.classList.add('is-hidden');
+    if (isTrackingActive()) {
+      stopWatch();
+    } else {
+      // Un utilisateur qui active la localisation à la main veut probablement qu'elle
+      // démarre automatiquement aux prochaines ouvertures — on mémorise ce choix plutôt que
+      // de le forcer à cocher le réglage séparément.
+      if (!autoLocateCheckbox.checked) {
+        autoLocateCheckbox.checked = true;
+        localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, '1');
+      }
+      startWatch();
+    }
+  });
+
+  const WELCOME_SEEN_KEY = 'ousuisje_welcome_seen';
+  const isFirstVisit = localStorage.getItem(WELCOME_SEEN_KEY) !== '1';
+  if (isFirstVisit) {
+    welcomeBanner.classList.remove('is-hidden');
+    // Le message d'accueil propose déjà d'activer la localisation (boutons Oui/Non) : cacher
+    // ce bouton redondant tant qu'il n'y a pas répondu, pour ne pas pousser tout le reste du
+    // contenu hors écran sur les petits téléphones.
+    locateBtn.classList.add('is-hidden');
+  }
+  // Ces deux réponses au message d'accueil déclenchent (ou non) la vraie demande de
+  // localisation au tout premier passage — geste utilisateur direct, plutôt qu'une demande
+  // lancée silencieusement avant même qu'il ait pu lire le message.
+  welcomeYesBtn.addEventListener('click', () => {
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+    welcomeBanner.classList.add('is-hidden');
+    locateBtn.classList.remove('is-hidden');
+    if (!autoLocateCheckbox.checked) {
+      autoLocateCheckbox.checked = true;
+      localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, '1');
+    }
+    if (!isTrackingActive()) startWatch();
+  });
+  welcomeNoBtn.addEventListener('click', () => {
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+    welcomeBanner.classList.add('is-hidden');
+    locateBtn.classList.remove('is-hidden');
+    autoLocateCheckbox.checked = false;
+    localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, '0');
+  });
 
   const AUTO_LOCATE_STORAGE_KEY = 'ousuisje_alpha_auto_locate';
-  autoLocateCheckbox.checked = localStorage.getItem(AUTO_LOCATE_STORAGE_KEY) === '1';
+  // Activée par défaut (y compris pour un tout nouveau visiteur, avant tout choix
+  // explicite) — seul un '0' mémorisé (l'utilisateur a décoché) désactive la demande
+  // automatique de localisation au chargement.
+  autoLocateCheckbox.checked = localStorage.getItem(AUTO_LOCATE_STORAGE_KEY) !== '0';
   autoLocateCheckbox.addEventListener('change', () => {
     localStorage.setItem(AUTO_LOCATE_STORAGE_KEY, autoLocateCheckbox.checked ? '1' : '0');
   });
-  if (autoLocateCheckbox.checked) startWatch();
+  // Pour un visiteur qui a déjà répondu au message d'accueil lors d'une visite précédente,
+  // on démarre directement comme avant. Pour un tout premier passage, c'est le clic sur le
+  // message d'accueil ci-dessus (ou sur le bouton principal) qui lance la demande.
+  if (!isFirstVisit && autoLocateCheckbox.checked) startWatch();
 
   // --- Radar de précipitations (RainViewer) ---
   // Ici, le recentrage zoome 2 crans de plus que le zoom "maison" (au lieu du comportement
@@ -2108,15 +2331,10 @@ I18N.ready.then(function () {
   }
 
   // --- Contours précis des communes (téléchargement optionnel, à la demande) ---
+  // Le niveau "centroides" (cercle indicatif) reste le filet de sécurité implicite tant
+  // que rien n'est téléchargé — il n'est juste plus proposé comme option explicite dans
+  // l'interface, qui n'offre plus que le téléchargement détaillé.
   const CONTOUR_TIERS = {
-    centroides: {
-      label: 'cercles (centroïdes)'
-    },
-    simplifiee: {
-      url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes-version-simplifiee.geojson',
-      label: 'polygones (version simplifiée)',
-      rawSizeBytes: 19342488
-    },
     precise: {
       url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson',
       label: 'détaillée (pleine précision)',
@@ -2201,47 +2419,27 @@ I18N.ready.then(function () {
     }
   }
 
+  // Le statut (téléchargée/en cours/absente) vit directement dans le libellé du bouton,
+  // il n'y a plus de colonne "Statut" séparée. Pour le niveau "précise" (le seul qui se
+  // télécharge/supprime), le même bouton bascule entre les deux actions selon l'état.
   function updateTierUI(tier) {
     const btn = tierButtons[tier];
-    const statusEl = tierStatusEls[tier];
-    const deleteBtn = tierDeleteButtons[tier];
-    if (communeContoursTier === tier) {
-      btn.textContent = I18N.t('common.active');
-      btn.disabled = true;
-      statusEl.textContent = I18N.t('offlineGeo.downloadedActive');
-      statusEl.classList.remove('dim');
-    } else if (tier === 'centroides' || communeContoursDownloaded.has(tier)) {
-      btn.textContent = I18N.t('common.activate');
-      btn.disabled = false;
-      statusEl.textContent = tier === 'centroides' ? I18N.t('offlineGeo.downloadedInactiveCircles') : I18N.t('offlineGeo.downloadedInactive');
-      statusEl.classList.remove('dim');
-    } else {
-      btn.textContent = I18N.t('common.download');
-      btn.disabled = false;
-      statusEl.textContent = I18N.t('common.notDownloadedFem');
-      statusEl.classList.add('dim');
-    }
-    if (deleteBtn) {
-      deleteBtn.style.display = communeContoursDownloaded.has(tier) ? '' : 'none';
-    }
+    const isDownloaded = communeContoursDownloaded.has(tier);
+    btn.textContent = I18N.t(isDownloaded ? 'common.delete' : 'common.download');
+    btn.disabled = false;
   }
 
   function refreshContoursUI() {
-    updateTierUI('centroides');
-    updateTierUI('simplifiee');
     updateTierUI('precise');
   }
 
   function setContoursButtonsDisabled(disabled) {
-    activateCentroidesBtn.disabled = disabled;
-    downloadSimplifieeBtn.disabled = disabled;
     downloadPreciseBtn.disabled = disabled;
-    deleteSimplifieeBtn.disabled = disabled;
-    deletePreciseBtn.disabled = disabled;
   }
 
   // Retire un jeu de contours téléchargé de l'appareil (cache du service worker) et,
-  // s'il était actif, retombe sur les cercles indicatifs.
+  // s'il était actif, retombe sur l'approximation par proximité (cercles indicatifs,
+  // implicite — ce n'est plus un niveau proposé explicitement dans l'interface).
   async function deleteContourTier(tier) {
     if (communeContoursLoading) return;
     communeContoursLoading = true;
@@ -2260,37 +2458,20 @@ I18N.ready.then(function () {
     setContoursButtonsDisabled(false);
     refreshContoursUI();
   }
-  deleteSimplifieeBtn.addEventListener('click', () => deleteContourTier('simplifiee'));
-  deletePreciseBtn.addEventListener('click', () => deleteContourTier('precise'));
-
-  // Le niveau "cercles" (centroïdes) est toujours prêt (chargé avec les données de base) :
-  // l'activer ne fait que basculer la recherche de commune sur l'approximation par proximité.
-  function activateCentroides() {
-    if (communeContoursLoading) return;
-    communeContoursTier = 'centroides';
-    localStorage.setItem(CONTOURS_ACTIVE_STORAGE_KEY, 'centroides');
-    refreshContoursUI();
-    const point = getReferencePoint();
-    if (point) updateOfflineGeo(point.lat, point.lon);
-  }
-  activateCentroidesBtn.addEventListener('click', activateCentroides);
 
   async function downloadCommuneContours(tier) {
     if (communeContoursLoading) return;
     const conf = CONTOUR_TIERS[tier];
-    const alreadyDownloaded = communeContoursDownloaded.has(tier);
     communeContoursLoading = true;
     setContoursButtonsDisabled(true);
-    const statusEl = tierStatusEls[tier];
-    statusEl.classList.remove('dim');
-    statusEl.textContent = alreadyDownloaded ? I18N.t('common.activating') : I18N.t('common.downloading', { pct: 0 });
+    const btn = tierButtons[tier];
+    btn.textContent = I18N.t('common.downloading', { pct: 0 });
     try {
       const text = await fetchTextWithProgress(conf.url, conf.rawSizeBytes, (frac) => {
-        if (alreadyDownloaded) return;
         const pct = Math.round(frac * 100);
-        statusEl.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
+        btn.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
       });
-      statusEl.textContent = I18N.t('common.analyzing');
+      btn.textContent = I18N.t('common.analyzing');
       const geojson = JSON.parse(text);
       communeContoursByDept = indexCommuneContours(geojson);
       communeContoursTier = tier;
@@ -2300,7 +2481,7 @@ I18N.ready.then(function () {
       const point = getReferencePoint();
       if (point) updateOfflineGeo(point.lat, point.lon);
     } catch (e) {
-      statusEl.textContent = alreadyDownloaded ? I18N.t('common.activationFailed') : I18N.t('common.downloadFailed');
+      btn.textContent = I18N.t('common.downloadFailed');
     } finally {
       communeContoursLoading = false;
       setContoursButtonsDisabled(false);
@@ -2308,13 +2489,17 @@ I18N.ready.then(function () {
     }
   }
 
-  downloadSimplifieeBtn.addEventListener('click', () => downloadCommuneContours('simplifiee'));
-  downloadPreciseBtn.addEventListener('click', () => downloadCommuneContours('precise'));
+  // Un seul bouton par niveau téléchargeable : télécharge s'il est absent, supprime s'il
+  // est déjà là (voir updateTierUI pour le libellé affiché selon l'état).
+  downloadPreciseBtn.addEventListener('click', () => {
+    if (communeContoursDownloaded.has('precise')) deleteContourTier('precise');
+    else downloadCommuneContours('precise');
+  });
 
   refreshContoursUI();
 
   const savedActiveTier = localStorage.getItem(CONTOURS_ACTIVE_STORAGE_KEY);
-  if (savedActiveTier === 'simplifiee' || savedActiveTier === 'precise') downloadCommuneContours(savedActiveTier);
+  if (savedActiveTier === 'precise') downloadCommuneContours(savedActiveTier);
 
   // --- Antennes relais ANFR (téléchargement optionnel, à la demande) ---
   const ANTENNAS_URL = 'data/anfr-antennas.min.csv';
@@ -2519,32 +2704,29 @@ I18N.ready.then(function () {
     updateAntennasNearby(point.lat, point.lon);
   });
 
+  // Un seul bouton : le statut vit dans son libellé (Télécharger / Téléchargement… N% /
+  // Supprimer), plus de colonne "Statut" ni de bouton poubelle séparé.
   async function downloadAntennas() {
     if (antennasLoading) return;
-    const alreadyDownloaded = localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1';
     antennasLoading = true;
     downloadAntennasBtn.disabled = true;
-    antennasRowStatusEl.classList.remove('dim');
-    antennasRowStatusEl.textContent = alreadyDownloaded ? I18N.t('common.analyzing') : I18N.t('common.downloading', { pct: 0 });
+    downloadAntennasBtn.textContent = I18N.t('common.downloading', { pct: 0 });
     try {
       const text = await fetchTextWithProgress(ANTENNAS_URL, ANTENNAS_RAW_BYTES, (frac) => {
-        if (alreadyDownloaded) return;
         const pct = Math.round(frac * 100);
-        antennasRowStatusEl.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
+        downloadAntennasBtn.textContent = pct < 100 ? I18N.t('common.downloading', { pct: pct }) : I18N.t('common.analyzing');
       });
-      antennasRowStatusEl.textContent = I18N.t('common.analyzing');
+      downloadAntennasBtn.textContent = I18N.t('common.analyzing');
       antennaSites = parseAntennasCsv(text);
       localStorage.setItem(ANTENNAS_DOWNLOADED_STORAGE_KEY, '1');
-      downloadAntennasBtn.textContent = I18N.t('common.downloadedFemPl');
-      antennasRowStatusEl.textContent = I18N.t('common.downloadedFemPl');
-      deleteAntennasBtn.style.display = '';
+      downloadAntennasBtn.textContent = I18N.t('common.delete');
       const point = getReferencePoint();
       if (point) updateAntennasNearby(point.lat, point.lon);
     } catch (e) {
-      antennasRowStatusEl.textContent = I18N.t('common.downloadFailed');
+      downloadAntennasBtn.textContent = I18N.t('common.downloadFailed');
     } finally {
       antennasLoading = false;
-      downloadAntennasBtn.disabled = !!antennaSites;
+      downloadAntennasBtn.disabled = false;
     }
   }
 
@@ -2552,27 +2734,24 @@ I18N.ready.then(function () {
     if (antennasLoading) return;
     antennasLoading = true;
     downloadAntennasBtn.disabled = true;
-    deleteAntennasBtn.disabled = true;
     await deleteCachedUrl(ANTENNAS_URL);
     antennaSites = null;
     clearAntennaMarkers();
     localStorage.removeItem(ANTENNAS_DOWNLOADED_STORAGE_KEY);
     downloadAntennasBtn.textContent = I18N.t('common.download');
-    antennasRowStatusEl.textContent = I18N.t('common.notDownloadedFemPl');
-    antennasRowStatusEl.classList.add('dim');
-    deleteAntennasBtn.style.display = 'none';
     antennasLoading = false;
     downloadAntennasBtn.disabled = false;
-    deleteAntennasBtn.disabled = false;
     const point = getReferencePoint();
     if (point) updateAntennasNearby(point.lat, point.lon);
   }
 
-  downloadAntennasBtn.addEventListener('click', downloadAntennas);
-  deleteAntennasBtn.addEventListener('click', deleteAntennas);
+  downloadAntennasBtn.addEventListener('click', () => {
+    if (antennaSites) deleteAntennas();
+    else downloadAntennas();
+  });
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
-  // --- Points d'intérêt, en direct via Overpass (escape games, piscines, escalade) ---
+  // --- Points d'intérêt, en direct via Overpass (piscines, escalade) ---
   function distanceMetersApprox(lat1, lon1, lat2, lon2) {
     const coslat = Math.cos(lat1 * Math.PI / 180);
     const dLat = lat2 - lat1;
@@ -2580,8 +2759,101 @@ I18N.ready.then(function () {
     return Math.sqrt(dLat * dLat + dLon * dLon) * 111320;
   }
 
+  // --- Cache géographique + repli sur un miroir Overpass alternatif ---
+  // Pas d'escalade de rayon ici : chaque section garde un rayon fixe, seul le résultat de
+  // la requête est mis en cache (par section, grille ~5 m, 3 jours) pour éviter de refaire
+  // la même requête réseau à répétition sur un point quasi identique.
+  const GEOCACHE_KEY = 'ousuisje_geocache_v1';
+  const GEOCACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 jours
+  const GEOCACHE_GRID_DEG = 0.00005; // ~5,5 m de large à l'équateur
+  const GEOCACHE_MAX_ENTRIES = 300;
+
+  function geocacheRoundCoord(v) {
+    return Math.round(v / GEOCACHE_GRID_DEG) * GEOCACHE_GRID_DEG;
+  }
+
+  function geocacheLoad() {
+    try {
+      const raw = localStorage.getItem(GEOCACHE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function geocacheSave(store) {
+    try { localStorage.setItem(GEOCACHE_KEY, JSON.stringify(store)); } catch (e) {}
+  }
+
+  function geocacheKey(section, lat, lon, radiusM) {
+    return `${section}|${geocacheRoundCoord(lat).toFixed(5)}|${geocacheRoundCoord(lon).toFixed(5)}|${radiusM}`;
+  }
+
+  // Lecture exacte : même section, même case de grille (~5 m), même rayon.
+  function geocacheGet(section, lat, lon, radiusM) {
+    const store = geocacheLoad();
+    const entry = store[geocacheKey(section, lat, lon, radiusM)];
+    if (!entry || Date.now() - entry.t > GEOCACHE_TTL_MS) return null;
+    return entry.items;
+  }
+
+  // Réutilisation en cascade : si une entrée en cache (même section) couvre entièrement le
+  // cercle demandé avec un rayon plus grand (ex. recherche précédente à rayon plus large
+  // depuis un point proche), on en extrait les points pertinents plutôt que de refaire une
+  // requête réseau. Les items en cache gardent leurs lat/lon d'origine — pas leur
+  // distance/cap, recalculés par l'appelant pour le nouveau point de référence.
+  function geocacheFindSuperset(section, lat, lon, radiusM) {
+    const store = geocacheLoad();
+    const now = Date.now();
+    let best = null;
+    for (const k in store) {
+      if (!k.startsWith(section + '|')) continue;
+      const entry = store[k];
+      if (now - entry.t > GEOCACHE_TTL_MS) continue;
+      if (entry.radiusM < radiusM) continue;
+      const distM = distanceMetersApprox(lat, lon, entry.lat, entry.lon);
+      if (distM + radiusM <= entry.radiusM && (!best || entry.radiusM < best.radiusM)) best = entry;
+    }
+    if (!best) return null;
+    return best.items.filter((it) => distanceMetersApprox(lat, lon, it.lat, it.lon) <= radiusM);
+  }
+
+  function geocacheSet(section, lat, lon, radiusM, items) {
+    const store = geocacheLoad();
+    const now = Date.now();
+    store[geocacheKey(section, lat, lon, radiusM)] = { t: now, lat: lat, lon: lon, radiusM: radiusM, items: items };
+    for (const k in store) {
+      if (now - store[k].t > GEOCACHE_TTL_MS) delete store[k];
+    }
+    const keys = Object.keys(store);
+    if (keys.length > GEOCACHE_MAX_ENTRIES) {
+      keys.sort((a, b) => store[a].t - store[b].t);
+      for (let i = 0; i < keys.length - GEOCACHE_MAX_ENTRIES; i++) delete store[keys[i]];
+    }
+    geocacheSave(store);
+  }
+
+  const OVERPASS_PRIMARY_URL = 'https://overpass-api.de/api/interpreter';
+
+  async function fetchOverpass(query) {
+    const res = await fetch(OVERPASS_PRIMARY_URL, { method: 'POST', body: query });
+    if (!res.ok) throw new Error('overpass HTTP ' + res.status);
+    return await res.json();
+  }
+
+  // Vérifie le cache (correspondance exacte puis cascade depuis un rayon plus large déjà en
+  // cache) avant d'appeler `fetchItems`, qui doit renvoyer des items bruts (lat/lon/nom/etc,
+  // sans distance ni cap — recalculés par l'appelant).
+  async function cachedOverpassSearch(section, lat, lon, radiusM, fetchItems) {
+    let items = geocacheGet(section, lat, lon, radiusM);
+    if (items === null) items = geocacheFindSuperset(section, lat, lon, radiusM);
+    if (items === null) {
+      items = await fetchItems();
+      geocacheSet(section, lat, lon, radiusM, items);
+    }
+    return items;
+  }
+
   function setupNearbyOverpassFeature(config) {
-    const { btn, statusEl, tableBody, map, buildQuery, color, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
+    const { btn, statusEl, tableBody, map, buildQuery, color, section, radiusM, maxResults, defaultName, emptyLabel, badgeEl } = config;
     let markers = [];
     // Deux marqueurs distincts (comme sur la carte principale) : un clic sur cette carte ne
     // doit pas faire disparaître le point de la position GPS, et inversement.
@@ -2606,19 +2878,21 @@ I18N.ready.then(function () {
       }
 
       try {
-        const query = buildQuery(lat, lon, radiusM);
-        const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-        const data = await res.json();
+        const rawItems = await cachedOverpassSearch(section, lat, lon, radiusM, async () => {
+          const query = buildQuery(lat, lon, radiusM);
+          const data = await fetchOverpass(query);
+          return (data.elements || [])
+            .map((el) => {
+              const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+              const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+              if (elat == null || elon == null) return null;
+              return { name: (el.tags && el.tags.name) || defaultName, lat: elat, lon: elon };
+            })
+            .filter(Boolean);
+        });
 
-        const items = (data.elements || [])
-          .map((el) => {
-            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
-            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
-            if (elat == null || elon == null) return null;
-            const name = (el.tags && el.tags.name) || defaultName;
-            return { name, lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
-          })
-          .filter(Boolean)
+        const items = rawItems
+          .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
           .sort((a, b) => a.distM - b.distM)
           .slice(0, maxResults);
 
@@ -2674,7 +2948,6 @@ I18N.ready.then(function () {
   }
 
   const poiMap = initSecondaryMap('poiMap');
-  const escapeGamesMap = initSecondaryMap('escapeGamesMap');
   const climbingGymsMap = initSecondaryMap('climbingGymsMap');
   const toiletsMap = initSecondaryMap('toiletsMap');
   const drinkingWaterMap = initSecondaryMap('drinkingWaterMap');
@@ -2687,6 +2960,7 @@ I18N.ready.then(function () {
     map: poiMap,
     badgeEl: poiSourceBadge,
     color: '#4FD1C5',
+    section: 'poi',
     radiusM: 1500,
     maxResults: 10,
     defaultName: I18N.t('poi.defaultName'),
@@ -2696,27 +2970,13 @@ I18N.ready.then(function () {
   });
 
   setupNearbyOverpassFeature({
-    btn: escapeGamesBtn,
-    statusEl: escapeGamesStatusEl,
-    tableBody: escapeGamesTableBody,
-    map: escapeGamesMap,
-    badgeEl: escapeGamesSourceBadge,
-    color: '#8B5CF6',
-    radiusM: 20000,
-    maxResults: 10,
-    defaultName: I18N.t('escapeGames.defaultName'),
-    emptyLabel: I18N.t('escapeGames.emptyLabel'),
-    buildQuery: (lat, lon, r) =>
-      `[out:json][timeout:20];(node["leisure"="escape_game"](around:${r},${lat},${lon});way["leisure"="escape_game"](around:${r},${lat},${lon}););out center 200;`
-  });
-
-  setupNearbyOverpassFeature({
     btn: climbingGymsBtn,
     statusEl: climbingGymsStatusEl,
     tableBody: climbingGymsTableBody,
     map: climbingGymsMap,
     badgeEl: climbingGymsSourceBadge,
     color: '#F2994A',
+    section: 'climbing-gyms',
     radiusM: 20000,
     maxResults: 10,
     defaultName: I18N.t('climbingGyms.defaultName'),
@@ -2830,17 +3090,20 @@ I18N.ready.then(function () {
 
     toiletsStatusEl.textContent = I18N.t('common.searching');
     try {
-      const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
-      const items = (data.elements || [])
-        .map((el) => {
-          const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
-          const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
-          if (elat == null || elon == null) return null;
-          return { name: (el.tags && el.tags.name) || I18N.t('toilets.defaultName'), lat: elat, lon: elon, distM: distanceMetersApprox(lat, lon, elat, elon), bearing: bearingTo(lat, lon, elat, elon) };
-        })
-        .filter(Boolean)
+      const rawItems = await cachedOverpassSearch('toilets', lat, lon, TOILETS_RADIUS_M, async () => {
+        const query = `[out:json][timeout:20];(node["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon});way["amenity"="toilets"](around:${TOILETS_RADIUS_M},${lat},${lon}););out center 200;`;
+        const data = await fetchOverpass(query);
+        return (data.elements || [])
+          .map((el) => {
+            const elat = el.lat != null ? el.lat : (el.center && el.center.lat);
+            const elon = el.lon != null ? el.lon : (el.center && el.center.lon);
+            if (elat == null || elon == null) return null;
+            return { name: (el.tags && el.tags.name) || I18N.t('toilets.defaultName'), lat: elat, lon: elon };
+          })
+          .filter(Boolean);
+      });
+      const items = rawItems
+        .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
         .sort((a, b) => a.distM - b.distM)
         .slice(0, TOILETS_MAX_RESULTS);
       renderToiletsResults(lat, lon, source, items);
@@ -2993,15 +3256,18 @@ I18N.ready.then(function () {
 
     drinkingWaterStatusEl.textContent = I18N.t('common.searching');
     try {
-      const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
-      const items = (data.elements || [])
-        .map((el) => {
-          if (el.lat == null || el.lon == null) return null;
-          return { name: (el.tags && el.tags.name) || I18N.t('drinkingWater.defaultName'), lat: el.lat, lon: el.lon, distM: distanceMetersApprox(lat, lon, el.lat, el.lon), bearing: bearingTo(lat, lon, el.lat, el.lon) };
-        })
-        .filter(Boolean)
+      const rawItems = await cachedOverpassSearch('drinking-water', lat, lon, DRINKING_WATER_RADIUS_M, async () => {
+        const query = `[out:json][timeout:20];node["amenity"="drinking_water"](around:${DRINKING_WATER_RADIUS_M},${lat},${lon});out body 200;`;
+        const data = await fetchOverpass(query);
+        return (data.elements || [])
+          .map((el) => {
+            if (el.lat == null || el.lon == null) return null;
+            return { name: (el.tags && el.tags.name) || I18N.t('drinkingWater.defaultName'), lat: el.lat, lon: el.lon };
+          })
+          .filter(Boolean);
+      });
+      const items = rawItems
+        .map((it) => ({ ...it, distM: distanceMetersApprox(lat, lon, it.lat, it.lon), bearing: bearingTo(lat, lon, it.lat, it.lon) }))
         .sort((a, b) => a.distM - b.distM)
         .slice(0, DRINKING_WATER_MAX_RESULTS);
       renderDrinkingWaterResults(lat, lon, source, items);
@@ -3057,6 +3323,7 @@ I18N.ready.then(function () {
     map: foodMap,
     badgeEl: foodSourceBadge,
     color: '#E24A4A',
+    section: 'food',
     radiusM: 2000,
     maxResults: 10,
     defaultName: I18N.t('food.defaultName'),
@@ -3171,7 +3438,8 @@ I18N.ready.then(function () {
       map: secMap,
       badgeEl: badgeEl,
       color: color,
-      radiusM: 5000,
+      section: 'custom-' + id,
+      radiusM: (opts.radiusKm || 5) * 1000,
       maxResults: 10,
       defaultName: label,
       emptyLabel: I18N.t('custom.emptyLabelTemplate', { label: label }),
@@ -3215,7 +3483,7 @@ I18N.ready.then(function () {
     });
 
     if (!opts.silent) {
-      saveCustomSections(loadCustomSections().concat([{ id: id, keyword: keyword, label: label }]));
+      saveCustomSections(loadCustomSections().concat([{ id: id, keyword: keyword, label: label, radiusKm: opts.radiusKm }]));
       applySectionVisibility();
       details.open = true; // ouvre la nouvelle section (referme les autres via l'accordéon)
     }
@@ -3227,7 +3495,7 @@ I18N.ready.then(function () {
   loadCustomSections().forEach((s) => {
     customSectionSeq = Math.max(customSectionSeq, parseInt((s.id || '').replace('custom-', ''), 10) + 1 || 0);
   });
-  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { id: s.id, label: s.label, silent: true }));
+  loadCustomSections().forEach((s) => addCustomSection(s.keyword, { id: s.id, label: s.label, radiusKm: s.radiusKm, silent: true }));
   applySectionVisibility();
 
   // Toutes les sections (natives + personnalisées recréées) sont maintenant en place :
@@ -3238,13 +3506,29 @@ I18N.ready.then(function () {
   const storedSectionOrder = loadSectionOrder();
   if (storedSectionOrder) applySectionOrder(storedSectionOrder);
 
+  // Ouvre par défaut la première section visible dans l'ordre actuel, plutôt qu'une section
+  // fixe : si l'utilisateur a glissé une autre section en tête de liste, c'est elle qui
+  // s'ouvre automatiquement aux prochaines visites (pas de défilement pour cette ouverture-là).
+  (function openFirstVisibleSection() {
+    const ordered = Array.from(document.querySelectorAll('details.feature'));
+    const first = ordered.find((s) => s.style.display !== 'none');
+    ordered.forEach((s) => { if (s !== first) s.open = false; });
+    if (first) first.open = true;
+  })();
+  suppressAccordionAutoScroll = false;
+
   const customSectionInput = $('customSectionInput');
+  const customSectionRadiusInput = $('customSectionRadiusInput');
   const customSectionAddBtn = $('customSectionAddBtn');
+  const CUSTOM_SECTION_DEFAULT_RADIUS_KM = 5;
   customSectionAddBtn.addEventListener('click', () => {
     const kw = customSectionInput.value.trim();
     if (!kw) return;
-    addCustomSection(kw);
+    const parsedRadius = parseInt(customSectionRadiusInput.value, 10);
+    const radiusKm = Number.isFinite(parsedRadius) ? Math.min(30, Math.max(1, parsedRadius)) : CUSTOM_SECTION_DEFAULT_RADIUS_KM;
+    addCustomSection(kw, { radiusKm: radiusKm });
     customSectionInput.value = '';
+    customSectionRadiusInput.value = CUSTOM_SECTION_DEFAULT_RADIUS_KM;
   });
   customSectionInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); customSectionAddBtn.click(); }
@@ -3425,7 +3709,27 @@ I18N.ready.then(function () {
 
   // --- Service worker, installation, partage ---
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then((registration) => {
+        // Web uniquement : dans l'app Android, le contenu est chargé localement
+        // (WebViewAssetLoader) et cette détection de nouvelle version n'a pas de sens.
+        if (typeof window.CrashBridge !== 'undefined') return;
+
+        let refreshedForUpdate = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshedForUpdate) return;
+          refreshedForUpdate = true;
+          window.location.reload();
+        });
+
+        // Un onglet resté ouvert ne revérifie pas spontanément l'existence d'une version plus
+        // récente : on le fait nous-même périodiquement et au retour de visibilité de l'onglet.
+        setInterval(() => { registration.update().catch(() => {}); }, 5 * 60 * 1000);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') registration.update().catch(() => {});
+        });
+      }).catch(() => {});
+    });
   }
 
   const installBtn = $('installBtn');

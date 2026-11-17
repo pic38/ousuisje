@@ -18,6 +18,7 @@
     "dragHandleAriaLabel": "Drag to reorder",
     "removeAriaLabel": "Remove",
     "customPlaceholder": "Add a place: pharmacy, bakery…",
+    "customRadiusTitle": "Search radius (km)",
     "customAdd": "Add",
     "close": "Close",
     "langLabel": "Language",
@@ -30,7 +31,6 @@
       "altitude": "Altitude from map",
       "offlineGeo": "Department and municipality",
       "antennas": "2G/3G/4G/5G cell towers",
-      "escapeGames": "Escape games",
       "climbingGyms": "Climbing gyms",
       "toilets": "Toilets",
       "drinkingWater": "Drinking water",
@@ -47,6 +47,14 @@
     "disable": "Turn off GPS location",
     "searching": "Searching…",
     "unavailableDevice": "Unavailable on this device"
+  },
+  "welcome": {
+    "point1": "For the full experience, enable location.",
+    "point2": "Your location data is never stored, sold, or used for advertising.",
+    "point3": "For easy access, add a shortcut to your home screen using the button at the very bottom.",
+    "question": "Do you want to enable GPS?",
+    "yes": "Yes",
+    "no": "No"
   },
   "translation": {
     "notice": "This translation is machine-generated and hasn't been reviewed by a native speaker yet.",
@@ -70,10 +78,11 @@
   },
   "grid": {
     "accuracy": "Horizontal accuracy",
-    "altitude": "GPS altitude"
+    "altitude": "Altitude"
   },
   "warning": {
-    "lowAccuracy": "Low accuracy ({accuracy} m) — check that precise location is enabled for this site (browser and device settings)."
+    "lowAccuracy": "Low accuracy ({accuracy} m) — check that precise location is enabled for this site (browser and device settings).",
+    "iosLocationHelp": "Location denied or disabled. On iPhone: <strong>Settings → Privacy & Security → Location Services</strong> (check it's turned on), then <strong>Settings → Safari → Location</strong> → choose \"Ask\"."
   },
   "common": {
     "mapHint": "The map is clickable to search from another point.",
@@ -96,17 +105,10 @@
     "tableDistance": "Distance",
     "tableDirection": "Direction",
     "download": "Download",
-    "notDownloadedFem": "Not downloaded",
-    "notDownloadedFemPl": "Not downloaded",
-    "downloadedFemPl": "Downloaded",
-    "activate": "Activate",
-    "active": "Active ✓",
+    "delete": "Delete",
     "downloading": "Downloading… {pct}%",
-    "activating": "Activating…",
     "analyzing": "Analyzing file…",
     "downloadFailed": "Download failed",
-    "activationFailed": "Activation failed",
-    "deleteAriaLabel": "Delete downloaded data",
     "goto": "Go there →",
     "homeControlTitle": "Return to the default view",
     "recenterControlTitle": "Recenter on my GPS position"
@@ -141,7 +143,15 @@
     "heading": "Heading",
     "time": "GPS time",
     "altAccuracy": "Altitude accuracy",
+    "altRaw": "Raw GPS altitude",
+    "altCorrected": "Corrected GPS altitude",
     "altOffset": "Altitude offset",
+    "altOffsetAuto": "Auto altitude offset",
+    "altOffsetAutoPending": "Measuring…",
+    "altOffsetAutoSamples": "{count} samples",
+    "altOffsetMode": "Altitude offset mode",
+    "altOffsetModeAuto": "Auto",
+    "altOffsetModeManual": "Manual",
     "fixState": "Fix status",
     "fixAge": "Fix age",
     "fixCount": "Fixes received",
@@ -195,13 +205,7 @@
     "cp": "Postcode",
     "contoursTitle": "Precise municipality boundaries (optional)",
     "colVersion": "Version",
-    "colStatus": "Status",
-    "tierCentroidesLabel": "Circles (1.4 MB)",
-    "tierSimplifieeLabel": "Polygons (6.7 MB)",
     "tierPreciseLabel": "Detailed (16 MB)",
-    "downloadedActive": "Downloaded, active",
-    "downloadedInactiveCircles": "Downloaded, inactive",
-    "downloadedInactive": "Downloaded, inactive",
     "credit": "Boundaries: © IGN Admin Express, via the <a class=\"inline\" href=\"https://github.com/gregoiredavid/france-geojson\" target=\"_blank\" rel=\"noopener\">france-geojson</a> project",
     "notFound": "Not found",
     "notAvailable": "Not available",
@@ -220,13 +224,6 @@
     "downloadPromptTable": "Download the data, then run a search.",
     "emptyLabel": "No cell towers",
     "resultCount": "{count} site(s) · radius {radius} m"
-  },
-  "escapeGames": {
-    "findBtn": "Find escape games",
-    "panelTitle": "Escape games",
-    "credit": "Escape games: © <a class=\"inline\" href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> contributors (Overpass API)",
-    "defaultName": "Escape game",
-    "emptyLabel": "No escape games found"
   },
   "climbingGyms": {
     "findBtn": "Find climbing gyms",

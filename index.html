@@ -2583,7 +2583,7 @@ I18N.ready.then(function () {
   // Icône "camembert" : une part colorée par opérateur partageant le site (2 à 4 couleurs).
   function buildAntennaPieIcon(ops) {
     const colors = ops.map(operatorColor);
-    const size = 18;
+    const size = 24;
     const r = size / 2;
     const anglePer = 360 / colors.length;
     let paths = '';
@@ -2601,8 +2601,14 @@ I18N.ready.then(function () {
     return d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km';
   }
 
-  function gotoLinkHtml(lat, lon) {
-    return `<a class="popup-goto" href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank" rel="noopener">${I18N.t('common.goto')}</a>`;
+  // Un appui sur un point de résultat lance directement l'itinéraire (plus besoin d'ouvrir
+  // une bulle puis d'y toucher un lien) : plus rapide au doigt, et cohérent avec le rayon de
+  // hitbox agrandi de ces points.
+  function gotoUrl(lat, lon) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  }
+  function openGoto(lat, lon) {
+    window.open(gotoUrl(lat, lon), '_blank', 'noopener');
   }
 
   function findNearbyAntennas(lat, lon, radiusM, maxResults) {
@@ -2675,17 +2681,16 @@ I18N.ready.then(function () {
         bounds.push([first.lat, first.lon]);
         if (group.length === 1) {
           const color = operatorColor(first.op);
-          const marker = L.circleMarker([first.lat, first.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-            .bindPopup(`<strong>${first.op}</strong><br>${first.gens.join(', ')}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
+          const marker = L.circleMarker([first.lat, first.lon], { radius: 9, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
+            .on('click', () => openGoto(first.lat, first.lon))
             .addTo(antennaMap);
           antennaMarkers.push(marker);
         } else {
           // Site mutualisé par plusieurs opérateurs : un marqueur camembert avec une part
           // par opérateur, plutôt que plusieurs points superposés.
           const icon = buildAntennaPieIcon(group.map((g) => g.op));
-          const popupLines = group.map((g) => `<strong style="color:${operatorColor(g.op)};">${g.op}</strong> — ${g.gens.join(', ')}`).join('<br>');
           const marker = L.marker([first.lat, first.lon], { icon: icon })
-            .bindPopup(`${popupLines}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
+            .on('click', () => openGoto(first.lat, first.lon))
             .addTo(antennaMap);
           antennaMarkers.push(marker);
         }
@@ -2929,8 +2934,8 @@ I18N.ready.then(function () {
             </tr>
           `).join('');
           for (const it of items) {
-            const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+            const marker = L.circleMarker([it.lat, it.lon], { radius: 9, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
+              .on('click', () => openGoto(it.lat, it.lon))
               .addTo(map);
             markers.push(marker);
             bounds.push([it.lat, it.lon]);
@@ -3069,8 +3074,8 @@ I18N.ready.then(function () {
         </tr>
       `).join('');
       for (const it of items) {
-        const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: TOILETS_COLOR, weight: 2, fillColor: TOILETS_COLOR, fillOpacity: 0.6 })
-          .bindPopup(`<strong>${it.name || I18N.t('toilets.defaultName')}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+        const marker = L.circleMarker([it.lat, it.lon], { radius: 9, color: TOILETS_COLOR, weight: 2, fillColor: TOILETS_COLOR, fillOpacity: 0.6 })
+          .on('click', () => openGoto(it.lat, it.lon))
           .addTo(toiletsMap);
         toiletsMarkers.push(marker);
         bounds.push([it.lat, it.lon]);
@@ -3235,8 +3240,8 @@ I18N.ready.then(function () {
         </tr>
       `).join('');
       for (const it of items) {
-        const marker = L.circleMarker([it.lat, it.lon], { radius: 6, color: DRINKING_WATER_COLOR, weight: 2, fillColor: DRINKING_WATER_COLOR, fillOpacity: 0.6 })
-          .bindPopup(`<strong>${it.name || I18N.t('drinkingWater.defaultName')}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
+        const marker = L.circleMarker([it.lat, it.lon], { radius: 9, color: DRINKING_WATER_COLOR, weight: 2, fillColor: DRINKING_WATER_COLOR, fillOpacity: 0.6 })
+          .on('click', () => openGoto(it.lat, it.lon))
           .addTo(drinkingWaterMap);
         drinkingWaterMarkers.push(marker);
         bounds.push([it.lat, it.lon]);

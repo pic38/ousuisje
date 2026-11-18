@@ -513,6 +513,19 @@ h1 {
   border-radius: 50%;
   flex-shrink: 0;
 }
+.leaflet-popup-content a.popup-goto {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 5px 10px;
+  background: var(--teal);
+  color: #06201C;
+  font-weight: 600;
+  font-size: 12.5px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.leaflet-popup-content a.popup-goto:hover { background: #6fe0d4; }
+
 /* --- Data grid --- */
 .grid {
   display: grid;
@@ -673,6 +686,8 @@ h1 {
 .altitude-profile-gap.is-hidden { display: none; }
 .v.copyable, td.copyable { cursor: pointer; }
 .v.copyable:hover, td.copyable:hover { text-decoration: underline; }
+td.goto-cell { cursor: pointer; color: var(--teal); }
+td.goto-cell:hover { text-decoration: underline; }
 
 /* --- Badge discret "Source" au-dessus de chaque carte --- */
 .source-mini-badge {

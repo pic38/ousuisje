@@ -1135,6 +1135,17 @@ I18N.ready.then(function () {
     badgeEl.textContent = I18N.t('common.sourceLabel', { source: source === 'carte' ? I18N.t('common.sourceMap') : I18N.t('common.sourceGps') });
   }
 
+  // Première colonne (nom du lieu / opérateur) de chaque ligne de résultat : un appui lance
+  // directement l'itinéraire, plutôt que de copier le texte — même action qu'un appui sur le
+  // point correspondant sur la carte, mais sans avoir à viser un petit point.
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('td.goto-cell');
+    if (!target) return;
+    const lat = parseFloat(target.dataset.lat);
+    const lon = parseFloat(target.dataset.lon);
+    if (Number.isFinite(lat) && Number.isFinite(lon)) openGoto(lat, lon);
+  });
+
   // Chaque texte de résultat de recherche (valeurs d'adresse, cellules de tableau) est
   // cliquable pour en copier le contenu — délégation unique, fonctionne aussi pour les
   // lignes régénérées dynamiquement à chaque recherche et les sections personnalisées.
@@ -2601,11 +2612,14 @@ I18N.ready.then(function () {
     return d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km';
   }
 
-  // Un appui sur un point de résultat lance directement l'itinéraire (plus besoin d'ouvrir
-  // une bulle puis d'y toucher un lien) : plus rapide au doigt, et cohérent avec le rayon de
-  // hitbox agrandi de ces points.
   function gotoUrl(lat, lon) {
     return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  }
+  // Popup affichée sur un point de la carte : infos + lien "y aller". Le nom du lieu dans le
+  // tableau de résultats (au-dessus de la carte) lance la même action en un seul appui, sans
+  // bulle intermédiaire — voir le délégué .goto-cell plus bas.
+  function gotoLinkHtml(lat, lon) {
+    return `<a class="popup-goto" href="${gotoUrl(lat, lon)}" target="_blank" rel="noopener">${I18N.t('common.goto')}</a>`;
   }
   function openGoto(lat, lon) {
     window.open(gotoUrl(lat, lon), '_blank', 'noopener');
@@ -2670,7 +2684,7 @@ I18N.ready.then(function () {
       antennasTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
       antennasTableBody.innerHTML = results.map((r) => `
         <tr>
-          <td class="copyable" style="color:${operatorColor(r.op)};">${r.op}</td>
+          <td class="goto-cell" style="color:${operatorColor(r.op)};" data-lat="${r.lat}" data-lon="${r.lon}">${r.op}</td>
           <td class="copyable">${r.gens.join(', ')}</td>
           <td class="copyable">${fmtDistanceM(r.distM)}</td>
           <td class="copyable">${r.bearing}</td>
@@ -2682,15 +2696,16 @@ I18N.ready.then(function () {
         if (group.length === 1) {
           const color = operatorColor(first.op);
           const marker = L.circleMarker([first.lat, first.lon], { radius: 9, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-            .on('click', () => openGoto(first.lat, first.lon))
+            .bindPopup(`<strong>${first.op}</strong><br>${first.gens.join(', ')}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
             .addTo(antennaMap);
           antennaMarkers.push(marker);
         } else {
           // Site mutualisé par plusieurs opérateurs : un marqueur camembert avec une part
           // par opérateur, plutôt que plusieurs points superposés.
           const icon = buildAntennaPieIcon(group.map((g) => g.op));
+          const popupLines = group.map((g) => `<strong style="color:${operatorColor(g.op)};">${g.op}</strong> — ${g.gens.join(', ')}`).join('<br>');
           const marker = L.marker([first.lat, first.lon], { icon: icon })
-            .on('click', () => openGoto(first.lat, first.lon))
+            .bindPopup(`${popupLines}<br>${fmtDistanceM(first.distM)} · ${first.bearing}<br>${gotoLinkHtml(first.lat, first.lon)}`)
             .addTo(antennaMap);
           antennaMarkers.push(marker);
         }
@@ -2928,14 +2943,14 @@ I18N.ready.then(function () {
           tableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
           tableBody.innerHTML = items.map((it) => `
             <tr>
-              <td class="copyable">${it.name}</td>
+              <td class="goto-cell" data-lat="${it.lat}" data-lon="${it.lon}">${it.name}</td>
               <td class="copyable">${fmtDistanceM(it.distM)}</td>
               <td class="copyable">${it.bearing}</td>
             </tr>
           `).join('');
           for (const it of items) {
             const marker = L.circleMarker([it.lat, it.lon], { radius: 9, color: color, weight: 2, fillColor: color, fillOpacity: 0.6 })
-              .on('click', () => openGoto(it.lat, it.lon))
+              .bindPopup(`<strong>${it.name}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
               .addTo(map);
             markers.push(marker);
             bounds.push([it.lat, it.lon]);
@@ -3068,14 +3083,14 @@ I18N.ready.then(function () {
       toiletsTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
       toiletsTableBody.innerHTML = items.map((it) => `
         <tr>
-          <td class="copyable">${it.name || I18N.t('toilets.defaultName')}</td>
+          <td class="goto-cell" data-lat="${it.lat}" data-lon="${it.lon}">${it.name || I18N.t('toilets.defaultName')}</td>
           <td class="copyable">${fmtDistanceM(it.distM)}</td>
           <td class="copyable">${it.bearing}</td>
         </tr>
       `).join('');
       for (const it of items) {
         const marker = L.circleMarker([it.lat, it.lon], { radius: 9, color: TOILETS_COLOR, weight: 2, fillColor: TOILETS_COLOR, fillOpacity: 0.6 })
-          .on('click', () => openGoto(it.lat, it.lon))
+          .bindPopup(`<strong>${it.name || I18N.t('toilets.defaultName')}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
           .addTo(toiletsMap);
         toiletsMarkers.push(marker);
         bounds.push([it.lat, it.lon]);
@@ -3234,14 +3249,14 @@ I18N.ready.then(function () {
       drinkingWaterTableBody.className = source === 'carte' ? 'results-carte' : 'results-gps';
       drinkingWaterTableBody.innerHTML = items.map((it) => `
         <tr>
-          <td class="copyable">${it.name || I18N.t('drinkingWater.defaultName')}</td>
+          <td class="goto-cell" data-lat="${it.lat}" data-lon="${it.lon}">${it.name || I18N.t('drinkingWater.defaultName')}</td>
           <td class="copyable">${fmtDistanceM(it.distM)}</td>
           <td class="copyable">${it.bearing}</td>
         </tr>
       `).join('');
       for (const it of items) {
         const marker = L.circleMarker([it.lat, it.lon], { radius: 9, color: DRINKING_WATER_COLOR, weight: 2, fillColor: DRINKING_WATER_COLOR, fillOpacity: 0.6 })
-          .on('click', () => openGoto(it.lat, it.lon))
+          .bindPopup(`<strong>${it.name || I18N.t('drinkingWater.defaultName')}</strong><br>${fmtDistanceM(it.distM)} · ${it.bearing}<br>${gotoLinkHtml(it.lat, it.lon)}`)
           .addTo(drinkingWaterMap);
         drinkingWaterMarkers.push(marker);
         bounds.push([it.lat, it.lon]);

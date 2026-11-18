@@ -89,7 +89,6 @@
   <div id="settingsCustomList"></div>
   <div class="settings-custom-add">
     <input type="text" id="customSectionInput" class="settings-custom-input" placeholder="Ajouter un lieu : pharmacie, boulangerie…" data-i18n-attr="placeholder:settings.customPlaceholder" />
-    <input type="number" id="customSectionRadiusInput" class="settings-custom-radius-input" min="1" max="30" step="1" value="5" data-i18n-attr="title:settings.customRadiusTitle" title="Rayon de recherche (km)" />
     <button type="button" id="customSectionAddBtn" class="settings-bulk-btn" data-i18n="settings.customAdd">Ajouter</button>
   </div>
   <div class="settings-bulk">
@@ -758,6 +757,13 @@ I18N.ready.then(function () {
       featureSections.forEach((other) => {
         if (other !== section) other.open = false;
       });
+      // Contrairement aux autres sections hors ligne, les antennes ANFR n'ont aucun
+      // équivalent en direct (pas de repli Overpass) : sans ce jeu de données téléchargé,
+      // rouvrir la section ne fait qu'afficher une invite à le télécharger. On lance donc
+      // ce téléchargement dès l'ouverture plutôt que d'attendre un clic sur son bouton.
+      if (section.dataset.section === 'antennas' && !antennaSites && !antennasLoading) {
+        downloadAntennas();
+      }
       const autoSearchFn = AUTO_SEARCH_ON_OPEN[section.dataset.section];
       if (autoSearchFn) {
         const point = getReferencePoint();
@@ -793,7 +799,7 @@ I18N.ready.then(function () {
 
   // --- Réglages : sections affichées, personnalisable et mémorisé ---
   const SECTION_VISIBILITY_KEY = 'ousuisje_alpha_visible_sections';
-  const DEFAULT_HIDDEN_SECTIONS = new Set(); // plus rien de masqué par défaut
+  const DEFAULT_HIDDEN_SECTIONS = new Set(['poi', 'climbing-gyms', 'food']);
 
   // Sections qui ne concernent que la France (données ANFR/IGN, sans équivalent ailleurs).
   // Restent masquées tant que la position de l'utilisateur n'est pas connue ; se révèlent
@@ -2751,6 +2757,16 @@ I18N.ready.then(function () {
   });
   if (localStorage.getItem(ANTENNAS_DOWNLOADED_STORAGE_KEY) === '1') downloadAntennas();
 
+  // App installée sur l'écran d'accueil (mode standalone) : usage probablement régulier et
+  // hors ligne, donc précharger les antennes même sans ouvrir la section — mais après un
+  // court délai pour ne pas faire concurrence au chargement initial de la page.
+  const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isStandaloneApp) {
+    setTimeout(() => {
+      if (!antennaSites && !antennasLoading) downloadAntennas();
+    }, 4000);
+  }
+
   // --- Points d'intérêt, en direct via Overpass (piscines, escalade) ---
   function distanceMetersApprox(lat1, lon1, lat2, lon2) {
     const coslat = Math.cos(lat1 * Math.PI / 180);
@@ -3439,7 +3455,7 @@ I18N.ready.then(function () {
       badgeEl: badgeEl,
       color: color,
       section: 'custom-' + id,
-      radiusM: (opts.radiusKm || 5) * 1000,
+      radiusM: (opts.radiusKm || 10) * 1000,
       maxResults: 10,
       defaultName: label,
       emptyLabel: I18N.t('custom.emptyLabelTemplate', { label: label }),
@@ -3518,17 +3534,13 @@ I18N.ready.then(function () {
   suppressAccordionAutoScroll = false;
 
   const customSectionInput = $('customSectionInput');
-  const customSectionRadiusInput = $('customSectionRadiusInput');
   const customSectionAddBtn = $('customSectionAddBtn');
-  const CUSTOM_SECTION_DEFAULT_RADIUS_KM = 5;
+  const CUSTOM_SECTION_DEFAULT_RADIUS_KM = 10;
   customSectionAddBtn.addEventListener('click', () => {
     const kw = customSectionInput.value.trim();
     if (!kw) return;
-    const parsedRadius = parseInt(customSectionRadiusInput.value, 10);
-    const radiusKm = Number.isFinite(parsedRadius) ? Math.min(30, Math.max(1, parsedRadius)) : CUSTOM_SECTION_DEFAULT_RADIUS_KM;
-    addCustomSection(kw, { radiusKm: radiusKm });
+    addCustomSection(kw, { radiusKm: CUSTOM_SECTION_DEFAULT_RADIUS_KM });
     customSectionInput.value = '';
-    customSectionRadiusInput.value = CUSTOM_SECTION_DEFAULT_RADIUS_KM;
   });
   customSectionInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); customSectionAddBtn.click(); }

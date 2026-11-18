@@ -439,16 +439,16 @@ h1 {
   font-family: var(--mono);
   color: var(--muted);
 }
-.radar-legend-labels span {
+.radar-legend-labels .radar-legend-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.radar-legend-labels span:not(:first-child):not(:last-child) {
+.radar-legend-labels .radar-legend-item:not(:first-child):not(:last-child) {
   align-items: center;
   text-align: center;
 }
-.radar-legend-labels span:last-child {
+.radar-legend-labels .radar-legend-item:last-child {
   align-items: flex-end;
   text-align: right;
 }
